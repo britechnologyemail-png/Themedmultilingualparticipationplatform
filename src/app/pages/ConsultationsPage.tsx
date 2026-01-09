@@ -1,183 +1,210 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { PageBanner } from '../components/PageBanner';
+import { PageLayout } from '../components/layout/PageLayout';
+import { KPICard } from '../components/layout/KPICard';
+import { FilterBar } from '../components/layout/FilterBar';
+import { FilterField } from '../components/layout/FilterField';
+import { ContentGrid } from '../components/layout/ContentGrid';
 import { ThemeTag } from '../components/ThemeTag';
 import { StatusBadge } from '../components/StatusBadge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { consultations } from '../data/mockData';
 import { themes } from '../data/themes';
-import { MessageSquare, MapPin, Calendar, Users, Heart } from 'lucide-react';
+import { Calendar, Users, MessageSquare, ArrowRight, Filter, MapPin, Heart, TrendingUp, FileText } from 'lucide-react';
 
 export function ConsultationsPage() {
-  const { t } = useLanguage();
-  const [selectedTheme, setSelectedTheme] = useState<string>('all');
-  const [selectedType, setSelectedType] = useState<string>('all');
+  const { t, language } = useLanguage();
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const filteredConsultations = consultations.filter((consultation) => {
-    if (selectedTheme !== 'all' && consultation.themeId !== selectedTheme) return false;
-    if (selectedType !== 'all' && consultation.type !== selectedType) return false;
+    if (selectedTheme && consultation.themeId !== selectedTheme) return false;
+    if (selectedStatus && consultation.status !== selectedStatus) return false;
     return true;
   });
 
-  const stats = {
-    debates: consultations.filter((c) => c.type === 'debate').length,
-    proposals: consultations.filter((c) => c.type === 'proposal').length,
-    meetings: consultations.filter((c) => c.type === 'meeting').length,
-    totalParticipants: consultations.reduce((sum, c) => sum + c.participants, 0),
-  };
+  // Calculate statistics
+  const totalConsultations = consultations.length;
+  const openConsultations = consultations.filter(c => c.status === 'open').length;
+  const totalParticipants = consultations.reduce((sum, c) => sum + c.participants, 0);
+  const totalSupports = consultations.reduce((sum, c) => sum + (c.supports || 0), 0);
+  const engagementRate = totalConsultations > 0 
+    ? Math.round((totalParticipants / totalConsultations) * 100) / 100
+    : 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl mb-4 text-gray-900">{t('nav.consultations')}</h1>
-        <p className="text-xl text-gray-600">
-          Débats, propositions et rencontres citoyennes
-        </p>
-      </div>
+    <div>
+      <PageBanner
+        title={
+          language === 'fr' ? 'Consultations publiques' :
+          language === 'de' ? 'Öffentliche Konsultationen' :
+          'Public Consultations'
+        }
+        description={
+          language === 'fr' ? 'Donnez votre avis sur les projets et politiques de votre commune' :
+          language === 'de' ? 'Geben Sie Ihre Meinung zu Projekten und Richtlinien Ihrer Gemeinde ab' :
+          'Give your opinion on your community\'s projects and policies'
+        }
+        gradient="from-cyan-600 to-blue-600"
+        icon={<MessageSquare className="w-12 h-12 text-white" />}
+      />
+      
+      <PageLayout className="py-8">
+        {/* Statistics Dashboard */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <KPICard
+            label={
+              language === 'fr' ? 'Total' :
+              language === 'de' ? 'Gesamt' :
+              'Total'
+            }
+            value={totalConsultations}
+            icon={FileText}
+            variant="blue"
+          />
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Débats</p>
-                <p className="text-3xl">{stats.debates}</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <KPICard
+            label={
+              language === 'fr' ? 'Ouvertes' :
+              language === 'de' ? 'Offen' :
+              'Open'
+            }
+            value={openConsultations}
+            icon={TrendingUp}
+            variant="green"
+          />
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Propositions</p>
-                <p className="text-3xl">{stats.proposals}</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
-                <Heart className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <KPICard
+            label={
+              language === 'fr' ? 'Participants' :
+              language === 'de' ? 'Teilnehmer' :
+              'Participants'
+            }
+            value={totalParticipants.toLocaleString()}
+            icon={Users}
+            variant="purple"
+          />
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Rencontres</p>
-                <p className="text-3xl">{stats.meetings}</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                <MapPin className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Participants</p>
-                <p className="text-3xl">{stats.totalParticipants}</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
-                <Users className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-8">
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm mb-2 text-gray-700">{t('common.filter')} par thème</label>
-          <Select value={selectedTheme} onValueChange={setSelectedTheme}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('common.all')}</SelectItem>
-              {themes.map((theme) => (
-                <SelectItem key={theme.id} value={theme.id}>
-                  {theme.icon} {t(theme.name)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <KPICard
+            label={
+              language === 'fr' ? 'Contributions' :
+              language === 'de' ? 'Beiträge' :
+              'Contributions'
+            }
+            value={totalSupports.toLocaleString()}
+            icon={Heart}
+            variant="orange"
+          />
         </div>
 
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm mb-2 text-gray-700">Type de concertation</label>
-          <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('common.all')}</SelectItem>
-              <SelectItem value="debate">Débats</SelectItem>
-              <SelectItem value="proposal">Propositions</SelectItem>
-              <SelectItem value="meeting">Rencontres</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Filters */}
+        <div className="mb-8">
+          <FilterBar>
+            <FilterField label={
+              language === 'fr' ? `${t('common.filter')} par thème` :
+              language === 'de' ? `${t('common.filter')} nach Thema` :
+              `${t('common.filter')} by theme`
+            }>
+              <Select value={selectedTheme || 'all'} onValueChange={setSelectedTheme}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('common.all')}</SelectItem>
+                  {themes.map((theme) => (
+                    <SelectItem key={theme.id} value={theme.id}>
+                      {theme.icon} {t(theme.name)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FilterField>
+
+            <FilterField label={
+              language === 'fr' ? `${t('common.filter')} par statut` :
+              language === 'de' ? `${t('common.filter')} nach Status` :
+              `${t('common.filter')} by status`
+            }>
+              <Select value={selectedStatus || 'all'} onValueChange={setSelectedStatus}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('common.all')}</SelectItem>
+                  <SelectItem value="open">Ouvertes</SelectItem>
+                  <SelectItem value="closed">Fermées</SelectItem>
+                </SelectContent>
+              </Select>
+            </FilterField>
+          </FilterBar>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="all" className="w-full mb-8">
-        <TabsList>
-          <TabsTrigger value="all">Toutes ({filteredConsultations.length})</TabsTrigger>
-          <TabsTrigger value="debate">Débats ({filteredConsultations.filter(c => c.type === 'debate').length})</TabsTrigger>
-          <TabsTrigger value="proposal">Propositions ({filteredConsultations.filter(c => c.type === 'proposal').length})</TabsTrigger>
-          <TabsTrigger value="meeting">Rencontres ({filteredConsultations.filter(c => c.type === 'meeting').length})</TabsTrigger>
-        </TabsList>
+        {/* Tabs */}
+        <Tabs defaultValue="all" className="w-full mb-8">
+          <TabsList>
+            <TabsTrigger value="all">Toutes ({filteredConsultations.length})</TabsTrigger>
+            <TabsTrigger value="debate">Débats ({filteredConsultations.filter(c => c.type === 'debate').length})</TabsTrigger>
+            <TabsTrigger value="proposal">Propositions ({filteredConsultations.filter(c => c.type === 'proposal').length})</TabsTrigger>
+            <TabsTrigger value="meeting">Rencontres ({filteredConsultations.filter(c => c.type === 'meeting').length})</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="all">
-          <ConsultationsList consultations={filteredConsultations} />
-        </TabsContent>
+          <TabsContent value="all">
+            <ConsultationsList consultations={filteredConsultations} />
+          </TabsContent>
 
-        <TabsContent value="debate">
-          <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'debate')} />
-        </TabsContent>
+          <TabsContent value="debate">
+            <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'debate')} />
+          </TabsContent>
 
-        <TabsContent value="proposal">
-          <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'proposal')} />
-        </TabsContent>
+          <TabsContent value="proposal">
+            <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'proposal')} />
+          </TabsContent>
 
-        <TabsContent value="meeting">
-          <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'meeting')} />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="meeting">
+            <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'meeting')} />
+          </TabsContent>
+        </Tabs>
 
-      {filteredConsultations.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-600">Aucune concertation ne correspond à vos critères.</p>
-        </div>
-      )}
-
-      {/* CTA */}
-      <div className="mt-12 p-8 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
-        <div className="max-w-2xl">
-          <h2 className="text-2xl mb-4 text-gray-900">Participez aux concertations</h2>
-          <div className="space-y-3 text-gray-700">
-            <p>• <strong>Débats :</strong> Échangez sur les sujets qui vous tiennent à cœur</p>
-            <p>• <strong>Propositions :</strong> Soumettez vos idées et soutenez celles des autres</p>
-            <p>• <strong>Rencontres :</strong> Rencontrez les élus et acteurs locaux en personne</p>
+        {filteredConsultations.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Aucune concertation ne correspond à vos critères.</p>
           </div>
-          <button className="mt-6 px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-            Proposer une idée
-          </button>
+        )}
+
+        {/* CTA */}
+        <div className="mt-12 p-8 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-2xl text-gray-900">
+                {language === 'fr' && 'Participez aux concertations'}
+                {language === 'de' && 'Nehmen Sie an Beratungen teil'}
+                {language === 'en' && 'Participate in consultations'}
+              </h2>
+            </div>
+            <div className="space-y-3 text-gray-700 mb-6">
+              <p>• <strong>Débats :</strong> Échangez sur les sujets qui vous tiennent à cœur</p>
+              <p>• <strong>Propositions :</strong> Soumettez vos idées et soutenez celles des autres</p>
+              <p>• <strong>Rencontres :</strong> Rencontrez les élus et acteurs locaux en personne</p>
+            </div>
+            <Link to="/propose-idea">
+              <Button size="lg" className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                <MessageSquare className="w-5 h-5" />
+                {language === 'fr' && 'Proposer une idée'}
+                {language === 'de' && 'Eine Idee vorschlagen'}
+                {language === 'en' && 'Propose an idea'}
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
+      </PageLayout>
     </div>
   );
 }
@@ -191,9 +218,9 @@ function ConsultationsList({ consultations }: { consultations: typeof import('..
       case 'debate':
         return <MessageSquare className="w-5 h-5" />;
       case 'proposal':
-        return <Heart className="w-5 h-5" />;
+        return <MessageSquare className="w-5 h-5" />;
       case 'meeting':
-        return <MapPin className="w-5 h-5" />;
+        return <MessageSquare className="w-5 h-5" />;
       default:
         return null;
     }
@@ -213,10 +240,10 @@ function ConsultationsList({ consultations }: { consultations: typeof import('..
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <ContentGrid>
       {consultations.map((consultation) => (
-        <Card key={consultation.id} className="hover:shadow-lg transition-shadow">
-          <CardHeader>
+        <Card key={consultation.id} className="hover:shadow-lg transition-shadow flex flex-col h-full">
+          <CardHeader className="flex-shrink-0">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
                 <ThemeTag themeId={consultation.themeId} />
@@ -227,13 +254,13 @@ function ConsultationsList({ consultations }: { consultations: typeof import('..
               </div>
               <StatusBadge status={consultation.status} />
             </div>
-            <CardTitle>{consultation.title}</CardTitle>
-            <CardDescription className="text-base mt-2">
+            <CardTitle className="line-clamp-2">{consultation.title}</CardTitle>
+            <CardDescription className="text-base mt-2 line-clamp-3">
               {consultation.description}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="flex flex-col flex-grow">
+            <div className="space-y-4 flex-grow">
               {/* Details */}
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-gray-600 text-sm">
@@ -261,19 +288,22 @@ function ConsultationsList({ consultations }: { consultations: typeof import('..
                   </div>
                 </div>
               )}
-
-              {consultation.status === 'open' && (
-                <Link
-                  to={`/consultations/${consultation.id}`}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                >
-                  {t('common.participate')}
-                </Link>
-              )}
             </div>
+
+            {/* Button aligned at bottom */}
+            {consultation.status === 'open' && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <Link to={`/consultations/${consultation.id}`}>
+                  <Button className="w-full gap-2">
+                    {t('common.participate')}
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       ))}
-    </div>
+    </ContentGrid>
   );
 }

@@ -1,233 +1,434 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { PageBanner } from '../components/PageBanner';
+import { PageLayout } from '../components/layout/PageLayout';
+import { KPICard } from '../components/layout/KPICard';
+import { FilterBar } from '../components/layout/FilterBar';
+import { FilterField } from '../components/layout/FilterField';
 import { ThemeTag } from '../components/ThemeTag';
-import { StatusBadge } from '../components/StatusBadge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { petitions } from '../data/mockData';
 import { themes } from '../data/themes';
-import { FileText, TrendingUp, Users } from 'lucide-react';
+import { FileText, Users, TrendingUp, ArrowRight, Clock, CheckCircle2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { toast } from 'sonner';
+import { Edit } from 'lucide-react';
 
 export function PetitionsPage() {
-  const { t } = useLanguage();
-  const [selectedTheme, setSelectedTheme] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const { t, language } = useLanguage();
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [signedPetitions, setSignedPetitions] = useState<string[]>([]); // Track signed petitions by ID
+
+  const handleSignPetition = (e: React.MouseEvent, petitionId: string, petitionTitle: string) => {
+    e.preventDefault(); // Prevent Link navigation
+    e.stopPropagation();
+    
+    setSignedPetitions(prev => [...prev, petitionId]);
+    
+    toast.success(
+      language === 'fr' ? `Signature ajoutée à "${petitionTitle}"` :
+      language === 'de' ? `Unterschrift zu "${petitionTitle}" hinzugefügt` :
+      `Signature added to "${petitionTitle}"`
+    );
+  };
+
+  const handleUnsignPetition = (e: React.MouseEvent, petitionId: string, petitionTitle: string) => {
+    e.preventDefault(); // Prevent Link navigation
+    e.stopPropagation();
+    
+    setSignedPetitions(prev => prev.filter(id => id !== petitionId));
+    
+    toast.success(
+      language === 'fr' ? `Signature retirée de "${petitionTitle}"` :
+      language === 'de' ? `Unterschrift von "${petitionTitle}" entfernt` :
+      `Signature removed from "${petitionTitle}"`
+    );
+  };
 
   const filteredPetitions = petitions.filter((petition) => {
-    if (selectedTheme !== 'all' && petition.themeId !== selectedTheme) return false;
-    if (selectedStatus !== 'all' && petition.status !== selectedStatus) return false;
+    if (selectedTheme && selectedTheme !== 'all' && petition.themeId !== selectedTheme) return false;
+    if (selectedStatus && selectedStatus !== 'all' && petition.status !== selectedStatus) return false;
     return true;
   });
 
-  const stats = {
-    total: petitions.length,
-    open: petitions.filter((p) => p.status === 'open').length,
-    thresholdReached: petitions.filter((p) => p.status === 'threshold_reached').length,
-    totalSignatures: petitions.reduce((sum, p) => sum + p.current, 0),
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'open':
+        return {
+          label: language === 'fr' ? 'Ouvert' : language === 'de' ? 'Offen' : 'Open',
+          variant: 'default' as const,
+          className: 'bg-green-100 text-green-800 hover:bg-green-100'
+        };
+      case 'closed':
+        return {
+          label: language === 'fr' ? 'Fermé' : language === 'de' ? 'Geschlossen' : 'Closed',
+          variant: 'secondary' as const,
+          className: 'bg-gray-100 text-gray-800 hover:bg-gray-200/50'
+        };
+      case 'threshold_reached':
+        return {
+          label: language === 'fr' ? 'Seuil atteint' : language === 'de' ? 'Schwelle erreicht' : 'Threshold reached',
+          variant: 'default' as const,
+          className: 'bg-blue-100 text-blue-800 hover:bg-blue-100'
+        };
+      default:
+        return {
+          label: status,
+          variant: 'default' as const,
+          className: ''
+        };
+    }
   };
 
+  // Calculate statistics
+  const activePetitions = petitions.filter((p) => p.status === 'open').length;
+  const thresholdReached = petitions.filter((p) => p.status === 'threshold_reached').length;
+  const totalPetitions = petitions.length;
+  const totalSignatures = petitions.reduce((sum, p) => sum + p.current, 0);
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl mb-4 text-gray-900">{t('nav.petitions')}</h1>
-        <p className="text-xl text-gray-600">
-          Lancez ou signez des pétitions pour faire entendre votre voix
-        </p>
-      </div>
+    <div>
+      <PageBanner
+        title={
+          language === 'fr' ? 'Pétitions citoyennes' :
+          language === 'de' ? 'Bürgerpetitionen' :
+          'Citizen Petitions'
+        }
+        description={
+          language === 'fr' ? 'Signez ou lancez une pétition pour faire entendre votre voix' :
+          language === 'de' ? 'Unterschreiben oder starten Sie eine Petition, um Ihre Stimme zu erheben' :
+          'Sign or start a petition to make your voice heard'
+        }
+        gradient="from-green-600 to-emerald-600"
+        icon={<FileText className="w-12 h-12 text-white" />}
+      />
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Pétitions actives</p>
-                <p className="text-3xl">{stats.open}</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <PageLayout className="py-8">
+        {/* KPI Cards - Standard 4-column grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <KPICard
+            label={
+              language === 'fr' ? 'Pétitions actives' :
+              language === 'de' ? 'Aktive Petitionen' :
+              'Active petitions'
+            }
+            value={activePetitions}
+            icon={FileText}
+            variant="green"
+            type="primary"
+          />
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Seuil atteint</p>
-                <p className="text-3xl">{stats.thresholdReached}</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <KPICard
+            label={
+              language === 'fr' ? 'Seuil atteint' :
+              language === 'de' ? 'Schwelle erreicht' :
+              'Threshold reached'
+            }
+            value={thresholdReached}
+            icon={TrendingUp}
+            variant="blue"
+            type="primary"
+          />
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Total pétitions</p>
-                <p className="text-3xl">{stats.total}</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <KPICard
+            label={
+              language === 'fr' ? 'Total pétitions' :
+              language === 'de' ? 'Petitionen insgesamt' :
+              'Total petitions'
+            }
+            value={totalPetitions}
+            icon={FileText}
+            variant="purple"
+            type="primary"
+          />
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Signatures totales</p>
-                <p className="text-3xl">{stats.totalSignatures.toLocaleString()}</p>
-              </div>
-              <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
-                <Users className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-8">
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm mb-2 text-gray-700">{t('common.filter')} par thème</label>
-          <Select value={selectedTheme} onValueChange={setSelectedTheme}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('common.all')}</SelectItem>
-              {themes.map((theme) => (
-                <SelectItem key={theme.id} value={theme.id}>
-                  {theme.icon} {t(theme.name)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <KPICard
+            label={
+              language === 'fr' ? 'Signatures totales' :
+              language === 'de' ? 'Unterschriften insgesamt' :
+              'Total signatures'
+            }
+            value={totalSignatures.toLocaleString()}
+            icon={Users}
+            variant="orange"
+            type="primary"
+          />
         </div>
 
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm mb-2 text-gray-700">{t('common.filter')} par statut</label>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('common.all')}</SelectItem>
-              <SelectItem value="open">Ouvertes</SelectItem>
-              <SelectItem value="closed">Fermées</SelectItem>
-              <SelectItem value="threshold_reached">Seuil atteint</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Filters */}
+        <div className="mb-8">
+          <FilterBar>
+            <FilterField label={
+              language === 'fr' ? `${t('common.filter')} par thème` :
+              language === 'de' ? `${t('common.filter')} nach Thema` :
+              `${t('common.filter')} by theme`
+            }>
+              <Select value={selectedTheme || 'all'} onValueChange={setSelectedTheme}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('common.all')}</SelectItem>
+                  {themes.map((theme) => (
+                    <SelectItem key={theme.id} value={theme.id}>
+                      {theme.icon} {t(theme.name)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FilterField>
+
+            <FilterField label={
+              language === 'fr' ? `${t('common.filter')} par statut` :
+              language === 'de' ? `${t('common.filter')} nach Status` :
+              `${t('common.filter')} by status`
+            }>
+              <Select value={selectedStatus || 'all'} onValueChange={setSelectedStatus}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t('common.all')}</SelectItem>
+                  <SelectItem value="open">
+                    {language === 'fr' && 'Ouvertes'}
+                    {language === 'de' && 'Offen'}
+                    {language === 'en' && 'Open'}
+                  </SelectItem>
+                  <SelectItem value="closed">
+                    {language === 'fr' && 'Fermées'}
+                    {language === 'de' && 'Geschlossen'}
+                    {language === 'en' && 'Closed'}
+                  </SelectItem>
+                  <SelectItem value="threshold_reached">
+                    {language === 'fr' && 'Seuil atteint'}
+                    {language === 'de' && 'Schwelle erreicht'}
+                    {language === 'en' && 'Threshold reached'}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </FilterField>
+          </FilterBar>
         </div>
-      </div>
 
-      {/* Petitions List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredPetitions.map((petition) => {
-          const percentage = (petition.current / petition.target) * 100;
-          const daysLeft = Math.ceil(
-            (new Date(petition.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-          );
+        {/* Petitions Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          {filteredPetitions.map((petition, index) => {
+            const percentage = (petition.current / petition.target) * 100;
+            const daysLeft = Math.ceil(
+              (new Date(petition.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+            );
+            const statusInfo = getStatusLabel(petition.status);
+            const isSigned = signedPetitions.includes(petition.id);
+            const canUnsign = isSigned && petition.status === 'open'; // Can only unsign if petition is open
 
-          return (
-            <Card key={petition.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between mb-3">
-                  <ThemeTag themeId={petition.themeId} />
-                  <StatusBadge status={petition.status} />
-                </div>
-                <CardTitle>{petition.title}</CardTitle>
-                <CardDescription>{petition.description}</CardDescription>
-                <div className="text-sm text-gray-600 mt-2">
-                  Lancée par : <span className="font-medium">{petition.author}</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Progress bar */}
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="text-gray-600">
-                        <span className="font-semibold text-gray-900">{petition.current}</span> /{' '}
-                        {petition.target} {t('common.signatures')}
-                      </span>
-                      <span className="font-semibold">{percentage.toFixed(0)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3">
-                      <div
-                        className={`h-3 rounded-full transition-all ${
-                          percentage >= 100 ? 'bg-green-600' : 'bg-blue-600'
-                        }`}
-                        style={{ width: `${Math.min(percentage, 100)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Time remaining */}
-                  {petition.status === 'open' && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">
-                        {daysLeft > 0 ? (
-                          <>
-                            <span className="font-medium text-gray-900">{daysLeft}</span> jours
-                            restants
-                          </>
-                        ) : (
-                          <span className="text-red-600">Expire bientôt</span>
+            return (
+              <motion.div
+                key={petition.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="h-full flex flex-col hover:shadow-xl transition-all duration-300 group border-0 shadow-md">
+                  <CardHeader className="flex-shrink-0">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-2">
+                        <ThemeTag themeId={petition.themeId} />
+                        {isSigned && (
+                          <Badge className="bg-blue-600 hover:bg-blue-700">
+                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                            {language === 'fr' && 'Signé'}
+                            {language === 'de' && 'Unterschrieben'}
+                            {language === 'en' && 'Signed'}
+                          </Badge>
                         )}
+                      </div>
+                      <Badge className={statusInfo.className}>
+                        {statusInfo.label}
+                      </Badge>
+                    </div>
+                    <CardTitle className="line-clamp-2 text-xl group-hover:text-blue-600 transition-colors">
+                      {petition.title}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2 text-base">
+                      {petition.description}
+                    </CardDescription>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                      <Users className="w-4 h-4" />
+                      <span>
+                        {language === 'fr' && 'Par '}
+                        {language === 'de' && 'Von '}
+                        {language === 'en' && 'By '}
+                        <span className="font-medium text-gray-900">{petition.author}</span>
                       </span>
-                      <Link
-                        to={`/petitions/${petition.id}`}
-                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                      >
-                        Signer
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="flex-grow flex flex-col">
+                    {/* Progress Section */}
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-gray-500" />
+                          <span className="font-semibold text-gray-900">{petition.current.toLocaleString()}</span>
+                          <span className="text-gray-600">/ {petition.target.toLocaleString()}</span>
+                        </div>
+                        <span className="font-semibold text-gray-900">{percentage.toFixed(0)}%</span>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="relative w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                        <motion.div
+                          className={`absolute top-0 left-0 h-full rounded-full ${
+                            percentage >= 100 
+                              ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
+                              : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                          }`}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(percentage, 100)}%` }}
+                          transition={{ duration: 1, ease: "easeOut" }}
+                        />
+                      </div>
+
+                      {/* Time remaining */}
+                      {petition.status === 'open' && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="w-4 h-4" />
+                          {daysLeft > 0 ? (
+                            <>
+                              <span className="font-medium text-gray-900">{daysLeft}</span>{' '}
+                              {language === 'fr' && 'jours restants'}
+                              {language === 'de' && 'Tage verbleibend'}
+                              {language === 'en' && 'days remaining'}
+                            </>
+                          ) : (
+                            <span className="text-red-600 font-medium">
+                              {language === 'fr' && 'Expire bientôt'}
+                              {language === 'de' && 'Läuft bald ab'}
+                              {language === 'en' && 'Expiring soon'}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Success Badge */}
+                      {petition.status === 'threshold_reached' && (
+                        <div className="flex items-center gap-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                          <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+                          <p className="text-sm text-green-800 font-medium">
+                            {language === 'fr' && 'Objectif atteint ! En cours d\'examen'}
+                            {language === 'de' && 'Ziel erreicht! In Prüfung'}
+                            {language === 'en' && 'Goal reached! Under review'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="mt-auto pt-4 border-t space-y-2">
+                      {/* Sign/Unsign button - only show if petition is open or if already signed */}
+                      {(petition.status === 'open' || isSigned) && (
+                        <>
+                          {!isSigned ? (
+                            <Button 
+                              onClick={(e) => handleSignPetition(e, petition.id, petition.title)}
+                              className="w-full gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                            >
+                              <Edit className="w-4 h-4" />
+                              {language === 'fr' && 'Signer la pétition'}
+                              {language === 'de' && 'Petition unterschreiben'}
+                              {language === 'en' && 'Sign the petition'}
+                            </Button>
+                          ) : canUnsign ? (
+                            <>
+                              <Button 
+                                onClick={(e) => handleUnsignPetition(e, petition.id, petition.title)}
+                                variant="destructive"
+                                className="w-full gap-2"
+                              >
+                                <Edit className="w-4 h-4" />
+                                {language === 'fr' && 'Retirer ma signature'}
+                                {language === 'de' && 'Unterschrift zurückziehen'}
+                                {language === 'en' && 'Remove signature'}
+                              </Button>
+                              <p className="text-xs text-gray-600 text-center">
+                                {language === 'fr' && 'Vous pouvez retirer votre signature tant que la pétition est ouverte'}
+                                {language === 'de' && 'Sie können Ihre Unterschrift zurückziehen, solange die Petition offen ist'}
+                                {language === 'en' && 'You can remove your signature while the petition is open'}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <Button 
+                                variant="secondary"
+                                className="w-full gap-2"
+                                disabled
+                              >
+                                <CheckCircle2 className="w-4 h-4" />
+                                {language === 'fr' && 'Déjà signé'}
+                                {language === 'de' && 'Bereits unterschrieben'}
+                                {language === 'en' && 'Already signed'}
+                              </Button>
+                              <p className="text-xs text-gray-500 text-center italic">
+                                {language === 'fr' && 'La pétition est fermée'}
+                                {language === 'de' && 'Die Petition ist geschlossen'}
+                                {language === 'en' && 'The petition is closed'}
+                              </p>
+                            </>
+                          )}
+                        </>
+                      )}
+                      
+                      {/* View details button */}
+                      <Link to={`/petitions/${petition.id}`} className="block">
+                        <Button 
+                          variant={petition.status === 'open' || isSigned ? 'outline' : 'default'}
+                          className={petition.status === 'open' || isSigned ? 
+                            'w-full gap-2' : 
+                            'w-full gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 group-hover:shadow-lg transition-all'
+                          }
+                        >
+                          {language === 'fr' && 'Voir les détails'}
+                          {language === 'de' && 'Details ansehen'}
+                          {language === 'en' && 'View details'}
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </Button>
                       </Link>
                     </div>
-                  )}
-
-                  {petition.status === 'threshold_reached' && (
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm text-green-800">
-                        ✓ Objectif atteint ! Cette pétition sera examinée par les autorités.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {filteredPetitions.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-600">Aucune pétition ne correspond à vos critères de recherche.</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
-      )}
 
-      {/* CTA to create petition */}
-      <div className="mt-12 p-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-        <div className="max-w-2xl">
-          <h2 className="text-2xl mb-4 text-gray-900">Lancez votre propre pétition</h2>
-          <p className="text-gray-700 mb-6">
-            Vous avez une idée pour améliorer votre commune ? Créez une pétition et mobilisez les
-            citoyens autour de votre cause.
-          </p>
-          <button className="px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-            Créer une pétition
-          </button>
-        </div>
-      </div>
+        {/* Empty State */}
+        {filteredPetitions.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-16"
+          >
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+              <FileText className="w-10 h-10 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              {language === 'fr' && 'Aucune pétition trouvée'}
+              {language === 'de' && 'Keine Petition gefunden'}
+              {language === 'en' && 'No petition found'}
+            </h3>
+            <p className="text-gray-600">
+              {language === 'fr' && 'Aucune pétition ne correspond à vos critères de recherche.'}
+              {language === 'de' && 'Keine Petition entspricht Ihren Suchkriterien.'}
+              {language === 'en' && 'No petition matches your search criteria.'}
+            </p>
+          </motion.div>
+        )}
+      </PageLayout>
     </div>
   );
 }

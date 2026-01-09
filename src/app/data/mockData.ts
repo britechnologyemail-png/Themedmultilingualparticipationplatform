@@ -229,6 +229,30 @@ export const assemblies: Assembly[] = [
     nextMeeting: '2025-02-25',
     meetings: [],
   },
+  {
+    id: 'a3',
+    title: 'Assemblée Citoyenne Numérique et Innovation',
+    description: 'Assemblée dédiée à la transformation numérique de la commune et aux innovations technologiques au service des citoyens',
+    themeId: 'governance',
+    members: 42,
+    nextMeeting: '2026-02-02',
+    meetings: [
+      {
+        id: 'm3',
+        title: 'Lancement de l\'assemblée numérique',
+        date: '2025-11-15',
+        agenda: ['Présentation des objectifs', 'Définition du cadre de travail', 'Constitution des groupes thématiques'],
+        documents: ['Charte_numerique.pdf', 'Presentation_2025.pdf'],
+      },
+      {
+        id: 'm4',
+        title: 'Atelier participatif - Services en ligne',
+        date: '2025-12-10',
+        agenda: ['État des lieux des services numériques', 'Besoins des citoyens', 'Priorisation des développements'],
+        documents: ['Enquete_besoins.pdf', 'Roadmap_2026.pdf'],
+      },
+    ],
+  },
 ];
 
 // Mock Petitions
