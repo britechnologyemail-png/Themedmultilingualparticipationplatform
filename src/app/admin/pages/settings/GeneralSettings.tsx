@@ -1,14 +1,54 @@
 import React, { useState } from 'react';
-import { Settings, Globe, Mail, Shield, Save, CheckCircle } from 'lucide-react';
+import { Settings, Globe, Mail, Shield, Save, CheckCircle, Image, Palette, Trash2, Upload } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Textarea } from '../../../components/ui/textarea';
+import { Switch } from '../../../components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
+import { toast } from 'sonner';
 
 export function GeneralSettings() {
   const [saved, setSaved] = useState(false);
+  
+  // Platform Information State
+  const [platformName, setPlatformName] = useState('CiviAgora');
+  const [institutionName, setInstitutionName] = useState('Ville de Bruxelles');
+  const [description, setDescription] = useState('Plateforme de démocratie participative pour impliquer les citoyens dans les décisions publiques.');
+  const [platformUrl, setPlatformUrl] = useState('https://civiagora.brussels.be');
+  const [contactEmail, setContactEmail] = useState('contact@civiagora.brussels.be');
+  
+  // Language Settings State
+  const [defaultLanguage, setDefaultLanguage] = useState('fr');
+  const [timezone, setTimezone] = useState('Europe/Brussels');
+  
+  // Email Settings State
+  const [smtpServer, setSmtpServer] = useState('smtp.brussels.be');
+  const [smtpPort, setSmtpPort] = useState('587');
+  const [senderEmail, setSenderEmail] = useState('noreply@civiagora.brussels.be');
+  const [senderName, setSenderName] = useState('CiviAgora - Ville de Bruxelles');
+  const [smtpAuth, setSmtpAuth] = useState(true);
+  
+  // Security Settings State
+  const [sessionDuration, setSessionDuration] = useState('60');
+  const [maxLoginAttempts, setMaxLoginAttempts] = useState('5');
+  const [require2FA, setRequire2FA] = useState(false);
+  const [requireStrongPassword, setRequireStrongPassword] = useState(true);
+  const [enableCaptcha, setEnableCaptcha] = useState(true);
+  const [autoLogout, setAutoLogout] = useState(true);
+  
+  // Module Activation State
+  const [moduleConcertations, setModuleConcertations] = useState(true);
+  const [moduleAssemblies, setModuleAssemblies] = useState(true);
+  const [modulePetitions, setModulePetitions] = useState(true);
+  const [moduleConferences, setModuleConferences] = useState(true);
+  const [moduleVotes, setModuleVotes] = useState(true);
 
   const handleSave = () => {
     setSaved(true);
+    toast.success('✓ Paramètres généraux enregistrés avec succès');
     setTimeout(() => setSaved(false), 3000);
   };
 
@@ -55,56 +95,61 @@ export function GeneralSettings() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Nom de la plateforme
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
-                defaultValue="CiviAgora"
+                value={platformName}
+                onChange={(e) => setPlatformName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Nom de l'institution
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
-                defaultValue="Ville de Bruxelles"
+                value={institutionName}
+                onChange={(e) => setInstitutionName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Description
-            </label>
-            <textarea
+            </Label>
+            <Textarea
               rows={3}
-              defaultValue="Plateforme de démocratie participative pour impliquer les citoyens dans les décisions publiques."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 URL de la plateforme
-              </label>
-              <input
+              </Label>
+              <Input
                 type="url"
-                defaultValue="https://civiagora.brussels.be"
+                value={platformUrl}
+                onChange={(e) => setPlatformUrl(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Email de contact
-              </label>
-              <input
+              </Label>
+              <Input
                 type="email"
-                defaultValue="contact@civiagora.brussels.be"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -125,9 +170,9 @@ export function GeneralSettings() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Langues actives
-            </label>
+            </Label>
             <div className="flex flex-wrap gap-2">
               <Badge className="bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400">
                 Français (FR) - Par défaut
@@ -143,24 +188,42 @@ export function GeneralSettings() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Langue par défaut
-              </label>
-              <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="en">English</option>
-              </select>
+              </Label>
+              <Select
+                value={defaultLanguage}
+                onValueChange={(value) => setDefaultLanguage(value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fr">Français</SelectItem>
+                  <SelectItem value="de">Deutsch</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Fuseau horaire
-              </label>
-              <select className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="Europe/Brussels">Europe/Brussels (UTC+1)</option>
-                <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
-                <option value="Europe/Berlin">Europe/Berlin (UTC+1)</option>
-              </select>
+              </Label>
+              <Select
+                value={timezone}
+                onValueChange={(value) => setTimezone(value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Europe/Brussels">Europe/Brussels (UTC+1)</SelectItem>
+                  <SelectItem value="Europe/Paris">Europe/Paris (UTC+1)</SelectItem>
+                  <SelectItem value="Europe/Berlin">Europe/Berlin (UTC+1)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>
@@ -180,22 +243,24 @@ export function GeneralSettings() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Serveur SMTP
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
-                defaultValue="smtp.brussels.be"
+                value={smtpServer}
+                onChange={(e) => setSmtpServer(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Port SMTP
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
-                defaultValue="587"
+                value={smtpPort}
+                onChange={(e) => setSmtpPort(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -203,37 +268,38 @@ export function GeneralSettings() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Email expéditeur
-              </label>
-              <input
+              </Label>
+              <Input
                 type="email"
-                defaultValue="noreply@civiagora.brussels.be"
+                value={senderEmail}
+                onChange={(e) => setSenderEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Nom de l'expéditeur
-              </label>
-              <input
+              </Label>
+              <Input
                 type="text"
-                defaultValue="CiviAgora - Ville de Bruxelles"
+                value={senderName}
+                onChange={(e) => setSenderName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="smtp-auth"
-              defaultChecked
+            <Switch
+              checked={smtpAuth}
+              onCheckedChange={(checked) => setSmtpAuth(checked)}
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label htmlFor="smtp-auth" className="text-sm text-gray-700 dark:text-gray-300">
+            <Label className="text-sm text-gray-700 dark:text-gray-300">
               Utiliser l'authentification SMTP
-            </label>
+            </Label>
           </div>
         </CardContent>
       </Card>
@@ -252,22 +318,24 @@ export function GeneralSettings() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Durée de session (minutes)
-              </label>
-              <input
+              </Label>
+              <Input
                 type="number"
-                defaultValue="60"
+                value={sessionDuration}
+                onChange={(e) => setSessionDuration(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Tentatives de connexion max
-              </label>
-              <input
+              </Label>
+              <Input
                 type="number"
-                defaultValue="5"
+                value={maxLoginAttempts}
+                onChange={(e) => setMaxLoginAttempts(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -275,50 +343,47 @@ export function GeneralSettings() {
 
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="require-2fa"
+              <Switch
+                checked={require2FA}
+                onCheckedChange={(checked) => setRequire2FA(checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="require-2fa" className="text-sm text-gray-700 dark:text-gray-300">
+              <Label className="text-sm text-gray-700 dark:text-gray-300">
                 Exiger l'authentification à deux facteurs pour les administrateurs
-              </label>
+              </Label>
             </div>
 
             <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="require-strong-pwd"
-                defaultChecked
+              <Switch
+                checked={requireStrongPassword}
+                onCheckedChange={(checked) => setRequireStrongPassword(checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="require-strong-pwd" className="text-sm text-gray-700 dark:text-gray-300">
+              <Label className="text-sm text-gray-700 dark:text-gray-300">
                 Exiger des mots de passe forts
-              </label>
+              </Label>
             </div>
 
             <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="enable-captcha"
-                defaultChecked
+              <Switch
+                checked={enableCaptcha}
+                onCheckedChange={(checked) => setEnableCaptcha(checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="enable-captcha" className="text-sm text-gray-700 dark:text-gray-300">
+              <Label className="text-sm text-gray-700 dark:text-gray-300">
                 Activer le CAPTCHA sur les formulaires publics
-              </label>
+              </Label>
             </div>
 
             <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="auto-logout"
-                defaultChecked
+              <Switch
+                checked={autoLogout}
+                onCheckedChange={(checked) => setAutoLogout(checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="auto-logout" className="text-sm text-gray-700 dark:text-gray-300">
+              <Label className="text-sm text-gray-700 dark:text-gray-300">
                 Déconnexion automatique après inactivité
-              </label>
+              </Label>
             </div>
           </div>
         </CardContent>
@@ -339,9 +404,9 @@ export function GeneralSettings() {
                 <p className="font-medium text-gray-900 dark:text-white">Concertations</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Consultations publiques</p>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={moduleConcertations}
+                onCheckedChange={(checked) => setModuleConcertations(checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -351,9 +416,9 @@ export function GeneralSettings() {
                 <p className="font-medium text-gray-900 dark:text-white">Assemblées</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Assemblées citoyennes</p>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={moduleAssemblies}
+                onCheckedChange={(checked) => setModuleAssemblies(checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -363,9 +428,9 @@ export function GeneralSettings() {
                 <p className="font-medium text-gray-900 dark:text-white">Pétitions</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Pétitions citoyennes</p>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={modulePetitions}
+                onCheckedChange={(checked) => setModulePetitions(checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -375,9 +440,9 @@ export function GeneralSettings() {
                 <p className="font-medium text-gray-900 dark:text-white">Conférences</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Événements et débats</p>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={moduleConferences}
+                onCheckedChange={(checked) => setModuleConferences(checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -387,9 +452,9 @@ export function GeneralSettings() {
                 <p className="font-medium text-gray-900 dark:text-white">Votes</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Sondages et votes</p>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={moduleVotes}
+                onCheckedChange={(checked) => setModuleVotes(checked)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>

@@ -1,14 +1,40 @@
 import React, { useState } from 'react';
-import { Bell, Mail, MessageSquare, Users, Calendar, Vote, FileText, Save, CheckCircle } from 'lucide-react';
+import { Bell, Mail, MessageSquare, Users, Calendar, CheckSquare, FileText, Save, CheckCircle, AlertCircle, Shield } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
+import { Switch } from '../../../components/ui/switch';
+import { Label } from '../../../components/ui/label';
+import { Input } from '../../../components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
+import { toast } from 'sonner';
 
 export function NotificationsSettings() {
   const [saved, setSaved] = useState(false);
 
+  // Email Notifications State
+  const [notifyNewUser, setNotifyNewUser] = useState(true);
+  const [notifyNewComment, setNotifyNewComment] = useState(true);
+  const [notifyEventReminder, setNotifyEventReminder] = useState(true);
+  const [notifyVoteReminder, setNotifyVoteReminder] = useState(true);
+  const [notifyResults, setNotifyResults] = useState(true);
+  const [digestFrequency, setDigestFrequency] = useState('weekly');
+
+  // Admin Notifications State
+  const [notifyModeration, setNotifyModeration] = useState(true);
+  const [notifyReports, setNotifyReports] = useState(true);
+  const [notifySecurity, setNotifySecurity] = useState(true);
+  const [notifySystemReports, setNotifySystemReports] = useState(true);
+
+  // In-App Notifications State
+  const [browserNotifications, setBrowserNotifications] = useState(true);
+  const [soundNotifications, setSoundNotifications] = useState(false);
+  const [badgeNotifications, setBadgeNotifications] = useState(true);
+  const [toastDuration, setToastDuration] = useState('5');
+
   const handleSave = () => {
     setSaved(true);
+    toast.success('✓ Paramètres de notifications enregistrés avec succès');
     setTimeout(() => setSaved(false), 3000);
   };
 
@@ -69,9 +95,9 @@ export function NotificationsSettings() {
                   </p>
                 </div>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={notifyNewUser}
+                onCheckedChange={setNotifyNewUser}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -88,9 +114,9 @@ export function NotificationsSettings() {
                   </p>
                 </div>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={notifyNewComment}
+                onCheckedChange={setNotifyNewComment}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -107,16 +133,16 @@ export function NotificationsSettings() {
                   </p>
                 </div>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={notifyEventReminder}
+                onCheckedChange={setNotifyEventReminder}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
 
             <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
               <div className="flex items-center gap-3">
-                <Vote className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <CheckSquare className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
                     Rappel de vote
@@ -126,9 +152,9 @@ export function NotificationsSettings() {
                   </p>
                 </div>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={notifyVoteReminder}
+                onCheckedChange={setNotifyVoteReminder}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -145,9 +171,9 @@ export function NotificationsSettings() {
                   </p>
                 </div>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={notifyResults}
+                onCheckedChange={setNotifyResults}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -157,12 +183,23 @@ export function NotificationsSettings() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Fréquence des digests hebdomadaires
             </label>
-            <select className="w-full md:w-1/2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="disabled">Désactivé</option>
-              <option value="weekly">Chaque lundi</option>
-              <option value="biweekly">Tous les 15 jours</option>
-              <option value="monthly">Mensuel</option>
-            </select>
+            <Select
+              value={digestFrequency}
+              onValueChange={setDigestFrequency}
+              className="w-full md:w-1/2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <SelectTrigger>
+                <SelectValue>
+                  {digestFrequency === 'disabled' ? 'Désactivé' : digestFrequency === 'weekly' ? 'Chaque lundi' : digestFrequency === 'biweekly' ? 'Tous les 15 jours' : 'Mensuel'}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="disabled">Désactivé</SelectItem>
+                <SelectItem value="weekly">Chaque lundi</SelectItem>
+                <SelectItem value="biweekly">Tous les 15 jours</SelectItem>
+                <SelectItem value="monthly">Mensuel</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -186,9 +223,9 @@ export function NotificationsSettings() {
                   Alerte immédiate pour les modérateurs
                 </p>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={notifyModeration}
+                onCheckedChange={setNotifyModeration}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -202,9 +239,9 @@ export function NotificationsSettings() {
                   Contenu signalé plus de 3 fois
                 </p>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={notifyReports}
+                onCheckedChange={setNotifyReports}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -218,9 +255,9 @@ export function NotificationsSettings() {
                   Tentatives de connexion suspectes
                 </p>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={notifySecurity}
+                onCheckedChange={setNotifySecurity}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -234,9 +271,9 @@ export function NotificationsSettings() {
                   Statistiques hebdomadaires
                 </p>
               </div>
-              <input
-                type="checkbox"
-                defaultChecked
+              <Switch
+                checked={notifySystemReports}
+                onCheckedChange={setNotifySystemReports}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -254,7 +291,7 @@ export function NotificationsSettings() {
                 moderateur@civiagora.ch
               </Badge>
             </div>
-            <input
+            <Input
               type="email"
               placeholder="Ajouter une adresse email..."
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -274,38 +311,36 @@ export function NotificationsSettings() {
         <CardContent className="space-y-4">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="browser-notif"
-                defaultChecked
+              <Switch
+                checked={browserNotifications}
+                onCheckedChange={setBrowserNotifications}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="browser-notif" className="text-sm text-gray-700 dark:text-gray-300">
+              <Label htmlFor="browser-notif" className="text-sm text-gray-700 dark:text-gray-300">
                 Activer les notifications navigateur (push)
-              </label>
+              </Label>
             </div>
 
             <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="sound-notif"
+              <Switch
+                checked={soundNotifications}
+                onCheckedChange={setSoundNotifications}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="sound-notif" className="text-sm text-gray-700 dark:text-gray-300">
+              <Label htmlFor="sound-notif" className="text-sm text-gray-700 dark:text-gray-300">
                 Activer les sons de notification
-              </label>
+              </Label>
             </div>
 
             <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="badge-notif"
-                defaultChecked
+              <Switch
+                checked={badgeNotifications}
+                onCheckedChange={setBadgeNotifications}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label htmlFor="badge-notif" className="text-sm text-gray-700 dark:text-gray-300">
+              <Label htmlFor="badge-notif" className="text-sm text-gray-700 dark:text-gray-300">
                 Afficher un badge de notification non lue
-              </label>
+              </Label>
             </div>
           </div>
 
@@ -313,9 +348,10 @@ export function NotificationsSettings() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Durée d'affichage des toasts (secondes)
             </label>
-            <input
+            <Input
               type="number"
-              defaultValue="5"
+              value={toastDuration}
+              onChange={(e) => setToastDuration(e.target.value)}
               min="1"
               max="10"
               className="w-full md:w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"

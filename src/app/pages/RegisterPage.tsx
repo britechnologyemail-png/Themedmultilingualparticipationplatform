@@ -338,7 +338,7 @@ export function RegisterPage() {
               const isCompleted = currentStep > index;
 
               return (
-                <React.Fragment key={step.id}>
+                <div key={step.id} className="flex items-center flex-1">
                   <div className="flex flex-col items-center flex-1">
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
@@ -369,7 +369,7 @@ export function RegisterPage() {
                       }`}
                     />
                   )}
-                </React.Fragment>
+                </div>
               );
             })}
           </div>

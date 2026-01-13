@@ -6,18 +6,18 @@ import { Button } from '../../components/ui/button';
 import {
   Users,
   Activity,
-  MessageSquare,
+  Mail,
   AlertCircle,
   TrendingUp,
   Calendar,
   FileText,
-  CheckCircle2,
+  CheckCircle,
   Clock,
   ArrowRight,
   UserMinus,
   Edit,
-  Presentation,
-  Vote
+  Mic,
+  CheckSquare
 } from 'lucide-react';
 import {
   LineChart,
@@ -70,7 +70,7 @@ const recentActivities = [
     user: 'Sophie Martin',
     action: 'a modéré 3 contributions',
     time: 'Il y a 5 minutes',
-    icon: MessageSquare,
+    icon: Mail,
     color: 'text-blue-600'
   },
   {
@@ -172,7 +172,7 @@ export function AdminDashboard() {
           title={language === 'fr' ? 'Contributions' : language === 'de' ? 'Beiträge' : 'Contributions'}
           value="342"
           description="En attente de modération"
-          icon={MessageSquare}
+          icon={Mail}
           iconColor="text-purple-600"
           iconBgColor="bg-purple-100"
         />
@@ -255,7 +255,7 @@ export function AdminDashboard() {
             {/* Conférences */}
             <div className="bg-white p-4 rounded-lg border border-purple-200">
               <div className="flex items-center justify-between mb-2">
-                <Presentation className="w-5 h-5 text-purple-600" />
+                <Mic className="w-5 h-5 text-purple-600" />
                 <span className="text-xs font-medium text-purple-600">Conférences</span>
               </div>
               <div className="space-y-1">
@@ -273,7 +273,7 @@ export function AdminDashboard() {
             {/* Commentaires */}
             <div className="bg-white p-4 rounded-lg border border-cyan-200">
               <div className="flex items-center justify-between mb-2">
-                <MessageSquare className="w-5 h-5 text-cyan-600" />
+                <Mail className="w-5 h-5 text-cyan-600" />
                 <span className="text-xs font-medium text-cyan-600">Commentaires</span>
               </div>
               <div className="space-y-1">
@@ -291,7 +291,7 @@ export function AdminDashboard() {
             {/* Votes */}
             <div className="bg-white p-4 rounded-lg border border-indigo-200">
               <div className="flex items-center justify-between mb-2">
-                <Vote className="w-5 h-5 text-indigo-600" />
+                <CheckSquare className="w-5 h-5 text-indigo-600" />
                 <span className="text-xs font-medium text-indigo-600">Votes</span>
               </div>
               <div className="space-y-1">
@@ -543,7 +543,7 @@ export function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-              <CheckCircle2 className="w-5 h-5 text-blue-600 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-gray-900">
                   Taux de participation en hausse de 12% ce mois

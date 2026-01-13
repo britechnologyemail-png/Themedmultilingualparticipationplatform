@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { usePetition, useTheme } from '../hooks/useApi';
 import { ThemeTag } from '../components/ThemeTag';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -9,7 +10,6 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
 import { Separator } from '../components/ui/separator';
-import { petitions } from '../data/mockData';
 import { 
   ArrowLeft, 
   FileText, 
@@ -33,7 +33,13 @@ import { toast } from 'sonner';
 export function PetitionDetailPage() {
   const { petitionId } = useParams<{ petitionId: string }>();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, tLocal } = useLanguage();
+  
+  // Fetch petition using React Query
+  const { data: petition, isLoading, error } = usePetition(petitionId || '');
+  
+  // Fetch theme data
+  const { data: theme } = useTheme(petition?.themeId || '');
   
   const [signatureData, setSignatureData] = useState({
     firstName: '',
@@ -46,9 +52,23 @@ export function PetitionDetailPage() {
 
   const [showShareMenu, setShowShareMenu] = useState(false);
 
-  const petition = petitions.find(p => p.id === petitionId);
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">
+            {language === 'fr' && 'Chargement...'}
+            {language === 'de' && 'Wird geladen...'}
+            {language === 'en' && 'Loading...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  if (!petition) {
+  // Show error or not found state
+  if (error || !petition) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -71,7 +91,7 @@ export function PetitionDetailPage() {
     );
   }
 
-  const percentage = (petition.current / petition.target) * 100;
+  const percentage = (petition.currentSignatures / petition.targetSignatures) * 100;
   const daysRemaining = Math.ceil((new Date(petition.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -112,7 +132,7 @@ export function PetitionDetailPage() {
 
   const handleShare = (platform?: string) => {
     const url = window.location.href;
-    const text = petition.title;
+    const text = tLocal(petition.title);
 
     if (platform === 'facebook') {
       window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
@@ -125,8 +145,8 @@ export function PetitionDetailPage() {
     } else {
       if (navigator.share) {
         navigator.share({
-          title: petition.title,
-          text: petition.description,
+          title: tLocal(petition.title),
+          text: tLocal(petition.description),
           url: url
         });
       } else {
@@ -153,7 +173,7 @@ export function PetitionDetailPage() {
           label: language === 'fr' ? 'Fermé' : language === 'de' ? 'Geschlossen' : 'Closed',
           className: 'bg-gray-100 text-gray-800'
         };
-      case 'threshold_reached':
+      case 'under_review':
         return {
           label: language === 'fr' ? 'Seuil atteint' : language === 'de' ? 'Schwelle erreicht' : 'Threshold reached',
           className: 'bg-blue-100 text-blue-800'
@@ -189,8 +209,8 @@ export function PetitionDetailPage() {
                   {statusInfo.label}
                 </Badge>
               </div>
-              <h1 className="text-4xl font-bold mb-4">{petition.title}</h1>
-              <p className="text-xl text-green-50">{petition.description}</p>
+              <h1 className="text-4xl font-bold mb-4">{tLocal(petition.title)}</h1>
+              <p className="text-xl text-green-50">{tLocal(petition.description)}</p>
             </div>
           </div>
         </div>
@@ -216,8 +236,8 @@ export function PetitionDetailPage() {
                         {language === 'en' && 'Progress'}
                       </p>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-bold text-gray-900">{petition.current.toLocaleString()}</span>
-                        <span className="text-xl text-gray-600">/ {petition.target.toLocaleString()}</span>
+                        <span className="text-4xl font-bold text-gray-900">{petition.currentSignatures.toLocaleString()}</span>
+                        <span className="text-xl text-gray-600">/ {petition.targetSignatures.toLocaleString()}</span>
                       </div>
                     </div>
                     <div className="text-right">
@@ -249,9 +269,9 @@ export function PetitionDetailPage() {
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4" />
                       <span>
-                        {language === 'fr' && `${petition.current.toLocaleString()} signataires`}
-                        {language === 'de' && `${petition.current.toLocaleString()} Unterzeichner`}
-                        {language === 'en' && `${petition.current.toLocaleString()} signatories`}
+                        {language === 'fr' && `${petition.currentSignatures.toLocaleString()} signataires`}
+                        {language === 'de' && `${petition.currentSignatures.toLocaleString()} Unterzeichner`}
+                        {language === 'en' && `${petition.currentSignatures.toLocaleString()} signatories`}
                       </span>
                     </div>
                     {petition.status === 'open' && daysRemaining > 0 && (
@@ -267,7 +287,7 @@ export function PetitionDetailPage() {
                   </div>
 
                   {/* Success Message */}
-                  {petition.status === 'threshold_reached' && (
+                  {petition.status === 'under_review' && (
                     <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
                       <div className="flex items-center gap-3">
                         <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
@@ -308,7 +328,7 @@ export function PetitionDetailPage() {
                 <CardContent>
                   <div className="prose max-w-none">
                     <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                      {petition.description}
+                      {tLocal(petition.description)}
                       {'\n\n'}
                       {language === 'fr' && 'Cette pétition vise à améliorer notre commune en prenant en compte les besoins et les aspirations des citoyens. Votre soutien est essentiel pour faire entendre notre voix auprès des autorités locales et obtenir des changements concrets.'}
                       {language === 'de' && 'Diese Petition zielt darauf ab, unsere Gemeinde zu verbessern, indem sie die Bedürfnisse und Wünsche der Bürger berücksichtigt. Ihre Unterstützung ist entscheidend, um unsere Stimme bei den lokalen Behörden Gehör zu verschaffen und konkrete Änderungen zu erreichen.'}
@@ -343,7 +363,9 @@ export function PetitionDetailPage() {
                           {language === 'de' && 'Ersteller'}
                           {language === 'en' && 'Creator'}
                         </p>
-                        <p className="font-medium text-gray-900">{petition.author}</p>
+                        <p className="font-medium text-gray-900">
+                          {petition.author.firstName} {petition.author.lastName}
+                        </p>
                       </div>
                     </div>
 
@@ -390,7 +412,7 @@ export function PetitionDetailPage() {
                           {language === 'de' && 'Unterschriftenziel'}
                           {language === 'en' && 'Signature goal'}
                         </p>
-                        <p className="font-medium text-gray-900">{petition.target.toLocaleString()}</p>
+                        <p className="font-medium text-gray-900">{petition.targetSignatures.toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
@@ -638,7 +660,7 @@ export function PetitionDetailPage() {
                           {language === 'de' && 'Gesammelte Unterschriften'}
                           {language === 'en' && 'Signatures collected'}
                         </p>
-                        <p className="text-3xl font-bold text-gray-900">{petition.current.toLocaleString()}</p>
+                        <p className="text-3xl font-bold text-gray-900">{petition.currentSignatures.toLocaleString()}</p>
                       </div>
                       <Separator />
                       <div>
@@ -647,7 +669,7 @@ export function PetitionDetailPage() {
                           {language === 'de' && 'Ziel'}
                           {language === 'en' && 'Goal'}
                         </p>
-                        <p className="text-2xl font-bold text-gray-900">{petition.target.toLocaleString()}</p>
+                        <p className="text-2xl font-bold text-gray-900">{petition.targetSignatures.toLocaleString()}</p>
                       </div>
                       <Separator />
                       <div>

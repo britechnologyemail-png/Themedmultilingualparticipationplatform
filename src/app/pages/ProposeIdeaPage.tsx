@@ -160,7 +160,7 @@ export function ProposeIdeaPage() {
                     <SelectItem key={theme.id} value={theme.id}>
                       <div className="flex items-center gap-2">
                         <span>{theme.icon}</span>
-                        <span>{t(theme.name)}</span>
+                        <span>{language === 'fr' ? theme.name : language === 'de' ? (theme.nameDE || theme.name) : (theme.nameEN || theme.name)}</span>
                       </div>
                     </SelectItem>
                   ))}
@@ -172,7 +172,7 @@ export function ProposeIdeaPage() {
                   style={{ backgroundColor: `${selectedTheme.color}20`, color: selectedTheme.color }}
                 >
                   <span>{selectedTheme.icon}</span>
-                  <span>{t(selectedTheme.name)}</span>
+                  <span>{language === 'fr' ? selectedTheme.name : language === 'de' ? (selectedTheme.nameDE || selectedTheme.name) : (selectedTheme.nameEN || selectedTheme.name)}</span>
                 </div>
               )}
             </div>

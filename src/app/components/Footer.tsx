@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const footerLinks = {
     platform: [
@@ -28,6 +28,8 @@ export function Footer() {
       { label: t('nav.petitions'), path: '/petitions' },
       { label: t('nav.conferences'), path: '/conferences' },
       { label: t('nav.votes'), path: '/votes' },
+      { label: language === 'fr' ? 'Signalements' : language === 'de' ? 'Meldungen' : 'Reports', path: '/signalements' },
+      { label: language === 'fr' ? '🌟 Espace Jeunesse' : language === 'de' ? '🌟 Jugendraum' : '🌟 Youth Space', path: '/youth-space' },
       { label: t('nav.themes'), path: '/themes' },
     ],
     resources: [
@@ -35,6 +37,7 @@ export function Footer() {
       { label: t('footer.faq'), path: '/faq' },
       { label: t('footer.guides'), path: '/guides' },
       { label: t('footer.support'), path: '/support' },
+      { label: t('footer.ivrAccess') || 'Accès téléphonique (IVR)', path: '/ivr-access' },
     ],
     legal: [
       { label: t('footer.legal'), path: '/legal-notice' },

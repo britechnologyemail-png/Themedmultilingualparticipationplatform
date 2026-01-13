@@ -126,24 +126,6 @@ export function SaasLayout() {
               >
                 <Building2 className="w-6 h-6 text-white" />
               </motion.div>
-              <div className="hidden sm:block">
-                <motion.h1 
-                  className="font-semibold text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-500 bg-clip-text text-transparent bg-[length:200%_auto]"
-                  animate={{
-                    backgroundPosition: ["0% center", "200% center", "0% center"],
-                  }}
-                  transition={{
-                    duration: 5,
-                    repeat: Infinity,
-                    ease: "linear"
-                  }}
-                >
-                  CiviAgora SaaS
-                </motion.h1>
-                <p className="text-xs text-gray-500">
-                  {language === 'fr' ? 'Plateforme SaaS' : language === 'de' ? 'SaaS Plattform' : 'SaaS Platform'}
-                </p>
-              </div>
             </Link>
           </div>
 

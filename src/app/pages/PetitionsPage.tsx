@@ -11,46 +11,104 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { petitions } from '../data/mockData';
-import { themes } from '../data/themes';
+import { usePetitions, useThemes } from '../hooks/useApi';
+import type { PetitionDTO, LocalizedString } from '../types';
 import { FileText, Users, TrendingUp, ArrowRight, Clock, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { Edit } from 'lucide-react';
 
 export function PetitionsPage() {
-  const { t, language } = useLanguage();
+  const { t, language, tLocal } = useLanguage();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [signedPetitions, setSignedPetitions] = useState<string[]>([]); // Track signed petitions by ID
 
-  const handleSignPetition = (e: React.MouseEvent, petitionId: string, petitionTitle: string) => {
+  // Fetch data using React Query hooks
+  const { data: petitions, isLoading, error } = usePetitions();
+  const { data: themesData } = useThemes();
+
+  const handleSignPetition = (e: React.MouseEvent, petitionId: string, petitionTitle: LocalizedString) => {
     e.preventDefault(); // Prevent Link navigation
     e.stopPropagation();
     
     setSignedPetitions(prev => [...prev, petitionId]);
     
     toast.success(
-      language === 'fr' ? `Signature ajoutée à "${petitionTitle}"` :
-      language === 'de' ? `Unterschrift zu "${petitionTitle}" hinzugefügt` :
-      `Signature added to "${petitionTitle}"`
+      language === 'fr' ? `Signature ajoutée à "${tLocal(petitionTitle)}"` :
+      language === 'de' ? `Unterschrift zu "${tLocal(petitionTitle)}" hinzugefügt` :
+      `Signature added to "${tLocal(petitionTitle)}"`
     );
   };
 
-  const handleUnsignPetition = (e: React.MouseEvent, petitionId: string, petitionTitle: string) => {
+  const handleUnsignPetition = (e: React.MouseEvent, petitionId: string, petitionTitle: LocalizedString) => {
     e.preventDefault(); // Prevent Link navigation
     e.stopPropagation();
     
     setSignedPetitions(prev => prev.filter(id => id !== petitionId));
     
     toast.success(
-      language === 'fr' ? `Signature retirée de "${petitionTitle}"` :
-      language === 'de' ? `Unterschrift von "${petitionTitle}" entfernt` :
-      `Signature removed from "${petitionTitle}"`
+      language === 'fr' ? `Signature retirée de "${tLocal(petitionTitle)}"` :
+      language === 'de' ? `Unterschrift von "${tLocal(petitionTitle)}" entfernt` :
+      `Signature removed from "${tLocal(petitionTitle)}"`
     );
   };
 
-  const filteredPetitions = petitions.filter((petition) => {
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div>
+        <PageBanner
+          title={
+            language === 'fr' ? 'Pétitions citoyennes' :
+            language === 'de' ? 'Bürgerpetitionen' :
+            'Citizen Petitions'
+          }
+          description={
+            language === 'fr' ? 'Signez ou lancez une pétition pour faire entendre votre voix' :
+            language === 'de' ? 'Unterschreiben oder starten Sie eine Petition, um Ihre Stimme zu erheben' :
+            'Sign or start a petition to make your voice heard'
+          }
+          gradient="from-green-600 to-emerald-600"
+          icon={<FileText className="w-12 h-12 text-white" />}
+        />
+        <PageLayout className="py-8">
+          <div className="text-center py-12">
+            <p className="text-gray-600">Chargement des pétitions...</p>
+          </div>
+        </PageLayout>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div>
+        <PageBanner
+          title={
+            language === 'fr' ? 'Pétitions citoyennes' :
+            language === 'de' ? 'Bürgerpetitionen' :
+            'Citizen Petitions'
+          }
+          description={
+            language === 'fr' ? 'Signez ou lancez une pétition pour faire entendre votre voix' :
+            language === 'de' ? 'Unterschreiben oder starten Sie eine Petition, um Ihre Stimme zu erheben' :
+            'Sign or start a petition to make your voice heard'
+          }
+          gradient="from-green-600 to-emerald-600"
+          icon={<FileText className="w-12 h-12 text-white" />}
+        />
+        <PageLayout className="py-8">
+          <div className="text-center py-12">
+            <p className="text-red-600">Erreur lors du chargement des données</p>
+          </div>
+        </PageLayout>
+      </div>
+    );
+  }
+
+  const filteredPetitions = (petitions || []).filter((petition) => {
     if (selectedTheme && selectedTheme !== 'all' && petition.themeId !== selectedTheme) return false;
     if (selectedStatus && selectedStatus !== 'all' && petition.status !== selectedStatus) return false;
     return true;
@@ -70,7 +128,7 @@ export function PetitionsPage() {
           variant: 'secondary' as const,
           className: 'bg-gray-100 text-gray-800 hover:bg-gray-200/50'
         };
-      case 'threshold_reached':
+      case 'under_review':
         return {
           label: language === 'fr' ? 'Seuil atteint' : language === 'de' ? 'Schwelle erreicht' : 'Threshold reached',
           variant: 'default' as const,
@@ -86,10 +144,10 @@ export function PetitionsPage() {
   };
 
   // Calculate statistics
-  const activePetitions = petitions.filter((p) => p.status === 'open').length;
-  const thresholdReached = petitions.filter((p) => p.status === 'threshold_reached').length;
-  const totalPetitions = petitions.length;
-  const totalSignatures = petitions.reduce((sum, p) => sum + p.current, 0);
+  const activePetitions = petitions?.filter((p) => p.status === 'open').length || 0;
+  const thresholdReached = petitions?.filter((p) => p.status === 'under_review').length || 0;
+  const totalPetitions = petitions?.length || 0;
+  const totalSignatures = petitions?.reduce((sum, p) => sum + (p.currentSignatures || 0), 0) || 0;
 
   return (
     <div>
@@ -174,9 +232,9 @@ export function PetitionsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('common.all')}</SelectItem>
-                  {themes.map((theme) => (
+                  {themesData?.map((theme) => (
                     <SelectItem key={theme.id} value={theme.id}>
-                      {theme.icon} {t(theme.name)}
+                      {theme.icon} {tLocal(theme.name)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -204,7 +262,7 @@ export function PetitionsPage() {
                     {language === 'de' && 'Geschlossen'}
                     {language === 'en' && 'Closed'}
                   </SelectItem>
-                  <SelectItem value="threshold_reached">
+                  <SelectItem value="under_review">
                     {language === 'fr' && 'Seuil atteint'}
                     {language === 'de' && 'Schwelle erreicht'}
                     {language === 'en' && 'Threshold reached'}
@@ -218,7 +276,7 @@ export function PetitionsPage() {
         {/* Petitions Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {filteredPetitions.map((petition, index) => {
-            const percentage = (petition.current / petition.target) * 100;
+            const percentage = (petition.currentSignatures / petition.targetSignatures) * 100;
             const daysLeft = Math.ceil(
               (new Date(petition.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
             );
@@ -252,10 +310,10 @@ export function PetitionsPage() {
                       </Badge>
                     </div>
                     <CardTitle className="line-clamp-2 text-xl group-hover:text-blue-600 transition-colors">
-                      {petition.title}
+                      {tLocal(petition.title)}
                     </CardTitle>
                     <CardDescription className="line-clamp-2 text-base">
-                      {petition.description}
+                      {tLocal(petition.description)}
                     </CardDescription>
                     <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
                       <Users className="w-4 h-4" />
@@ -263,7 +321,7 @@ export function PetitionsPage() {
                         {language === 'fr' && 'Par '}
                         {language === 'de' && 'Von '}
                         {language === 'en' && 'By '}
-                        <span className="font-medium text-gray-900">{petition.author}</span>
+                        <span className="font-medium text-gray-900">{petition.author.firstName} {petition.author.lastName}</span>
                       </span>
                     </div>
                   </CardHeader>
@@ -274,8 +332,8 @@ export function PetitionsPage() {
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4 text-gray-500" />
-                          <span className="font-semibold text-gray-900">{petition.current.toLocaleString()}</span>
-                          <span className="text-gray-600">/ {petition.target.toLocaleString()}</span>
+                          <span className="font-semibold text-gray-900">{petition.currentSignatures.toLocaleString()}</span>
+                          <span className="text-gray-600">/ {petition.targetSignatures.toLocaleString()}</span>
                         </div>
                         <span className="font-semibold text-gray-900">{percentage.toFixed(0)}%</span>
                       </div>
@@ -316,7 +374,7 @@ export function PetitionsPage() {
                       )}
 
                       {/* Success Badge */}
-                      {petition.status === 'threshold_reached' && (
+                      {petition.status === 'under_review' && (
                         <div className="flex items-center gap-2 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
                           <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
                           <p className="text-sm text-green-800 font-medium">
@@ -384,7 +442,7 @@ export function PetitionsPage() {
                       )}
                       
                       {/* View details button */}
-                      <Link to={`/petitions/${petition.id}`} className="block">
+                      <Link to={`/petitions/${petition.slug}`} className="block">
                         <Button 
                           variant={petition.status === 'open' || isSigned ? 'outline' : 'default'}
                           className={petition.status === 'open' || isSigned ? 

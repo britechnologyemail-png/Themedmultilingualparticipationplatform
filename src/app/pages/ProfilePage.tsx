@@ -90,7 +90,7 @@ const defaultProfile: UserProfile = {
 };
 
 export function ProfilePage() {
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language, setLanguage, tLocal } = useLanguage();
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
@@ -570,12 +570,12 @@ export function ProfilePage() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={`font-medium text-sm ${isFavorite ? 'text-gray-900' : 'text-gray-600'}`}>
-                                {theme.name[language]}
+                                {language === 'fr' ? theme.name : language === 'de' ? (theme.nameDE || theme.name) : (theme.nameEN || theme.name)}
                               </p>
                               <p className="text-xs text-gray-500 mt-0.5">
-                                {language === 'fr' && theme.description?.fr}
-                                {language === 'de' && theme.description?.de}
-                                {language === 'en' && theme.description?.en}
+                                {language === 'fr' && theme.descriptionFR}
+                                {language === 'de' && theme.descriptionDE}
+                                {language === 'en' && theme.descriptionEN}
                               </p>
                             </div>
                             {isFavorite && (
@@ -642,7 +642,7 @@ export function ProfilePage() {
                               backgroundColor: `${theme.color}10` 
                             }}
                           >
-                            {theme.name[language]}
+                            {language === 'fr' ? theme.name : language === 'de' ? (theme.nameDE || theme.name) : (theme.nameEN || theme.name)}
                           </Badge>
                         )}
                       </div>

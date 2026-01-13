@@ -20,12 +20,22 @@ import {
   Bell,
   Moon,
   Save,
-  CheckCircle2
+  CheckCircle2,
+  ShieldCheck,
+  Users,
+  Database,
+  Activity,
+  AlertCircle,
+  MessageSquare,
+  Vote,
+  Calendar,
+  FileText,
+  Trash2
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 
-type Section = 'profile' | 'account' | 'security' | 'preferences';
+type Section = 'profile' | 'account' | 'security' | 'preferences' | 'notifications' | 'administration';
 
 export function SettingsPage() {
   const { language } = useLanguage();
@@ -36,6 +46,8 @@ export function SettingsPage() {
   const [fullName, setFullName] = useState('Jean Dupont');
   const [username, setUsername] = useState('jdupont');
   const [bio, setBio] = useState('Citoyen engagé pour ma commune');
+  const [phone, setPhone] = useState('+41 79 123 45 67');
+  const [address, setAddress] = useState('Rue de la Commune 12, 1000 Lausanne');
 
   // Account form state
   const [email, setEmail] = useState('jean.dupont@example.com');
@@ -46,11 +58,30 @@ export function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [loginAlerts, setLoginAlerts] = useState(true);
 
   // Preferences state
   const [darkMode, setDarkMode] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [appLanguage, setAppLanguage] = useState('fr');
+  const [compactView, setCompactView] = useState(false);
+
+  // Notifications state
+  const [notifyConcertations, setNotifyConcertations] = useState(true);
+  const [notifyAssemblies, setNotifyAssemblies] = useState(true);
+  const [notifyPetitions, setNotifyPetitions] = useState(true);
+  const [notifyConferences, setNotifyConferences] = useState(true);
+  const [notifyVotes, setNotifyVotes] = useState(true);
+  const [notifyComments, setNotifyComments] = useState(false);
+  const [notifyDigest, setNotifyDigest] = useState('weekly');
+
+  // Administration state (for admin users)
+  const [platformName, setPlatformName] = useState('CiviAgora');
+  const [adminEmail, setAdminEmail] = useState('admin@civiagora.ch');
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [allowRegistrations, setAllowRegistrations] = useState(true);
+  const [moderationRequired, setModerationRequired] = useState(true);
 
   const handleSaveChanges = () => {
     setHasChanges(false);
@@ -112,6 +143,18 @@ export function SettingsPage() {
       icon: SettingsIcon,
       label: language === 'fr' ? 'Préférences' : language === 'de' ? 'Einstellungen' : 'Preferences',
       description: language === 'fr' ? 'Personnalisez votre expérience' : language === 'de' ? 'Personalisieren Sie Ihre Erfahrung' : 'Customize your experience'
+    },
+    {
+      id: 'notifications' as Section,
+      icon: Bell,
+      label: language === 'fr' ? 'Notifications' : language === 'de' ? 'Benachrichtigungen' : 'Notifications',
+      description: language === 'fr' ? 'Configurez vos notifications' : language === 'de' ? 'Konfigurieren Sie Ihre Benachrichtigungen' : 'Configure your notifications'
+    },
+    {
+      id: 'administration' as Section,
+      icon: Database,
+      label: language === 'fr' ? 'Administration' : language === 'de' ? 'Administration' : 'Administration',
+      description: language === 'fr' ? 'Paramètres de la plateforme' : language === 'de' ? 'Plattform-Einstellungen' : 'Platform settings'
     }
   ];
 
@@ -307,6 +350,52 @@ export function SettingsPage() {
                         />
                         <p className="text-xs text-gray-500">
                           {bio.length} / 500 caractères
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">
+                          {language === 'fr' && 'Téléphone'}
+                          {language === 'de' && 'Telefon'}
+                          {language === 'en' && 'Phone'}
+                        </Label>
+                        <Input
+                          id="phone"
+                          value={phone}
+                          onChange={(e) => {
+                            setPhone(e.target.value);
+                            setHasChanges(true);
+                          }}
+                          placeholder="+41 79 123 45 67"
+                          className="h-11"
+                        />
+                        <p className="text-xs text-gray-500">
+                          {language === 'fr' && 'Numéro de téléphone pour les communications'}
+                          {language === 'de' && 'Telefonnummer für Kommunikation'}
+                          {language === 'en' && 'Phone number for communication'}
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="address">
+                          {language === 'fr' && 'Adresse'}
+                          {language === 'de' && 'Adresse'}
+                          {language === 'en' && 'Address'}
+                        </Label>
+                        <Input
+                          id="address"
+                          value={address}
+                          onChange={(e) => {
+                            setAddress(e.target.value);
+                            setHasChanges(true);
+                          }}
+                          placeholder="Rue de la Commune 12, 1000 Lausanne"
+                          className="h-11"
+                        />
+                        <p className="text-xs text-gray-500">
+                          {language === 'fr' && 'Adresse pour les communications'}
+                          {language === 'de' && 'Adresse für Kommunikation'}
+                          {language === 'en' && 'Address for communication'}
                         </p>
                       </div>
                     </div>
@@ -545,6 +634,34 @@ export function SettingsPage() {
                           className="h-11"
                         />
                       </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="twoFactorEnabled" className="flex items-center gap-2">
+                          <ShieldCheck className="w-4 h-4 text-gray-500" />
+                          {language === 'fr' && 'Authentification à deux facteurs'}
+                          {language === 'de' && 'Zweistufige Authentifizierung'}
+                          {language === 'en' && 'Two-Factor Authentication'}
+                        </Label>
+                        <Switch
+                          id="twoFactorEnabled"
+                          checked={twoFactorEnabled}
+                          onCheckedChange={setTwoFactorEnabled}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="loginAlerts" className="flex items-center gap-2">
+                          <AlertCircle className="w-4 h-4 text-gray-500" />
+                          {language === 'fr' && 'Alertes de connexion'}
+                          {language === 'de' && 'Anmeldebenachrichtigungen'}
+                          {language === 'en' && 'Login Alerts'}
+                        </Label>
+                        <Switch
+                          id="loginAlerts"
+                          checked={loginAlerts}
+                          onCheckedChange={setLoginAlerts}
+                        />
+                      </div>
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t">
@@ -678,6 +795,426 @@ export function SettingsPage() {
                           <SelectItem value="en">🇬🇧 English</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    {/* Compact View Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <Activity className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="compactView" className="text-base font-medium cursor-pointer">
+                            {language === 'fr' && 'Vue compacte'}
+                            {language === 'de' && 'Kompakte Ansicht'}
+                            {language === 'en' && 'Compact View'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Afficher une vue compacte'}
+                            {language === 'de' && 'Kompakte Ansicht anzeigen'}
+                            {language === 'en' && 'Display a compact view'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="compactView"
+                        checked={compactView}
+                        onCheckedChange={setCompactView}
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4 border-t">
+                      <Button variant="outline">
+                        {language === 'fr' && 'Réinitialiser'}
+                        {language === 'de' && 'Zurücksetzen'}
+                        {language === 'en' && 'Reset'}
+                      </Button>
+                      <Button
+                        onClick={handleSaveChanges}
+                        className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      >
+                        <Save className="w-4 h-4" />
+                        {language === 'fr' && 'Enregistrer les préférences'}
+                        {language === 'de' && 'Einstellungen speichern'}
+                        {language === 'en' && 'Save preferences'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Notifications Section */}
+            {activeSection === 'notifications' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bell className="w-5 h-5 text-blue-600" />
+                      {language === 'fr' && 'Notifications'}
+                      {language === 'de' && 'Benachrichtigungen'}
+                      {language === 'en' && 'Notifications'}
+                    </CardTitle>
+                    <CardDescription>
+                      {language === 'fr' && 'Configurez vos notifications'}
+                      {language === 'de' && 'Konfigurieren Sie Ihre Benachrichtigungen'}
+                      {language === 'en' && 'Configure your notifications'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Concertations Notifications Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <MessageSquare className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="notifyConcertations" className="text-base font-medium cursor-pointer">
+                            {language === 'fr' && 'Notifications de concertations'}
+                            {language === 'de' && 'Benachrichtigungen zu Konzultationen'}
+                            {language === 'en' && 'Concertation Notifications'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Recevoir des notifications pour les concertations'}
+                            {language === 'de' && 'Benachrichtigungen für Konzultationen erhalten'}
+                            {language === 'en' && 'Receive notifications for concertations'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="notifyConcertations"
+                        checked={notifyConcertations}
+                        onCheckedChange={setNotifyConcertations}
+                      />
+                    </div>
+
+                    {/* Assemblies Notifications Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="notifyAssemblies" className="text-base font-medium cursor-pointer">
+                            {language === 'fr' && 'Notifications de réunions'}
+                            {language === 'de' && 'Benachrichtigungen zu Versammlungen'}
+                            {language === 'en' && 'Assembly Notifications'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Recevoir des notifications pour les réunions'}
+                            {language === 'de' && 'Benachrichtigungen für Versammlungen erhalten'}
+                            {language === 'en' && 'Receive notifications for assemblies'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="notifyAssemblies"
+                        checked={notifyAssemblies}
+                        onCheckedChange={setNotifyAssemblies}
+                      />
+                    </div>
+
+                    {/* Petitions Notifications Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <Vote className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="notifyPetitions" className="text-base font-medium cursor-pointer">
+                            {language === 'fr' && 'Notifications de pétitions'}
+                            {language === 'de' && 'Benachrichtigungen zu Petitionen'}
+                            {language === 'en' && 'Petition Notifications'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Recevoir des notifications pour les pétitions'}
+                            {language === 'de' && 'Benachrichtigungen für Petitionen erhalten'}
+                            {language === 'en' && 'Receive notifications for petitions'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="notifyPetitions"
+                        checked={notifyPetitions}
+                        onCheckedChange={setNotifyPetitions}
+                      />
+                    </div>
+
+                    {/* Conferences Notifications Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <Calendar className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="notifyConferences" className="text-base font-medium cursor-pointer">
+                            {language === 'fr' && 'Notifications de conférences'}
+                            {language === 'de' && 'Benachrichtigungen zu Konferenzen'}
+                            {language === 'en' && 'Conference Notifications'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Recevoir des notifications pour les conférences'}
+                            {language === 'de' && 'Benachrichtigungen für Konferenzen erhalten'}
+                            {language === 'en' && 'Receive notifications for conferences'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="notifyConferences"
+                        checked={notifyConferences}
+                        onCheckedChange={setNotifyConferences}
+                      />
+                    </div>
+
+                    {/* Votes Notifications Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <Vote className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="notifyVotes" className="text-base font-medium cursor-pointer">
+                            {language === 'fr' && 'Notifications de votes'}
+                            {language === 'de' && 'Benachrichtigungen zu Abstimmungen'}
+                            {language === 'en' && 'Vote Notifications'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Recevoir des notifications pour les votes'}
+                            {language === 'de' && 'Benachrichtigungen für Abstimmungen erhalten'}
+                            {language === 'en' && 'Receive notifications for votes'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="notifyVotes"
+                        checked={notifyVotes}
+                        onCheckedChange={setNotifyVotes}
+                      />
+                    </div>
+
+                    {/* Comments Notifications Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <MessageSquare className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="notifyComments" className="text-base font-medium cursor-pointer">
+                            {language === 'fr' && 'Notifications de commentaires'}
+                            {language === 'de' && 'Benachrichtigungen zu Kommentaren'}
+                            {language === 'en' && 'Comment Notifications'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Recevoir des notifications pour les commentaires'}
+                            {language === 'de' && 'Benachrichtigungen für Kommentare erhalten'}
+                            {language === 'en' && 'Receive notifications for comments'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="notifyComments"
+                        checked={notifyComments}
+                        onCheckedChange={setNotifyComments}
+                      />
+                    </div>
+
+                    {/* Digest Notifications */}
+                    <div className="p-4 rounded-lg border border-gray-200">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="notifyDigest" className="text-base font-medium">
+                            {language === 'fr' && 'Résumé des notifications'}
+                            {language === 'de' && 'Benachrichtigungsübersicht'}
+                            {language === 'en' && 'Notification Digest'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Recevoir un résumé des notifications'}
+                            {language === 'de' && 'Benachrichtigungsübersicht erhalten'}
+                            {language === 'en' && 'Receive a notification digest'}
+                          </p>
+                        </div>
+                      </div>
+                      <Select value={notifyDigest} onValueChange={setNotifyDigest}>
+                        <SelectTrigger className="h-11">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily"> quotidienne</SelectItem>
+                          <SelectItem value="weekly"> hebdomadaire</SelectItem>
+                          <SelectItem value="monthly"> mensuelle</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4 border-t">
+                      <Button variant="outline">
+                        {language === 'fr' && 'Réinitialiser'}
+                        {language === 'de' && 'Zurücksetzen'}
+                        {language === 'en' && 'Reset'}
+                      </Button>
+                      <Button
+                        onClick={handleSaveChanges}
+                        className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      >
+                        <Save className="w-4 h-4" />
+                        {language === 'fr' && 'Enregistrer les préférences'}
+                        {language === 'de' && 'Einstellungen speichern'}
+                        {language === 'en' && 'Save preferences'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Administration Section */}
+            {activeSection === 'administration' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="w-5 h-5 text-blue-600" />
+                      {language === 'fr' && 'Administration'}
+                      {language === 'de' && 'Administration'}
+                      {language === 'en' && 'Administration'}
+                    </CardTitle>
+                    <CardDescription>
+                      {language === 'fr' && 'Paramètres de la plateforme'}
+                      {language === 'de' && 'Plattform-Einstellungen'}
+                      {language === 'en' && 'Platform settings'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Platform Name */}
+                    <div className="space-y-2">
+                      <Label htmlFor="platformName">
+                        {language === 'fr' && 'Nom de la plateforme'}
+                        {language === 'de' && 'Plattformname'}
+                        {language === 'en' && 'Platform Name'}
+                      </Label>
+                      <Input
+                        id="platformName"
+                        value={platformName}
+                        onChange={(e) => setPlatformName(e.target.value)}
+                        placeholder="CiviAgora"
+                        className="h-11"
+                      />
+                      <p className="text-xs text-gray-500">
+                        {language === 'fr' && 'Nom affiché pour la plateforme'}
+                        {language === 'de' && 'Angezeigter Name der Plattform'}
+                        {language === 'en' && 'Displayed name for the platform'}
+                      </p>
+                    </div>
+
+                    {/* Admin Email */}
+                    <div className="space-y-2">
+                      <Label htmlFor="adminEmail">
+                        {language === 'fr' && 'Email de l\'administrateur'}
+                        {language === 'de' && 'Admin-E-Mail'}
+                        {language === 'en' && 'Admin Email'}
+                      </Label>
+                      <Input
+                        id="adminEmail"
+                        type="email"
+                        value={adminEmail}
+                        onChange={(e) => setAdminEmail(e.target.value)}
+                        placeholder="admin@civiagora.ch"
+                        className="h-11"
+                      />
+                      <p className="text-xs text-gray-500">
+                        {language === 'fr' && 'Email pour les notifications d\'administration'}
+                        {language === 'de' && 'E-Mail für administrative Benachrichtigungen'}
+                        {language === 'en' && 'Email for administrative notifications'}
+                      </p>
+                    </div>
+
+                    {/* Maintenance Mode Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <Trash2 className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="maintenanceMode" className="text-base font-medium cursor-pointer">
+                            {language === 'fr' && 'Mode maintenance'}
+                            {language === 'de' && 'Wartungsmodus'}
+                            {language === 'en' && 'Maintenance Mode'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Activer le mode maintenance'}
+                            {language === 'de' && 'Wartungsmodus aktivieren'}
+                            {language === 'en' && 'Enable maintenance mode'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="maintenanceMode"
+                        checked={maintenanceMode}
+                        onCheckedChange={setMaintenanceMode}
+                      />
+                    </div>
+
+                    {/* Allow Registrations Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="allowRegistrations" className="text-base font-medium cursor-pointer">
+                            {language === 'fr' && 'Autoriser les inscriptions'}
+                            {language === 'de' && 'Registrierungen zulassen'}
+                            {language === 'en' && 'Allow Registrations'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Autoriser les nouveaux utilisateurs à s\'inscrire'}
+                            {language === 'de' && 'Neuen Benutzern das Registrieren zulassen'}
+                            {language === 'en' && 'Allow new users to register'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="allowRegistrations"
+                        checked={allowRegistrations}
+                        onCheckedChange={setAllowRegistrations}
+                      />
+                    </div>
+
+                    {/* Moderation Required Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <ShieldCheck className="w-5 h-5 text-gray-700" />
+                        </div>
+                        <div>
+                          <Label htmlFor="moderationRequired" className="text-base font-medium cursor-pointer">
+                            {language === 'fr' && 'Modération requise'}
+                            {language === 'de' && 'Moderation erforderlich'}
+                            {language === 'en' && 'Moderation Required'}
+                          </Label>
+                          <p className="text-sm text-gray-500">
+                            {language === 'fr' && 'Toutes les publications nécessitent une modération'}
+                            {language === 'de' && 'Alle Veröffentlichungen erfordern eine Moderation'}
+                            {language === 'en' && 'All publications require moderation'}
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        id="moderationRequired"
+                        checked={moderationRequired}
+                        onCheckedChange={setModerationRequired}
+                      />
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t">

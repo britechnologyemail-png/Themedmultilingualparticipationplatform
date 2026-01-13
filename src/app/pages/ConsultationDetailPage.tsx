@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { consultations } from '../data/mockData';
-import { themes } from '../data/themes';
+import { useConsultation, useTheme } from '../hooks/useApi';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -60,7 +59,7 @@ const mockComments: Comment[] = [
 
 export function ConsultationDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { language, t } = useLanguage();
+  const { language, t, tLocal } = useLanguage();
   const navigate = useNavigate();
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<Comment[]>(mockComments);
@@ -68,13 +67,32 @@ export function ConsultationDetailPage() {
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState('');
 
-  const consultation = consultations.find(c => c.id === id);
-  const theme = consultation ? themes.find(t => t.id === consultation.themeId) : null;
+  // Fetch consultation using React Query
+  const { data: consultation, isLoading, error } = useConsultation(id || '');
+  
+  // Fetch theme data
+  const { data: theme } = useTheme(consultation?.themeId || '');
 
   // Check if debate is active
   const isDebateActive = consultation?.status === 'open' || consultation?.status === 'upcoming';
 
-  if (!consultation || !theme) {
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">
+          <p className="text-gray-600">
+            {language === 'fr' && 'Chargement...'}
+            {language === 'de' && 'Wird geladen...'}
+            {language === 'en' && 'Loading...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error or not found state
+  if (error || !consultation || !theme) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">
@@ -165,9 +183,9 @@ export function ConsultationDetailPage() {
   const getTypeLabel = () => {
     if (!consultation) return '';
     const labels = {
-      meeting: { fr: 'Rencontre', de: 'Treffen', en: 'Meeting' },
-      debate: { fr: 'Débat', de: 'Debatte', en: 'Debate' },
-      proposal: { fr: 'Proposition', de: 'Vorschlag', en: 'Proposal' }
+      public_meeting: { fr: 'Rencontre', de: 'Treffen', en: 'Meeting' },
+      online_debate: { fr: 'Débat', de: 'Debatte', en: 'Debate' },
+      citizen_proposal: { fr: 'Proposition', de: 'Vorschlag', en: 'Proposal' }
     };
     return labels[consultation.type]?.[language] || '';
   };
@@ -198,12 +216,12 @@ export function ConsultationDetailPage() {
                     <Badge variant="outline">{getTypeLabel()}</Badge>
                     <StatusBadge status={consultation.status} />
                   </div>
-                  <CardTitle className="text-3xl mb-2">{consultation.title}</CardTitle>
+                  <CardTitle className="text-3xl mb-2">{tLocal(consultation.title)}</CardTitle>
                   <ThemeTag themeId={consultation.themeId} />
                 </div>
               </div>
               <CardDescription className="text-base">
-                {consultation.description}
+                {tLocal(consultation.description)}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -216,7 +234,7 @@ export function ConsultationDetailPage() {
                       {language === 'de' && 'Datum'}
                       {language === 'en' && 'Date'}
                     </p>
-                    <p className="font-medium">{new Date(consultation.date).toLocaleDateString(language)}</p>
+                    <p className="font-medium">{new Date(consultation.startDate).toLocaleDateString(language)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
@@ -227,7 +245,7 @@ export function ConsultationDetailPage() {
                       {language === 'de' && 'Teilnehmer'}
                       {language === 'en' && 'Participants'}
                     </p>
-                    <p className="font-medium">{consultation.participants}</p>
+                    <p className="font-medium">{consultation.registeredParticipants}</p>
                   </div>
                 </div>
                 {consultation.location && (
@@ -239,20 +257,20 @@ export function ConsultationDetailPage() {
                         {language === 'de' && 'Ort'}
                         {language === 'en' && 'Location'}
                       </p>
-                      <p className="font-medium">{consultation.location}</p>
+                      <p className="font-medium">{consultation.location.name}</p>
                     </div>
                   </div>
                 )}
-                {consultation.supports !== undefined && (
+                {consultation.stats?.totalComments !== undefined && (
                   <div className="flex items-center gap-2 text-gray-600">
                     <Heart className="w-5 h-5" />
                     <div>
                       <p className="text-sm text-gray-500">
-                        {language === 'fr' && 'Soutiens'}
-                        {language === 'de' && 'Unterstützungen'}
-                        {language === 'en' && 'Supports'}
+                        {language === 'fr' && 'Contributions'}
+                        {language === 'de' && 'Beiträge'}
+                        {language === 'en' && 'Contributions'}
                       </p>
-                      <p className="font-medium">{consultation.supports + (hasSupported ? 1 : 0)}</p>
+                      <p className="font-medium">{consultation.stats.totalComments + (hasSupported ? 1 : 0)}</p>
                     </div>
                   </div>
                 )}
@@ -412,7 +430,7 @@ export function ConsultationDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {consultation.type === 'proposal' && (
+              {consultation.type === 'citizen_proposal' && (
                 <Button 
                   onClick={handleSupport} 
                   variant={hasSupported ? 'secondary' : 'default'}
@@ -425,7 +443,7 @@ export function ConsultationDetailPage() {
                   }
                 </Button>
               )}
-              {consultation.type === 'meeting' && consultation.status === 'upcoming' && (
+              {consultation.type === 'public_meeting' && consultation.status === 'upcoming' && (
                 <Button className="w-full gap-2">
                   <Users className="w-4 h-4" />
                   {language === 'fr' && 'S\'inscrire'}
@@ -459,7 +477,7 @@ export function ConsultationDetailPage() {
                 <span className="text-2xl">{theme.icon}</span>
                 <div>
                   <p className="font-medium" style={{ color: theme.color }}>
-                    {t(theme.name)}
+                    {tLocal(theme.name)}
                   </p>
                   <p className="text-sm text-gray-600">
                     {language === 'fr' && 'Découvrez tous les projets liés à ce thème'}

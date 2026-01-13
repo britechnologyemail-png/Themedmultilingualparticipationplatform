@@ -4,17 +4,33 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Button } from './ui/button';
-import { Users, Menu, LogIn, Search } from 'lucide-react';
+import { 
+  Users, 
+  Menu, 
+  LogIn, 
+  Search,
+  Home,
+  MessageSquare,
+  FileText,
+  Mic,
+  Vote,
+  Layers,
+  Sparkles,
+  AlertCircle,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { AuthModal } from './AuthModal';
 import { UserMenu } from './UserMenu';
 import { GlobalSearch } from './GlobalSearch';
+import { MobileMenu } from './MobileMenu';
+import { NotificationCenter } from './NotificationCenter';
 
 export function Header() {
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn, user, logout } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Keyboard shortcut for search (Ctrl+K or Cmd+K)
   useEffect(() => {
@@ -29,77 +45,49 @@ export function Header() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Navigation items with icons
+  const navItems = [
+    { key: 'home', path: '/', icon: Home, label: t('nav.home') },
+    { key: 'consultations', path: '/consultations', icon: MessageSquare, label: t('nav.consultations') },
+    { key: 'assemblies', path: '/assemblies', icon: Users, label: t('nav.assemblies') },
+    { key: 'petitions', path: '/petitions', icon: FileText, label: t('nav.petitions') },
+    { key: 'conferences', path: '/conferences', icon: Mic, label: t('nav.conferences') },
+    { key: 'votes', path: '/votes', icon: Vote, label: language === 'fr' ? 'Votes' : language === 'de' ? 'Abstimmungen' : 'Votes' },
+    { key: 'signalements', path: '/signalements', icon: AlertCircle, label: language === 'fr' ? 'Signalements' : language === 'de' ? 'Meldungen' : 'Reports' },
+    { key: 'youth-space', path: '/youth-space', icon: Sparkles, label: language === 'fr' ? '🌟 Jeunesse' : language === 'de' ? '🌟 Jugend' : '🌟 Youth' },
+    { key: 'themes', path: '/themes', icon: Layers, label: t('nav.themes') },
+  ];
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       {/* Centered Container with max-width */}
       <div className="w-full flex justify-center">
         <div className="w-full max-w-[1400px] px-6 lg:px-8">
           <div className="grid grid-cols-[auto_1fr_auto] items-center h-16 gap-6">
-            {/* Logo - Left aligned */}
+            {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
               <motion.div 
-                className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"
+                className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg"
                 whileHover={{ scale: 1.05, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
                 <Users className="w-6 h-6 text-white" />
               </motion.div>
-              <div className="hidden md:block">
-                <motion.div 
-                  className="text-xl font-semibold text-gray-900"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <motion.span
-                    className="inline-block bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent bg-[length:200%_auto]"
-                    animate={{
-                      backgroundPosition: ["0% center", "200% center", "0% center"],
-                    }}
-                    transition={{
-                      duration: 5,
-                      repeat: Infinity,
-                      ease: "linear"
-                    }}
-                  >
-                    CiviAgora
-                  </motion.span>
-                </motion.div>
-                <motion.div 
-                  className="text-xs text-gray-500"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.5 }}
-                >
-                  Plateforme citoyenne
-                </motion.div>
-              </div>
             </Link>
 
-            {/* Navigation principale - Center aligned */}
+            {/* Navigation principale - Center aligned with icons */}
             <nav className="hidden lg:flex items-center justify-center gap-1">
-              <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50/50 text-center whitespace-nowrap text-[15px]">
-                {t('nav.home')}
-              </Link>
-              <Link to="/consultations" className="text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50/50 text-center whitespace-nowrap text-[15px]">
-                {t('nav.consultations')}
-              </Link>
-              <Link to="/assemblies" className="text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50/50 text-center whitespace-nowrap text-[15px]">
-                {t('nav.assemblies')}
-              </Link>
-              <Link to="/petitions" className="text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50/50 text-center whitespace-nowrap text-[15px]">
-                {t('nav.petitions')}
-              </Link>
-              <Link to="/conferences" className="text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50/50 text-center whitespace-nowrap text-[15px]">
-                {t('nav.conferences')}
-              </Link>
-              <Link to="/votes" className="text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50/50 text-center whitespace-nowrap text-[15px]">
-                {t('nav.votes')}
-              </Link>
-              <Link to="/themes" className="text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50/50 text-center whitespace-nowrap text-[15px]">
-                {t('nav.themes')}
-              </Link>
+              {navItems.map((item) => (
+                <Link
+                  key={item.key}
+                  to={item.path}
+                  className="group flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50/50 text-center whitespace-nowrap text-[15px]"
+                >
+                  <item.icon className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity" />
+                  <span>{item.label}</span>
+                </Link>
+              ))}
             </nav>
 
             {/* Actions - Right aligned */}
@@ -108,9 +96,9 @@ export function Header() {
               <button
                 onClick={() => setSearchOpen(true)}
                 className="hidden md:flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-blue-50/50 hover:bg-blue-100/50 rounded-lg transition-colors"
+                title={language === 'fr' ? 'Rechercher (Ctrl+K)' : language === 'de' ? 'Suchen (Ctrl+K)' : 'Search (Ctrl+K)'}
               >
                 <Search className="w-4 h-4" />
-                <span className="hidden lg:inline">{language === 'fr' ? 'Rechercher' : language === 'de' ? 'Suchen' : 'Search'}</span>
                 <kbd className="hidden xl:inline-block px-2 py-0.5 text-xs bg-white border border-gray-300 rounded">
                   Ctrl+K
                 </kbd>
@@ -136,6 +124,9 @@ export function Header() {
                 </SelectContent>
               </Select>
 
+              {/* Notification Center (only when logged in) */}
+              {isLoggedIn && user && <NotificationCenter />}
+
               {/* Auth Button or User Menu */}
               {isLoggedIn && user ? (
                 <div className="hidden md:block">
@@ -148,17 +139,19 @@ export function Header() {
               ) : (
                 <Button
                   onClick={() => setAuthModalOpen(true)}
-                  className="hidden md:inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  size="icon"
+                  className="hidden md:inline-flex bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  title={language === 'fr' ? 'Connexion' : language === 'de' ? 'Anmelden' : 'Login'}
                 >
                   <LogIn className="w-4 h-4" />
-                  {language === 'fr' && 'Connexion'}
-                  {language === 'de' && 'Anmelden'}
-                  {language === 'en' && 'Login'}
                 </Button>
               )}
 
               {/* Mobile menu button */}
-              <button className="lg:hidden p-2 rounded-lg hover:bg-blue-50/50">
+              <button 
+                onClick={() => setMobileMenuOpen(true)}
+                className="lg:hidden p-2 rounded-lg hover:bg-blue-50/50 transition-colors"
+              >
                 <Menu className="w-6 h-6 text-gray-700" />
               </button>
             </div>
@@ -176,6 +169,12 @@ export function Header() {
       <GlobalSearch
         open={searchOpen}
         onOpenChange={setSearchOpen}
+      />
+
+      {/* Mobile Menu */}
+      <MobileMenu
+        open={mobileMenuOpen}
+        onOpenChange={setMobileMenuOpen}
       />
     </header>
   );

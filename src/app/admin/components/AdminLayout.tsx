@@ -9,7 +9,7 @@ import {
   Shield, 
   FileText, 
   Calendar, 
-  BarChart3, 
+  BarChart, 
   FileCheck, 
   Download, 
   Settings,
@@ -18,9 +18,8 @@ import {
   Menu,
   X,
   ChevronDown,
-  MessageSquare,
-  Database,
-  Activity
+  Mail,
+  Phone
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import {
@@ -84,7 +83,7 @@ export function AdminLayout() {
     {
       id: 'moderation',
       label: language === 'fr' ? 'Modération' : language === 'de' ? 'Moderation' : 'Moderation',
-      icon: <MessageSquare className="w-5 h-5" />,
+      icon: <Mail className="w-5 h-5" />,
       path: '/admin/moderation',
       roles: ['admin', 'manager', 'moderator']
     },
@@ -105,7 +104,7 @@ export function AdminLayout() {
     {
       id: 'analytics',
       label: language === 'fr' ? 'Indicateurs & Statistiques' : language === 'de' ? 'Indikatoren & Statistiken' : 'Analytics & Statistics',
-      icon: <BarChart3 className="w-5 h-5" />,
+      icon: <BarChart className="w-5 h-5" />,
       path: '/admin/analytics',
       roles: ['admin', 'manager', 'observer']
     },
@@ -121,6 +120,13 @@ export function AdminLayout() {
       label: language === 'fr' ? 'Exports & Rapports' : language === 'de' ? 'Exporte & Berichte' : 'Exports & Reports',
       icon: <Download className="w-5 h-5" />,
       path: '/admin/exports',
+      roles: ['admin', 'manager', 'observer']
+    },
+    {
+      id: 'ivr',
+      label: language === 'fr' ? 'Synthèse IVR' : language === 'de' ? 'IVR-Synthese' : 'IVR Synthesis',
+      icon: <Phone className="w-5 h-5" />,
+      path: '/admin/ivr',
       roles: ['admin', 'manager', 'observer']
     },
     {
@@ -142,20 +148,6 @@ export function AdminLayout() {
           label: language === 'fr' ? 'Notifications' : language === 'de' ? 'Benachrichtigungen' : 'Notifications',
           icon: <Bell className="w-4 h-4" />,
           path: '/admin/settings/notifications',
-          roles: ['admin']
-        },
-        {
-          id: 'settings-audit',
-          label: language === 'fr' ? 'Logs & Audit' : language === 'de' ? 'Protokolle & Audit' : 'Logs & Audit',
-          icon: <Activity className="w-4 h-4" />,
-          path: '/admin/settings/audit',
-          roles: ['admin']
-        },
-        {
-          id: 'settings-data',
-          label: language === 'fr' ? 'Archivage & Données' : language === 'de' ? 'Archivierung & Daten' : 'Archiving & Data',
-          icon: <Database className="w-4 h-4" />,
-          path: '/admin/settings/data',
           roles: ['admin']
         }
       ]
@@ -202,24 +194,6 @@ export function AdminLayout() {
               >
                 <Users className="w-6 h-6 text-white" />
               </motion.div>
-              <div className="hidden sm:block">
-                <motion.h1 
-                  className="font-semibold text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent bg-[length:200%_auto]"
-                  animate={{
-                    backgroundPosition: ["0% center", "200% center", "0% center"],
-                  }}
-                  transition={{
-                    duration: 5,
-                    repeat: Infinity,
-                    ease: "linear"
-                  }}
-                >
-                  CiviAgora
-                </motion.h1>
-                <p className="text-xs text-gray-500">
-                  {language === 'fr' ? 'Back-office' : language === 'de' ? 'Back-Office' : 'Back-office'}
-                </p>
-              </div>
             </Link>
           </div>
 
@@ -249,8 +223,10 @@ export function AdminLayout() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Settings className="w-4 h-4 mr-2" />
-                  {language === 'fr' ? 'Paramètres' : language === 'de' ? 'Einstellungen' : 'Settings'}
+                  <Link to="/settings" className="flex items-center w-full">
+                    <Settings className="w-4 h-4 mr-2" />
+                    {language === 'fr' ? 'Paramètres' : language === 'de' ? 'Einstellungen' : 'Settings'}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link to="/" className="flex items-center w-full">

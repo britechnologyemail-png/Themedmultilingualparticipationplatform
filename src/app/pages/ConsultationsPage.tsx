@@ -13,26 +13,84 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { consultations } from '../data/mockData';
-import { themes } from '../data/themes';
+import { useConsultations, useThemes } from '../hooks/useApi';
+import type { ConsultationDTO } from '../types';
 import { Calendar, Users, MessageSquare, ArrowRight, Filter, MapPin, Heart, TrendingUp, FileText } from 'lucide-react';
 
 export function ConsultationsPage() {
-  const { t, language } = useLanguage();
+  const { t, language, tLocal } = useLanguage();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
-  const filteredConsultations = consultations.filter((consultation) => {
+  // Fetch data using React Query hooks
+  const { data: consultations, isLoading, error } = useConsultations();
+  const { data: themesData } = useThemes();
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div>
+        <PageBanner
+          title={
+            language === 'fr' ? 'Consultations publiques' :
+            language === 'de' ? 'Öffentliche Konsultationen' :
+            'Public Consultations'
+          }
+          description={
+            language === 'fr' ? 'Donnez votre avis sur les projets et politiques de votre commune' :
+            language === 'de' ? 'Geben Sie Ihre Meinung zu Projekten und Richtlinien Ihrer Gemeinde ab' :
+            'Give your opinion on your community\'s projects and policies'
+          }
+          gradient="from-cyan-600 to-blue-600"
+          icon={<MessageSquare className="w-12 h-12 text-white" />}
+        />
+        <PageLayout className="py-8">
+          <div className="text-center py-12">
+            <p className="text-gray-600">Chargement des consultations...</p>
+          </div>
+        </PageLayout>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div>
+        <PageBanner
+          title={
+            language === 'fr' ? 'Consultations publiques' :
+            language === 'de' ? 'Öffentliche Konsultationen' :
+            'Public Consultations'
+          }
+          description={
+            language === 'fr' ? 'Donnez votre avis sur les projets et politiques de votre commune' :
+            language === 'de' ? 'Geben Sie Ihre Meinung zu Projekten und Richtlinien Ihrer Gemeinde ab' :
+            'Give your opinion on your community\'s projects and policies'
+          }
+          gradient="from-cyan-600 to-blue-600"
+          icon={<MessageSquare className="w-12 h-12 text-white" />}
+        />
+        <PageLayout className="py-8">
+          <div className="text-center py-12">
+            <p className="text-red-600">Erreur lors du chargement des données</p>
+          </div>
+        </PageLayout>
+      </div>
+    );
+  }
+
+  const filteredConsultations = (consultations || []).filter((consultation) => {
     if (selectedTheme && consultation.themeId !== selectedTheme) return false;
     if (selectedStatus && consultation.status !== selectedStatus) return false;
     return true;
   });
 
   // Calculate statistics
-  const totalConsultations = consultations.length;
-  const openConsultations = consultations.filter(c => c.status === 'open').length;
-  const totalParticipants = consultations.reduce((sum, c) => sum + c.participants, 0);
-  const totalSupports = consultations.reduce((sum, c) => sum + (c.supports || 0), 0);
+  const totalConsultations = consultations?.length || 0;
+  const openConsultations = consultations?.filter(c => c.status === 'open').length || 0;
+  const totalParticipants = consultations?.reduce((sum, c) => sum + (c.registeredParticipants || 0), 0) || 0;
+  const totalComments = consultations?.reduce((sum, c) => sum + (c.stats?.totalComments || 0), 0) || 0;
   const engagementRate = totalConsultations > 0 
     ? Math.round((totalParticipants / totalConsultations) * 100) / 100
     : 0;
@@ -96,7 +154,7 @@ export function ConsultationsPage() {
               language === 'de' ? 'Beiträge' :
               'Contributions'
             }
-            value={totalSupports.toLocaleString()}
+            value={totalComments.toLocaleString()}
             icon={Heart}
             variant="orange"
           />
@@ -116,9 +174,9 @@ export function ConsultationsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t('common.all')}</SelectItem>
-                  {themes.map((theme) => (
+                  {themesData?.map((theme) => (
                     <SelectItem key={theme.id} value={theme.id}>
-                      {theme.icon} {t(theme.name)}
+                      {theme.icon} {tLocal(theme.name)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -148,9 +206,9 @@ export function ConsultationsPage() {
         <Tabs defaultValue="all" className="w-full mb-8">
           <TabsList>
             <TabsTrigger value="all">Toutes ({filteredConsultations.length})</TabsTrigger>
-            <TabsTrigger value="debate">Débats ({filteredConsultations.filter(c => c.type === 'debate').length})</TabsTrigger>
-            <TabsTrigger value="proposal">Propositions ({filteredConsultations.filter(c => c.type === 'proposal').length})</TabsTrigger>
-            <TabsTrigger value="meeting">Rencontres ({filteredConsultations.filter(c => c.type === 'meeting').length})</TabsTrigger>
+            <TabsTrigger value="debate">Débats ({filteredConsultations.filter(c => c.type === 'online_debate').length})</TabsTrigger>
+            <TabsTrigger value="proposal">Propositions ({filteredConsultations.filter(c => c.type === 'citizen_proposal').length})</TabsTrigger>
+            <TabsTrigger value="meeting">Rencontres ({filteredConsultations.filter(c => c.type === 'public_meeting').length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all">
@@ -158,15 +216,15 @@ export function ConsultationsPage() {
           </TabsContent>
 
           <TabsContent value="debate">
-            <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'debate')} />
+            <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'online_debate')} />
           </TabsContent>
 
           <TabsContent value="proposal">
-            <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'proposal')} />
+            <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'citizen_proposal')} />
           </TabsContent>
 
           <TabsContent value="meeting">
-            <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'meeting')} />
+            <ConsultationsList consultations={filteredConsultations.filter(c => c.type === 'public_meeting')} />
           </TabsContent>
         </Tabs>
 
@@ -210,16 +268,16 @@ export function ConsultationsPage() {
 }
 
 // Component to display consultations list
-function ConsultationsList({ consultations }: { consultations: typeof import('../data/mockData').consultations }) {
-  const { t } = useLanguage();
+function ConsultationsList({ consultations }: { consultations: ConsultationDTO[] }) {
+  const { t, language, tLocal } = useLanguage();
   
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'debate':
+      case 'online_debate':
         return <MessageSquare className="w-5 h-5" />;
-      case 'proposal':
+      case 'citizen_proposal':
         return <MessageSquare className="w-5 h-5" />;
-      case 'meeting':
+      case 'public_meeting':
         return <MessageSquare className="w-5 h-5" />;
       default:
         return null;
@@ -228,11 +286,11 @@ function ConsultationsList({ consultations }: { consultations: typeof import('..
 
   const getTypeName = (type: string) => {
     switch (type) {
-      case 'debate':
+      case 'online_debate':
         return 'Débat';
-      case 'proposal':
+      case 'citizen_proposal':
         return 'Proposition';
-      case 'meeting':
+      case 'public_meeting':
         return 'Rencontre';
       default:
         return type;
@@ -254,9 +312,9 @@ function ConsultationsList({ consultations }: { consultations: typeof import('..
               </div>
               <StatusBadge status={consultation.status} />
             </div>
-            <CardTitle className="line-clamp-2">{consultation.title}</CardTitle>
+            <CardTitle className="line-clamp-2">{tLocal(consultation.title)}</CardTitle>
             <CardDescription className="text-base mt-2 line-clamp-3">
-              {consultation.description}
+              {tLocal(consultation.description)}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col flex-grow">
@@ -265,26 +323,26 @@ function ConsultationsList({ consultations }: { consultations: typeof import('..
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-gray-600 text-sm">
                   <Calendar className="w-4 h-4" />
-                  <span>{new Date(consultation.date).toLocaleDateString('fr-FR')}</span>
+                  <span>{new Date(consultation.startDate).toLocaleDateString('fr-FR')}</span>
                 </div>
                 {consultation.location && (
                   <div className="flex items-center gap-2 text-gray-600 text-sm">
                     <MapPin className="w-4 h-4" />
-                    <span>{consultation.location}</span>
+                    <span>{tLocal(consultation.location.name)}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-gray-600 text-sm">
                   <Users className="w-4 h-4" />
-                  <span>{consultation.participants} participants</span>
+                  <span>{consultation.registeredParticipants} participants</span>
                 </div>
               </div>
 
-              {/* Supports for proposals */}
-              {consultation.type === 'proposal' && consultation.supports !== undefined && (
+              {/* Comments for proposals */}
+              {consultation.type === 'citizen_proposal' && consultation.stats?.totalComments !== undefined && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                   <div className="flex items-center gap-2 text-green-800">
                     <Heart className="w-4 h-4" />
-                    <span className="font-medium">{consultation.supports} soutiens</span>
+                    <span className="font-medium">{consultation.stats.totalComments} contributions</span>
                   </div>
                 </div>
               )}
@@ -293,7 +351,7 @@ function ConsultationsList({ consultations }: { consultations: typeof import('..
             {/* Button aligned at bottom */}
             {consultation.status === 'open' && (
               <div className="mt-4 pt-4 border-t border-gray-100">
-                <Link to={`/consultations/${consultation.id}`}>
+                <Link to={`/consultations/${consultation.slug}`}>
                   <Button className="w-full gap-2">
                     {t('common.participate')}
                     <ArrowRight className="w-4 h-4" />

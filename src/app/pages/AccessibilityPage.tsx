@@ -4,16 +4,12 @@ import { PageLayout } from '../components/layout/PageLayout';
 import { motion } from 'motion/react';
 import { 
   Accessibility, 
-  Eye, 
-  Keyboard, 
-  Monitor, 
-  Volume2,
-  MousePointer,
   Contrast,
   Type,
-  CheckCircle2,
+  CheckCircle,
   Mail,
-  AlertCircle
+  AlertCircle,
+  Monitor
 } from 'lucide-react';
 
 export function AccessibilityPage() {
@@ -49,28 +45,6 @@ export function AccessibilityPage() {
       title: { fr: 'Fonctionnalités d\'accessibilité', de: 'Barrierefreiheitsfunktionen', en: 'Accessibility features' },
       list: [
         {
-          icon: Keyboard,
-          title: { fr: 'Navigation au clavier', de: 'Tastaturnavigation', en: 'Keyboard navigation' },
-          desc: { fr: 'Tous les éléments interactifs sont accessibles via le clavier (Tab, Entrée, Échap, flèches)', de: 'Alle interaktiven Elemente sind über die Tastatur zugänglich (Tab, Enter, Esc, Pfeiltasten)', en: 'All interactive elements are accessible via keyboard (Tab, Enter, Esc, arrows)' },
-          items: [
-            { fr: 'Tab : Navigation entre les éléments', de: 'Tab: Navigation zwischen Elementen', en: 'Tab: Navigate between elements' },
-            { fr: 'Entrée/Espace : Activer un élément', de: 'Enter/Leertaste: Element aktivieren', en: 'Enter/Space: Activate element' },
-            { fr: 'Échap : Fermer les modales', de: 'Esc: Modals schließen', en: 'Esc: Close modals' },
-            { fr: 'Ctrl+K : Recherche rapide', de: 'Ctrl+K: Schnellsuche', en: 'Ctrl+K: Quick search' }
-          ]
-        },
-        {
-          icon: Eye,
-          title: { fr: 'Compatibilité lecteurs d\'écran', de: 'Bildschirmleser-Kompatibilität', en: 'Screen reader compatibility' },
-          desc: { fr: 'Compatible avec JAWS, NVDA, VoiceOver et TalkBack avec descriptions ARIA complètes', de: 'Kompatibel mit JAWS, NVDA, VoiceOver und TalkBack mit vollständigen ARIA-Beschreibungen', en: 'Compatible with JAWS, NVDA, VoiceOver and TalkBack with full ARIA descriptions' },
-          items: [
-            { fr: 'Étiquettes ARIA descriptives', de: 'Beschreibende ARIA-Labels', en: 'Descriptive ARIA labels' },
-            { fr: 'Structure de titres hiérarchique', de: 'Hierarchische Überschriftenstruktur', en: 'Hierarchical heading structure' },
-            { fr: 'Textes alternatifs pour les images', de: 'Alternativtexte für Bilder', en: 'Alternative texts for images' },
-            { fr: 'Annonces dynamiques des changements', de: 'Dynamische Ankündigungen von Änderungen', en: 'Dynamic announcements of changes' }
-          ]
-        },
-        {
           icon: Contrast,
           title: { fr: 'Contraste et lisibilité', de: 'Kontrast und Lesbarkeit', en: 'Contrast and readability' },
           desc: { fr: 'Ratio de contraste minimum de 4.5:1 pour le texte normal et 3:1 pour le texte large', de: 'Mindestkontrastverhältnis von 4,5:1 für normalen Text und 3:1 für großen Text', en: 'Minimum contrast ratio of 4.5:1 for normal text and 3:1 for large text' },
@@ -90,28 +64,6 @@ export function AccessibilityPage() {
             { fr: 'Pas de limitation de hauteur fixe', de: 'Keine feste Höhenbeschränkung', en: 'No fixed height limitation' },
             { fr: 'Espacement des lignes ajustable', de: 'Anpassbarer Zeilenabstand', en: 'Adjustable line spacing' },
             { fr: 'Utilisation de polices système', de: 'Verwendung von Systemschriften', en: 'Use of system fonts' }
-          ]
-        },
-        {
-          icon: MousePointer,
-          title: { fr: 'Zones cliquables', de: 'Klickbare Bereiche', en: 'Clickable areas' },
-          desc: { fr: 'Toutes les cibles tactiles font au moins 44×44 pixels selon les normes WCAG', de: 'Alle Touch-Ziele sind mindestens 44×44 Pixel gemäß WCAG-Standards', en: 'All touch targets are at least 44×44 pixels according to WCAG standards' },
-          items: [
-            { fr: 'Boutons de taille minimale 44px', de: 'Schaltflächen mit Mindestgröße 44px', en: 'Buttons with minimum size 44px' },
-            { fr: 'Espacement suffisant entre les liens', de: 'Ausreichender Abstand zwischen Links', en: 'Sufficient spacing between links' },
-            { fr: 'Indicateurs de focus visibles', de: 'Sichtbare Fokusindikatoren', en: 'Visible focus indicators' },
-            { fr: 'Pas de timeouts courts', de: 'Keine kurzen Timeouts', en: 'No short timeouts' }
-          ]
-        },
-        {
-          icon: Volume2,
-          title: { fr: 'Médias et multimédia', de: 'Medien und Multimedia', en: 'Media and multimedia' },
-          desc: { fr: 'Sous-titres et transcriptions pour les contenus audio et vidéo', de: 'Untertitel und Transkriptionen für Audio- und Videoinhalte', en: 'Subtitles and transcriptions for audio and video content' },
-          items: [
-            { fr: 'Sous-titres pour toutes les vidéos', de: 'Untertitel für alle Videos', en: 'Subtitles for all videos' },
-            { fr: 'Contrôle du volume et de la lecture', de: 'Lautstärke- und Wiedergabesteuerung', en: 'Volume and playback control' },
-            { fr: 'Pas de lecture automatique', de: 'Keine automatische Wiedergabe', en: 'No autoplay' },
-            { fr: 'Descriptions audio disponibles', de: 'Audiobeschreibungen verfügbar', en: 'Audio descriptions available' }
           ]
         }
       ]
@@ -194,7 +146,7 @@ export function AccessibilityPage() {
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-white" />
+                <CheckCircle className="w-6 h-6 text-white" />
               </div>
               <h2 className="text-2xl font-semibold text-gray-900">{t('accessibility.standards')}</h2>
             </div>
@@ -242,7 +194,7 @@ export function AccessibilityPage() {
                     <div className="grid md:grid-cols-2 gap-2 ml-14">
                       {feature.items.map((item, idx) => (
                         <div key={idx} className="flex items-start gap-2 text-sm text-gray-600">
-                          <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                          <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                           <span>{item[language]}</span>
                         </div>
                       ))}
@@ -262,7 +214,7 @@ export function AccessibilityPage() {
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-white" />
+                <CheckCircle className="w-6 h-6 text-white" />
               </div>
               <h2 className="text-2xl font-semibold text-gray-900">{content.testing.title[language]}</h2>
             </div>
@@ -272,7 +224,7 @@ export function AccessibilityPage() {
             <div className="space-y-2">
               {content.testing.tools.map((tool, index) => (
                 <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                  <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                  <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
                   <span className="text-gray-700">{tool[language]}</span>
                 </div>
               ))}

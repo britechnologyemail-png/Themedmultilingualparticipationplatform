@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import type { LocalizedString } from '../types';
 
-type Language = 'fr' | 'de' | 'en';
+export type Language = 'fr' | 'de' | 'en';
 
 interface Translations {
   [key: string]: {
@@ -14,6 +15,7 @@ const translations: Translations = {
   // Navigation
   'nav.home': { fr: 'Accueil', de: 'Startseite', en: 'Home' },
   'nav.consultations': { fr: 'Concertations', de: 'Konsultationen', en: 'Consultations' },
+  'nav.legislativeConsultations': { fr: 'Consultations Législatives', de: 'Gesetzgebungsberatungen', en: 'Legislative Consultations' },
   'nav.assemblies': { fr: 'Assemblées', de: 'Versammlungen', en: 'Assemblies' },
   'nav.petitions': { fr: 'Pétitions', de: 'Petitionen', en: 'Petitions' },
   'nav.conferences': { fr: 'Conférences', de: 'Konferenzen', en: 'Conferences' },
@@ -32,6 +34,7 @@ const translations: Translations = {
   'footer.faq': { fr: 'FAQ', de: 'FAQ', en: 'FAQ' },
   'footer.guides': { fr: 'Guides', de: 'Leitfäden', en: 'Guides' },
   'footer.support': { fr: 'Support', de: 'Unterstützung', en: 'Support' },
+  'footer.ivrAccess': { fr: 'Accès téléphonique (IVR)', de: 'Telefonzugang (IVR)', en: 'Phone access (IVR)' },
   'footer.privacy': { fr: 'Confidentialité', de: 'Datenschutz', en: 'Privacy' },
   'footer.terms': { fr: 'Conditions d\'utilisation', de: 'Nutzungsbedingungen', en: 'Terms of use' },
   'footer.accessibility': { fr: 'Accessibilité', de: 'Zugänglichkeit', en: 'Accessibility' },
@@ -219,12 +222,26 @@ const translations: Translations = {
   'newsletter.preferences': { fr: 'Préférences d\'abonnement', de: 'Abonnementeinstellungen', en: 'Subscription preferences' },
   'newsletter.privacy': { fr: 'Confidentialité des données', de: 'Datenschutz', en: 'Data privacy' },
   'newsletter.success': { fr: 'Abonnement confirmé !', de: 'Abonnement bestätigt!', en: 'Subscription confirmed!' },
+  
+  // AI Assistant
+  'ai.openAssistant': { fr: 'Ouvrir l\'assistant', de: 'Assistent öffnen', en: 'Open assistant' },
+  'ai.closeAssistant': { fr: 'Fermer l\'assistant', de: 'Assistent schließen', en: 'Close assistant' },
+  'ai.askQuestion': { fr: 'Posez votre question...', de: 'Stellen Sie Ihre Frage...', en: 'Ask your question...' },
+  'ai.welcome': { fr: 'Bonjour ! Comment puis-je vous aider ?', de: 'Hallo! Wie kann ich Ihnen helfen?', en: 'Hello! How can I help you?' },
+  'ai.subtitle': { fr: 'Posez-moi vos questions sur la démocratie participative', de: 'Stellen Sie mir Fragen zur partizipativen Demokratie', en: 'Ask me questions about participatory democracy' },
+  'ai.frequentQuestions': { fr: 'Questions fréquentes', de: 'Häufige Fragen', en: 'Frequent questions' },
+  'ai.recommendations': { fr: 'Recommandations pour vous', de: 'Empfehlungen für Sie', en: 'Recommendations for you' },
+  'ai.disclaimer': { fr: 'L\'assistant peut faire des erreurs. Vérifiez les informations importantes.', de: 'Der Assistent kann Fehler machen. Überprüfen Sie wichtige Informationen.', en: 'The assistant can make mistakes. Check important information.' },
+  'ai.thinking': { fr: 'Réflexion en cours...', de: 'Denkt nach...', en: 'Thinking...' },
+  'ai.suggestions': { fr: 'Suggestions', de: 'Vorschläge', en: 'Suggestions' },
+  'ai.relatedContent': { fr: 'Contenu connexe', de: 'Verwandter Inhalt', en: 'Related content' },
 };
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  tLocal: (localizedString: LocalizedString | string | undefined) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -236,8 +253,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return translations[key]?.[language] || key;
   };
 
+  const tLocal = (localizedString: LocalizedString | string | undefined): string => {
+    if (!localizedString) return '';
+    if (typeof localizedString === 'string') return localizedString;
+    return localizedString[language] || localizedString.fr || localizedString.en || localizedString.de || '';
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, tLocal }}>
       {children}
     </LanguageContext.Provider>
   );

@@ -10,7 +10,7 @@ interface ThemeTagProps {
 
 export function ThemeTag({ themeId, size = 'md', showIcon = true }: ThemeTagProps) {
   const theme = getThemeById(themeId);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   if (!theme) return null;
 
@@ -19,6 +19,11 @@ export function ThemeTag({ themeId, size = 'md', showIcon = true }: ThemeTagProp
     md: 'text-sm px-3 py-1',
     lg: 'text-base px-4 py-2',
   };
+
+  // Use theme name directly, as it's already a string in the legacy format
+  const themeName = language === 'fr' ? theme.name : 
+                    language === 'de' ? (theme.nameDE || theme.name) :
+                    (theme.nameEN || theme.name);
 
   return (
     <span
@@ -30,7 +35,7 @@ export function ThemeTag({ themeId, size = 'md', showIcon = true }: ThemeTagProp
       }}
     >
       {showIcon && <span>{theme.icon}</span>}
-      <span>{t(theme.name)}</span>
+      <span>{themeName}</span>
     </span>
   );
 }

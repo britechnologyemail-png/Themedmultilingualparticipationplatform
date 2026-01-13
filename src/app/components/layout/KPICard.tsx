@@ -107,6 +107,11 @@ export function KPICard({
 }: KPICardProps) {
   const styles = variantStyles[variant];
 
+  // Guard against invalid icon - check if it's a valid React component
+  if (!Icon) {
+    return null;
+  }
+
   // Card styling based on type
   const cardStyles = {
     primary: 'bg-white border-gray-200 hover:shadow-md',
@@ -115,27 +120,27 @@ export function KPICard({
   };
 
   return (
-    <Card className={`${cardStyles[type]} transition-shadow h-full`}>
+    <Card className={`${cardStyles[type]} transition-all duration-300 h-full`}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             {/* Label - Top left */}
-            <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+            <p className="text-sm text-gray-600 mb-2 line-clamp-2 transition-colors duration-200">
               {label}
             </p>
             {/* Value - Center left, primary focus */}
-            <p className="text-3xl font-bold text-gray-900 truncate mb-1">
+            <p className={`font-bold text-gray-900 mb-1 leading-tight transition-all duration-300 ${type === 'insight' ? 'text-2xl line-clamp-2 animate-slide-in' : 'text-3xl truncate'}`}>
               {value}
             </p>
             {/* Optional subtitle */}
             {subtitle && (
-              <p className={`text-xs ${type === 'insight' ? styles.textAccent : 'text-gray-500'} mt-1`}>
+              <p className={`text-xs ${type === 'insight' ? styles.textAccent : 'text-gray-500'} mt-2 transition-colors duration-200`}>
                 {subtitle}
               </p>
             )}
           </div>
           {/* Icon - Top right, consistent position */}
-          <div className={`w-12 h-12 rounded-lg ${styles.iconBg} flex items-center justify-center flex-shrink-0`}>
+          <div className={`w-12 h-12 rounded-lg ${styles.iconBg} flex items-center justify-center flex-shrink-0 transition-transform duration-300 hover:scale-105`}>
             <Icon className={`w-6 h-6 ${styles.iconColor}`} />
           </div>
         </div>

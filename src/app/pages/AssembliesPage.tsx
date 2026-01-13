@@ -8,21 +8,25 @@ import { FilterBar } from '../components/layout/FilterBar';
 import { FilterField } from '../components/layout/FilterField';
 import { ContentGrid } from '../components/layout/ContentGrid';
 import { ThemeTag } from '../components/ThemeTag';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ErrorMessage } from '../components/ErrorMessage';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
+import { Label } from '../components/ui/label';
+import { Badge } from '../components/ui/badge';
 import { Checkbox } from '../components/ui/checkbox';
-import { assemblies } from '../data/mockData';
-import { Calendar, MapPin, Users, Filter, UserPlus, Clock, FileText, CheckCircle2, TrendingUp, UserMinus } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { useAssemblies, useThemes } from '../hooks/useApi';
+import type { AssemblyDTO } from '../types';
+import { Calendar, MapPin, Users, Filter, UserPlus, Clock, FileText, CheckCircle, TrendingUp, UserMinus } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function AssembliesPage() {
-  const { t, language } = useLanguage();
-  const [selectedAssembly, setSelectedAssembly] = useState<typeof assemblies[0] | null>(null);
+  const { t, language, tLocal } = useLanguage();
+  const { data: assemblies, isLoading, error } = useAssemblies();
+  const [selectedAssembly, setSelectedAssembly] = useState<AssemblyDTO | null>(null);
   const [joinedAssemblies, setJoinedAssemblies] = useState<string[]>([]); // Track joined assemblies by ID
   const [formData, setFormData] = useState({
     firstName: '',
@@ -60,9 +64,9 @@ export function AssembliesPage() {
 
     // Simuler l'inscription
     toast.success(
-      language === 'fr' ? `Demande d'inscription envoyée pour "${selectedAssembly?.title}" !` :
-      language === 'de' ? `Beitrittsanfrage für "${selectedAssembly?.title}" gesendet!` :
-      `Membership request sent for "${selectedAssembly?.title}"!`
+      language === 'fr' ? `Demande d'inscription envoyée pour "${tLocal(selectedAssembly.name)}" !` :
+      language === 'de' ? `Beitrittsanfrage für "${tLocal(selectedAssembly.name)}" gesendet!` :
+      `Membership request sent for "${tLocal(selectedAssembly.name)}"!`
     );
 
     // Réinitialiser le formulaire
@@ -90,16 +94,17 @@ export function AssembliesPage() {
   };
 
   // Calculate statistics
-  const totalAssemblies = assemblies.length;
-  const totalMembers = assemblies.reduce((sum, a) => sum + a.members, 0);
-  const upcomingMeetings = assemblies.filter(a => {
-    const nextMeeting = new Date(a.nextMeeting);
+  const totalAssemblies = assemblies ? assemblies.length : 0;
+  const totalMembers = assemblies ? assemblies.reduce((sum, a) => sum + a.totalMembers, 0) : 0;
+  const upcomingMeetings = assemblies ? assemblies.filter(a => {
+    if (!a.nextMeeting?.date) return false;
+    const nextMeeting = new Date(a.nextMeeting.date);
     const today = new Date();
     const thirtyDaysFromNow = new Date();
     thirtyDaysFromNow.setDate(today.getDate() + 30);
     return nextMeeting >= today && nextMeeting <= thirtyDaysFromNow;
-  }).length;
-  const totalDecisions = assemblies.reduce((sum, a) => sum + a.meetings.length, 0);
+  }).length : 0;
+  const totalDecisions = assemblies ? assemblies.reduce((sum, a) => sum + (a.pastMeetings?.length || 0), 0) : 0;
 
   return (
     <div>
@@ -161,7 +166,7 @@ export function AssembliesPage() {
               'Decisions Adopted'
             }
             value={totalDecisions}
-            icon={CheckCircle2}
+            icon={CheckCircle}
             variant="green"
           />
         </div>
@@ -184,9 +189,11 @@ export function AssembliesPage() {
           </h2>
         </div>
         <ContentGrid>
-          {assemblies.map((assembly) => {
+          {isLoading && <LoadingSpinner />}
+          {error && <ErrorMessage message={tLocal('error.loadingData')} />}
+          {assemblies && assemblies.map((assembly) => {
             const isJoined = joinedAssemblies.includes(assembly.id);
-            const nextMeetingDate = new Date(assembly.nextMeeting);
+            const nextMeetingDate = new Date(assembly.nextMeeting?.date || '');
             const today = new Date();
             const canCancel = isJoined && nextMeetingDate > today; // Can only cancel if meeting hasn't happened yet
             
@@ -197,15 +204,15 @@ export function AssembliesPage() {
                   <ThemeTag themeId={assembly.themeId} />
                   {isJoined && (
                     <Badge className="bg-green-600 hover:bg-green-700">
-                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      <CheckCircle className="w-3 h-3 mr-1" />
                       {language === 'fr' && 'Membre'}
                       {language === 'de' && 'Mitglied'}
                       {language === 'en' && 'Member'}
                     </Badge>
                   )}
                 </div>
-                <CardTitle className="line-clamp-2">{assembly.title}</CardTitle>
-                <CardDescription className="text-base mt-2 line-clamp-3">{assembly.description}</CardDescription>
+                <CardTitle className="line-clamp-2">{tLocal(assembly.name)}</CardTitle>
+                <CardDescription className="text-base mt-2 line-clamp-3">{tLocal(assembly.description)}</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col flex-grow">
                 <div className="space-y-4 flex-grow">
@@ -213,11 +220,11 @@ export function AssembliesPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex items-center gap-2 text-gray-600">
                       <Users className="w-5 h-5" />
-                      <span>{assembly.members} membres</span>
+                      <span>{assembly.totalMembers} membres</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
                       <FileText className="w-5 h-5" />
-                      <span>{assembly.meetings.length} réunions</span>
+                      <span>{assembly.pastMeetings?.length || 0} réunions</span>
                     </div>
                   </div>
 
@@ -242,14 +249,14 @@ export function AssembliesPage() {
                   </div>
 
                   {/* Last meetings */}
-                  {assembly.meetings.length > 0 && (
+                  {assembly.pastMeetings?.length && (
                     <div>
                       <div className="text-sm font-medium text-gray-900 mb-2">
                         {language === 'fr' && 'Réunions passées'}
                         {language === 'de' && 'Vergangene Treffen'}
                         {language === 'en' && 'Past meetings'}
                       </div>
-                      {assembly.meetings.slice(0, 2).map((meeting) => (
+                      {assembly.pastMeetings.slice(0, 2).map((meeting) => (
                         <div
                           key={meeting.id}
                           className="p-3 bg-gray-50 border border-gray-200 rounded mb-2"
@@ -281,7 +288,7 @@ export function AssembliesPage() {
                       <Button 
                         variant="destructive"
                         className="w-full gap-2" 
-                        onClick={() => handleLeaveAssembly(assembly.id, assembly.title)}
+                        onClick={() => handleLeaveAssembly(assembly.id, tLocal(assembly.name))}
                       >
                         <UserMinus className="w-4 h-4" />
                         {language === 'fr' && 'Annuler l\'adhésion'}
@@ -301,7 +308,7 @@ export function AssembliesPage() {
                         className="w-full gap-2"
                         disabled
                       >
-                        <CheckCircle2 className="w-4 h-4" />
+                        <CheckCircle className="w-4 h-4" />
                         {language === 'fr' && 'Membre actif'}
                         {language === 'de' && 'Aktives Mitglied'}
                         {language === 'en' && 'Active member'}
@@ -331,7 +338,7 @@ export function AssembliesPage() {
               </DialogTitle>
               <DialogDescription className="text-base">
                 {selectedAssembly && (
-                  <span className="font-medium text-gray-900">{selectedAssembly.title}</span>
+                  <span className="font-medium text-gray-900">{tLocal(selectedAssembly.name)}</span>
                 )}
               </DialogDescription>
             </DialogHeader>
@@ -425,10 +432,9 @@ export function AssembliesPage() {
                     required
                   />
                   <p className="text-xs text-gray-500">
-                    {formData.motivation.length} 
-                    {language === 'fr' && ' caractères'}
-                    {language === 'de' && ' Zeichen'}
-                    {language === 'en' && ' characters'}
+                    {language === 'fr' && `${formData.motivation.length} caractères`}
+                    {language === 'de' && `${formData.motivation.length} Zeichen`}
+                    {language === 'en' && `${formData.motivation.length} characters`}
                   </p>
                 </div>
 
@@ -471,9 +477,9 @@ export function AssembliesPage() {
                     <p className="text-xs text-gray-600 mt-1">
                       {selectedAssembly && (
                         <>
-                          {language === 'fr' && `Prochaine réunion : ${new Date(selectedAssembly.nextMeeting).toLocaleDateString('fr-FR')}`}
-                          {language === 'de' && `Nächstes Treffen: ${new Date(selectedAssembly.nextMeeting).toLocaleDateString('de-DE')}`}
-                          {language === 'en' && `Next meeting: ${new Date(selectedAssembly.nextMeeting).toLocaleDateString('en-US')}`}
+                          {language === 'fr' && `Prochaine réunion : ${new Date(selectedAssembly.nextMeeting?.date || '').toLocaleDateString('fr-FR')}`}
+                          {language === 'de' && `Nächstes Treffen: ${new Date(selectedAssembly.nextMeeting?.date || '').toLocaleDateString('de-DE')}`}
+                          {language === 'en' && `Next meeting: ${new Date(selectedAssembly.nextMeeting?.date || '').toLocaleDateString('en-US')}`}
                         </>
                       )}
                     </p>

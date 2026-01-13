@@ -4,46 +4,78 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { PageBanner } from '../components/PageBanner';
 import { PageLayout } from '../components/layout/PageLayout';
 import { KPICard } from '../components/layout/KPICard';
-import { themes } from '../data/themes';
-import { participatoryProcesses, consultations, petitions, votes } from '../data/mockData';
+import { useThemes, useConsultations, usePetitions, useVotes } from '../hooks/useApi';
+import type { ThemeDTO } from '../types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { ArrowRight, Layers, TrendingUp, FileText, Heart, BarChart3 } from 'lucide-react';
 
 export function ThemesPage() {
-  const { t, language } = useLanguage();
+  const { t, language, tLocal } = useLanguage();
+
+  // Fetch data using React Query hooks
+  const { data: themes, isLoading: isLoadingThemes } = useThemes();
+  const { data: consultations } = useConsultations();
+  const { data: petitions } = usePetitions();
+  const { data: votes } = useVotes();
 
   const getThemeStats = (themeId: string) => {
     return {
-      processes: participatoryProcesses.filter((p) => p.themeId === themeId).length,
-      consultations: consultations.filter((c) => c.themeId === themeId).length,
-      petitions: petitions.filter((p) => p.themeId === themeId).length,
-      votes: votes.filter((v) => v.themeId === themeId).length,
+      consultations: consultations?.filter((c) => c.themeId === themeId).length || 0,
+      petitions: petitions?.filter((p) => p.themeId === themeId).length || 0,
+      votes: votes?.filter((v) => v.themeId === themeId).length || 0,
     };
   };
 
+  // Show loading state
+  if (isLoadingThemes) {
+    return (
+      <div>
+        <PageBanner
+          title={
+            language === 'fr' ? 'Thèmes de participation' :
+            language === 'de' ? 'Beteiligungsthemen' :
+            'Participation Themes'
+          }
+          description={
+            language === 'fr' ? 'Explorez les différentes thématiques de participation citoyenne' :
+            language === 'de' ? 'Erkunden Sie die verschiedenen Themen der Bürgerbeteiligung' :
+            'Explore the different themes of citizen participation'
+          }
+          gradient="from-indigo-600 to-purple-600"
+          icon={<Layers className="w-12 h-12 text-white" />}
+        />
+        <PageLayout className="py-8">
+          <div className="text-center py-12">
+            <p className="text-gray-600">Chargement des thèmes...</p>
+          </div>
+        </PageLayout>
+      </div>
+    );
+  }
+
   // Calculate overall statistics
-  const activeThemes = themes.filter(theme => {
+  const activeThemes = themes?.filter(theme => {
     const stats = getThemeStats(theme.id);
-    return (stats.processes + stats.consultations + stats.petitions + stats.votes) > 0;
-  }).length;
+    return (stats.consultations + stats.petitions + stats.votes) > 0;
+  }).length || 0;
 
   // Find trending topic (theme with most activities)
-  const themeActivities = themes.map(theme => {
+  const themeActivities = (themes || []).map(theme => {
     const stats = getThemeStats(theme.id);
     return {
       theme,
-      total: stats.processes + stats.consultations + stats.petitions + stats.votes
+      total: stats.consultations + stats.petitions + stats.votes
     };
   });
   const trendingTheme = themeActivities.reduce((max, current) => 
-    current.total > max.total ? current : max
+    current.total > max.total ? current : max, themeActivities[0] || { theme: { id: '', name: { fr: 'N/A', de: 'N/A', en: 'N/A' }, icon: '', color: '' } as ThemeDTO, total: 0 }
   );
 
   // Total contributions
-  const totalContributions = consultations.reduce((sum, c) => sum + (c.supports || 0), 0);
+  const totalContributions = consultations?.reduce((sum, c) => sum + (c.stats?.totalComments || 0), 0) || 0;
 
-  // Proposals by category (consultations of type 'proposal')
-  const proposalsByCategory = consultations.filter(c => c.type === 'proposal').length;
+  // Proposals by category (consultations of type 'citizen_proposal')
+  const proposalsByCategory = consultations?.filter(c => c.type === 'citizen_proposal').length || 0;
 
   return (
     <div>
@@ -81,16 +113,16 @@ export function ThemesPage() {
             label={
               language === 'fr' ? 'Tendance' :
               language === 'de' ? 'Trend' :
-              'Top Trending'
+              'Trending'
             }
-            value={t(trendingTheme.theme.name)}
+            value={tLocal(trendingTheme.theme.name)}
             icon={TrendingUp}
             variant="emerald"
             type="insight"
             subtitle={
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 animate-fade-in">
                 <span>{trendingTheme.theme.icon}</span>
-                <span>{trendingTheme.total} activités</span>
+                <span>{trendingTheme.total} {language === 'fr' ? 'activités' : language === 'de' ? 'Aktivitäten' : 'activities'}</span>
               </span>
             }
           />
@@ -124,7 +156,7 @@ export function ThemesPage() {
           {themes.map((theme) => {
             const stats = getThemeStats(theme.id);
             const totalActivities =
-              stats.processes + stats.consultations + stats.petitions + stats.votes;
+              stats.consultations + stats.petitions + stats.votes;
 
             return (
               <Link key={theme.id} to={`/themes/${theme.id}`}>
@@ -138,7 +170,7 @@ export function ThemesPage() {
                     <div className="flex items-center gap-3 mb-3">
                       <span className="text-4xl">{theme.icon}</span>
                       <div className="flex-1">
-                        <CardTitle>{t(theme.name)}</CardTitle>
+                        <CardTitle>{tLocal(theme.name)}</CardTitle>
                         <CardDescription>
                           {totalActivities}{' '}
                           {language === 'fr' && 'activités en cours'}
@@ -150,16 +182,6 @@ export function ThemesPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2 mb-4">
-                      {stats.processes > 0 && (
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">
-                            {language === 'fr' && 'Processus participatifs'}
-                            {language === 'de' && 'Partizipative Prozesse'}
-                            {language === 'en' && 'Participatory processes'}
-                          </span>
-                          <span className="font-medium">{stats.processes}</span>
-                        </div>
-                      )}
                       {stats.consultations > 0 && (
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">

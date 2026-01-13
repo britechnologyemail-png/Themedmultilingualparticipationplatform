@@ -24,11 +24,11 @@ import {
   UserMinus,
   Edit,
   FileText,
-  Presentation,
-  Vote,
+  Mic,
+  CheckSquare,
   MessageSquare,
   Calendar,
-  CheckCircle2,
+  CheckCircle,
   XCircle,
   AlertCircle,
   TrendingUp,
@@ -271,11 +271,11 @@ export function ParticipationsManagement() {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { label: string; color: string; icon: any }> = {
-      active: { label: 'Actif', color: 'bg-green-100 text-green-700 border-green-200', icon: CheckCircle2 },
+      active: { label: 'Actif', color: 'bg-green-100 text-green-700 border-green-200', icon: CheckCircle },
       cancelled: { label: 'Annulé', color: 'bg-red-100 text-red-700 border-red-200', icon: XCircle },
-      confirmed: { label: 'Confirmé', color: 'bg-green-100 text-green-700 border-green-200', icon: CheckCircle2 },
+      confirmed: { label: 'Confirmé', color: 'bg-green-100 text-green-700 border-green-200', icon: CheckCircle },
       removed: { label: 'Retiré', color: 'bg-orange-100 text-orange-700 border-orange-200', icon: AlertCircle },
-      published: { label: 'Publié', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: CheckCircle2 },
+      published: { label: 'Publié', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: CheckCircle },
       deleted: { label: 'Supprimé', color: 'bg-red-100 text-red-700 border-red-200', icon: XCircle },
       updated: { label: 'Mis à jour', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: AlertCircle }
     };
@@ -385,7 +385,7 @@ export function ParticipationsManagement() {
                 </p>
               </div>
               <div className="p-3 bg-purple-100 rounded-lg">
-                <Presentation className="w-6 h-6 text-purple-600" />
+                <Mic className="w-6 h-6 text-purple-600" />
               </div>
             </div>
           </CardContent>
@@ -421,7 +421,7 @@ export function ParticipationsManagement() {
                 </p>
               </div>
               <div className="p-3 bg-indigo-100 rounded-lg">
-                <Vote className="w-6 h-6 text-indigo-600" />
+                <CheckSquare className="w-6 h-6 text-indigo-600" />
               </div>
             </div>
           </CardContent>
@@ -473,7 +473,7 @@ export function ParticipationsManagement() {
             Pétitions
           </TabsTrigger>
           <TabsTrigger value="conferences" className="gap-2">
-            <Presentation className="w-4 h-4" />
+            <Mic className="w-4 h-4" />
             Conférences
           </TabsTrigger>
           <TabsTrigger value="comments" className="gap-2">
@@ -481,7 +481,7 @@ export function ParticipationsManagement() {
             Commentaires
           </TabsTrigger>
           <TabsTrigger value="votes" className="gap-2">
-            <Vote className="w-4 h-4" />
+            <CheckSquare className="w-4 h-4" />
             Votes
           </TabsTrigger>
         </TabsList>

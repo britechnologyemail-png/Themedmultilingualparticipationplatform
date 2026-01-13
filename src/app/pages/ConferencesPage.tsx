@@ -13,16 +13,20 @@ import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
 import { Textarea } from '../components/ui/textarea';
 import { Separator } from '../components/ui/separator';
-import { conferences, Conference } from '../data/mockData';
-import { Calendar, MapPin, Users, Presentation, UserPlus, Clock, Award, Briefcase, GraduationCap, Mail, Linkedin, Twitter, Globe, FileText, TrendingUp } from 'lucide-react';
+import { useConferences } from '../hooks/useApi';
+import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ErrorMessage } from '../components/ErrorMessage';
+import type { ConferenceDTO } from '../types';
+import { Calendar, MapPin, Users, Mic, UserPlus, Clock, Award, Briefcase, GraduationCap, Mail, Linkedin, Twitter, Globe, FileText, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '../components/ui/badge';
 import { UserMinus } from 'lucide-react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 
 // Speaker profile interface
 interface SpeakerProfile {
-  name: string;
+  firstName: string;
+  lastName: string;
   title: string;
   organization: string;
   bio: string;
@@ -38,7 +42,8 @@ interface SpeakerProfile {
 // Mock speaker profiles data
 const speakerProfiles: { [key: string]: SpeakerProfile } = {
   'Dr. Marie Dupont': {
-    name: 'Dr. Marie Dupont',
+    firstName: 'Dr. Marie',
+    lastName: 'Dupont',
     title: 'Experte en développement durable',
     organization: 'Institut Fédéral de l\'Environnement',
     bio: 'Dr. Marie Dupont est une experte reconnue internationalement en développement durable avec plus de 15 ans d\'expérience dans la recherche et la mise en œuvre de politiques environnementales. Elle conseille les gouvernements et organisations sur les stratégies de transition écologique.',
@@ -54,7 +59,8 @@ const speakerProfiles: { [key: string]: SpeakerProfile } = {
     twitter: '@marie_dupont'
   },
   'Prof. Jean Martin': {
-    name: 'Prof. Jean Martin',
+    firstName: 'Prof. Jean',
+    lastName: 'Martin',
     title: 'Professeur d\'Urbanisme',
     organization: 'Université Libre de Bruxelles',
     bio: 'Prof. Jean Martin est spécialiste de l\'urbanisme durable et de l\'aménagement du territoire. Ses recherches portent sur les villes intelligentes et la mobilité urbaine. Il a participé à de nombreux projets de réaménagement urbain en Belgique et en Europe.',
@@ -69,7 +75,8 @@ const speakerProfiles: { [key: string]: SpeakerProfile } = {
     website: 'https://urbanisme.ulb.be/jmartin'
   },
   'Sophie Bernard': {
-    name: 'Sophie Bernard',
+    firstName: 'Sophie',
+    lastName: 'Bernard',
     title: 'Directrice Innovation Mobilité',
     organization: 'STIB-MIVB Bruxelles',
     bio: 'Sophie Bernard dirige le département innovation de la STIB-MIVB. Elle pilote des projets de mobilité douce et de transport intelligent. Passionnée par l\'amélioration de l\'expérience usager et la réduction de l\'empreinte carbone des transports.',
@@ -84,7 +91,8 @@ const speakerProfiles: { [key: string]: SpeakerProfile } = {
     linkedin: 'https://linkedin.com/in/sophiebernard'
   },
   'Marc Lehmann': {
-    name: 'Marc Lehmann',
+    firstName: 'Marc',
+    lastName: 'Lehmann',
     title: 'Architecte en Chef',
     organization: 'Ville de Bruxelles',
     bio: 'Marc Lehmann est architecte en chef de la Ville de Bruxelles. Il supervise les projets d\'aménagement urbain et veille à l\'intégration harmonieuse des nouveaux développements dans le tissu urbain existant. Expert en architecture durable et patrimoine.',
@@ -98,7 +106,8 @@ const speakerProfiles: { [key: string]: SpeakerProfile } = {
     website: 'https://bruxelles.be/architecture'
   },
   'Dr. Claire Rossier': {
-    name: 'Dr. Claire Rossier',
+    firstName: 'Dr. Claire',
+    lastName: 'Rossier',
     title: 'Experte en Éducation',
     organization: 'Département de l\'Instruction Publique',
     bio: 'Dr. Claire Rossier est une experte en pédagogie et innovation éducative. Elle travaille sur l\'intégration des technologies numériques dans l\'enseignement et le développement de méthodes pédagogiques inclusives.',
@@ -112,7 +121,8 @@ const speakerProfiles: { [key: string]: SpeakerProfile } = {
     email: 'c.rossier@vd.ch'
   },
   'Thomas Müller': {
-    name: 'Thomas Müller',
+    firstName: 'Thomas',
+    lastName: 'Müller',
     title: 'Chef de Service Santé Publique',
     organization: 'Région de Bruxelles-Capitale',
     bio: 'Thomas Müller dirige le service de santé publique de la Région de Bruxelles-Capitale. Il coordonne les politiques de prévention et de promotion de la santé. Expert en épidémiologie et santé communautaire.',
@@ -126,7 +136,8 @@ const speakerProfiles: { [key: string]: SpeakerProfile } = {
     linkedin: 'https://linkedin.com/in/thomasmuller'
   },
   'Laura Fontaine': {
-    name: 'Laura Fontaine',
+    firstName: 'Laura',
+    lastName: 'Fontaine',
     title: 'Directrice Culturelle',
     organization: 'Fondation pour la Culture',
     bio: 'Laura Fontaine est directrice de la Fondation pour la Culture. Elle développe des programmes culturels innovants et promeut l\'accès à la culture pour tous. Spécialiste en médiation culturelle et gestion d\'institutions.',
@@ -141,7 +152,8 @@ const speakerProfiles: { [key: string]: SpeakerProfile } = {
     website: 'https://fondationculture.ch'
   },
   'Pierre Dubois': {
-    name: 'Pierre Dubois',
+    firstName: 'Pierre',
+    lastName: 'Dubois',
     title: 'Expert en Gouvernance',
     organization: 'Institut de Recherche en Administration Publique',
     bio: 'Pierre Dubois est chercheur spécialisé en gouvernance et participation citoyenne. Ses travaux portent sur les nouvelles formes de démocratie participative et la transparence administrative.',
@@ -156,7 +168,8 @@ const speakerProfiles: { [key: string]: SpeakerProfile } = {
     twitter: '@p_dubois'
   },
   'Isabelle Wagner': {
-    name: 'Isabelle Wagner',
+    firstName: 'Isabelle',
+    lastName: 'Wagner',
     title: 'Économiste',
     organization: 'Chambre de Commerce',
     bio: 'Isabelle Wagner est économiste à la Chambre de Commerce. Elle analyse les tendances économiques locales et conseille les entreprises sur leur développement. Spécialiste en économie régionale et entrepreneuriat.',
@@ -173,9 +186,10 @@ const speakerProfiles: { [key: string]: SpeakerProfile } = {
 };
 
 export function ConferencesPage() {
-  const { t, language } = useLanguage();
+  const { t, language, tLocal } = useLanguage();
   const navigate = useNavigate();
-  const [selectedConference, setSelectedConference] = useState<Conference | null>(null);
+  const { data: conferences, isLoading, error } = useConferences();
+  const [selectedConference, setSelectedConference] = useState<ConferenceDTO | null>(null);
   const [selectedSpeaker, setSelectedSpeaker] = useState<SpeakerProfile | null>(null);
   const [registeredConferences, setRegisteredConferences] = useState<string[]>([]); // Track registered conferences by ID
   const [registrationData, setRegistrationData] = useState({
@@ -230,9 +244,9 @@ export function ConferencesPage() {
     }
 
     toast.success(
-      language === 'fr' ? `Votre inscription à "${selectedConference?.title}" est confirmée ! Vous recevrez un email de confirmation.` :
-      language === 'de' ? `Ihre Anmeldung zu "${selectedConference?.title}" ist bestätigt! Sie erhalten eine Bestätigungs-E-Mail.` :
-      `Your registration for "${selectedConference?.title}" is confirmed! You will receive a confirmation email.`
+      language === 'fr' ? `Votre inscription à \"${selectedConference ? tLocal(selectedConference.title) : ''}\" est confirmée ! Vous recevrez un email de confirmation.` :
+      language === 'de' ? `Ihre Anmeldung zu \"${selectedConference ? tLocal(selectedConference.title) : ''}\" ist bestätigt! Sie erhalten eine Bestätigungs-E-Mail.` :
+      `Your registration for \"${selectedConference ? tLocal(selectedConference.title) : ''}\" is confirmed! You will receive a confirmation email.`
     );
 
     // Add conference ID to registeredConferences
@@ -267,14 +281,14 @@ export function ConferencesPage() {
   };
 
   // Calculate statistics
-  const totalEvents = conferences.length;
-  const uniqueSpeakers = new Set(conferences.flatMap(c => c.speakers)).size;
-  const totalSeatsReserved = conferences.reduce((sum, c) => sum + c.registered, 0);
-  const totalCapacity = conferences.reduce((sum, c) => sum + c.capacity, 0);
+  const totalEvents = conferences ? conferences.length : 0;
+  const uniqueSpeakers = conferences ? new Set(conferences.flatMap(c => c.speakers?.filter(s => s).map(s => s.id) || [])).size : 0;
+  const totalSeatsReserved = conferences ? conferences.reduce((sum, c) => sum + c.registeredCount, 0) : 0;
+  const totalCapacity = conferences ? conferences.reduce((sum, c) => sum + c.capacity, 0) : 0;
   const seatsReservedPercent = totalCapacity > 0 
     ? Math.round((totalSeatsReserved / totalCapacity) * 100)
     : 0;
-  const upcomingSessions = conferences.reduce((sum, c) => sum + c.sessions, 0);
+  const upcomingSessions = conferences ? conferences.reduce((sum, c) => sum + c.sessions.length, 0) : 0;
 
   return (
     <div>
@@ -290,7 +304,7 @@ export function ConferencesPage() {
           'Participate in events and meet experts from your community'
         }
         gradient="from-indigo-600 to-purple-600"
-        icon={<Presentation className="w-12 h-12 text-white" />}
+        icon={<Mic className="w-12 h-12 text-white" />}
       />
       
       <PageLayout className="py-8">
@@ -339,7 +353,7 @@ export function ConferencesPage() {
               'Upcoming Sessions'
             }
             value={upcomingSessions}
-            icon={Presentation}
+            icon={Mic}
             variant="pink"
             type="primary"
           />
@@ -347,11 +361,13 @@ export function ConferencesPage() {
 
         {/* Conferences List */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {conferences.map((conference) => {
-            const availableSpots = conference.capacity - conference.registered;
-            const fillRate = (conference.registered / conference.capacity) * 100;
+          {isLoading && <LoadingSpinner />}
+          {error && <ErrorMessage message="Error loading conferences" />}
+          {conferences && conferences.map((conference) => {
+            const availableSpots = conference.capacity - conference.registeredCount;
+            const fillRate = (conference.registeredCount / conference.capacity) * 100;
             const isRegistered = registeredConferences.includes(conference.id);
-            const conferenceDate = new Date(conference.date);
+            const conferenceDate = new Date(conference.startDate);
             const today = new Date();
             const canCancel = isRegistered && conferenceDate > today; // Can only cancel if conference hasn't happened yet
 
@@ -362,16 +378,16 @@ export function ConferencesPage() {
                     <ThemeTag themeId={conference.themeId} />
                     {isRegistered && (
                       <Badge className="bg-purple-600 hover:bg-purple-700">
-                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        <CheckCircle className="w-3 h-3 mr-1" />
                         {language === 'fr' && 'Inscrit'}
                         {language === 'de' && 'Angemeldet'}
                         {language === 'en' && 'Registered'}
                       </Badge>
                     )}
                   </div>
-                  <CardTitle className="line-clamp-2">{conference.title}</CardTitle>
+                  <CardTitle className="line-clamp-2">{tLocal(conference.title)}</CardTitle>
                   <CardDescription className="text-base mt-2 line-clamp-3">
-                    {conference.description}
+                    {tLocal(conference.description)}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col flex-grow">
@@ -399,12 +415,12 @@ export function ConferencesPage() {
                       </div>
                       <div className="flex items-center gap-2 text-gray-600">
                         <MapPin className="w-5 h-5" />
-                        <span>{conference.location}</span>
+                        <span>{conference.location.name}</span>
                       </div>
                       <div className="flex items-center gap-2 text-gray-600">
-                        <Presentation className="w-5 h-5" />
+                        <Mic className="w-5 h-5" />
                         <span>
-                          {conference.sessions} 
+                          {conference.sessions.length} 
                           {language === 'fr' && ' sessions au programme'}
                           {language === 'de' && ' Sitzungen im Programm'}
                           {language === 'en' && ' sessions scheduled'}
@@ -421,11 +437,12 @@ export function ConferencesPage() {
                           {language === 'en' && 'Speakers'}
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          {conference.speakers.slice(0, 3).map((speaker, idx) => {
-                            const speakerId = speaker.toLowerCase()
-                              .replace(/dr\.\s/gi, '')
-                              .replace(/prof\.\s/gi, '')
-                              .replace(/\s+/g, '-');
+                          {conference.speakers.filter(s => s).slice(0, 3).map((speaker, idx) => {
+                            const speakerName = `${speaker.firstName} ${speaker.lastName}`;
+                            const speakerId = speakerName.toLowerCase()
+                              .replace(/dr\\.\\s/gi, '')
+                              .replace(/prof\\.\\s/gi, '')
+                              .replace(/\\s+/g, '-');
                             
                             return (
                               <button
@@ -433,7 +450,7 @@ export function ConferencesPage() {
                                 onClick={() => navigate(`/speakers/${speakerId}`)}
                                 className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full border border-gray-200 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors cursor-pointer line-clamp-1"
                               >
-                                {speaker}
+                                {speakerName}
                               </button>
                             );
                           })}
@@ -445,7 +462,7 @@ export function ConferencesPage() {
                     <div>
                       <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-600">
-                          {conference.registered} / {conference.capacity} 
+                          {conference.registeredCount} / {conference.capacity} 
                           {language === 'fr' && ' places réservées'}
                           {language === 'de' && ' Plätze reserviert'}
                           {language === 'en' && ' seats reserved'}
@@ -492,7 +509,7 @@ export function ConferencesPage() {
                     ) : canCancel ? (
                       <>
                         <Button 
-                          onClick={() => handleCancelRegistration(conference.id, conference.title)}
+                          onClick={() => handleCancelRegistration(conference.id, tLocal(conference.title))}
                           variant="destructive"
                           className="w-full gap-2"
                         >
@@ -514,7 +531,7 @@ export function ConferencesPage() {
                           className="w-full gap-2"
                           disabled
                         >
-                          <CheckCircle2 className="w-4 h-4" />
+                          <CheckCircle className="w-4 h-4" />
                           {language === 'fr' && 'Participant confirmé'}
                           {language === 'de' && 'Teilnahme bestätigt'}
                           {language === 'en' && 'Confirmed participant'}
@@ -539,9 +556,9 @@ export function ConferencesPage() {
             {selectedSpeaker && (
               <>
                 <DialogHeader>
-                  <DialogTitle className="text-2xl">{selectedSpeaker.name}</DialogTitle>
+                  <DialogTitle className="text-2xl">{selectedSpeaker.firstName} {selectedSpeaker.lastName}</DialogTitle>
                   <DialogDescription className="text-base">
-                    <span className="font-medium text-gray-900">{selectedSpeaker.title}</span>
+                    <span className="font-medium text-gray-900">{tLocal(selectedSpeaker.title)}</span>
                     <br />
                     <span className="text-gray-600">{selectedSpeaker.organization}</span>
                   </DialogDescription>
@@ -678,7 +695,7 @@ export function ConferencesPage() {
               </DialogTitle>
               <DialogDescription className="text-base">
                 {selectedConference && (
-                  <span className="font-medium text-gray-900">{selectedConference.title}</span>
+                  <span className="font-medium text-gray-900">{tLocal(selectedConference.title)}</span>
                 )}
               </DialogDescription>
             </DialogHeader>
@@ -862,7 +879,7 @@ export function ConferencesPage() {
                           {language === 'de' && 'Datum: '}
                           {language === 'en' && 'Date: '}
                         </strong>
-                        {new Date(selectedConference.date).toLocaleDateString('fr-FR', {
+                        {new Date(selectedConference.startDate).toLocaleDateString('fr-FR', {
                           weekday: 'long',
                           day: 'numeric',
                           month: 'long',
@@ -875,7 +892,7 @@ export function ConferencesPage() {
                           {language === 'de' && 'Ort: '}
                           {language === 'en' && 'Location: '}
                         </strong>
-                        {selectedConference.location}
+                        {selectedConference.location.name}
                       </p>
                       <p>
                         <strong>

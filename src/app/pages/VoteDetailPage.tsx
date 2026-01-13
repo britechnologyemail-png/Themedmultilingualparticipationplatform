@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useVote, useTheme } from '../hooks/useApi';
 import { ThemeTag } from '../components/ThemeTag';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Progress } from '../components/ui/progress';
 import { Separator } from '../components/ui/separator';
-import { votes } from '../data/mockData';
 import { 
   ArrowLeft, 
   Calendar, 
@@ -17,23 +17,50 @@ import {
   BarChart3,
   Info,
   Clock,
-  Edit3
+  Edit3,
+  Eye,
+  X,
+  Check,
+  Circle,
+  Square
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function VoteDetailPage() {
   const { voteId } = useParams<{ voteId: string }>();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, tLocal } = useLanguage();
+  
+  // Fetch vote using React Query
+  const { data: vote, isLoading, error } = useVote(voteId || '');
+  
+  // Fetch theme data
+  const { data: theme } = useTheme(vote?.themeId || '');
+  
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [previousVote, setPreviousVote] = useState<string | null>(null);
   const [isModifying, setIsModifying] = useState(false);
   const [voteDate, setVoteDate] = useState<Date | null>(null);
+  const [visualMode, setVisualMode] = useState(false);
 
-  const vote = votes.find(v => v.id === voteId);
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">
+          <p className="text-gray-600">
+            {language === 'fr' && 'Chargement...'}
+            {language === 'de' && 'Wird geladen...'}
+            {language === 'en' && 'Loading...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  if (!vote) {
+  // Show error or not found state
+  if (error || !vote) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button 
@@ -96,12 +123,23 @@ export function VoteDetailPage() {
   const getSelectedOptionText = () => {
     if (!previousVote) return '';
     const option = vote.options.find(opt => opt.id === previousVote);
-    return option ? option.text : '';
+    return option ? tLocal(option.label) : '';
   };
 
   const getOptionPercentage = (optionVotes: number) => {
     if (totalVotes === 0) return 0;
     return (optionVotes / totalVotes) * 100;
+  };
+
+  // Visual mode icons and colors for options
+  const getVisualForOption = (index: number) => {
+    const visuals = [
+      { icon: Check, color: 'bg-green-500', borderColor: 'border-green-500', textColor: 'text-green-500', emoji: '✓' },
+      { icon: X, color: 'bg-red-500', borderColor: 'border-red-500', textColor: 'text-red-500', emoji: '✗' },
+      { icon: Circle, color: 'bg-blue-500', borderColor: 'border-blue-500', textColor: 'text-blue-500', emoji: '●' },
+      { icon: Square, color: 'bg-purple-500', borderColor: 'border-purple-500', textColor: 'text-purple-500', emoji: '■' },
+    ];
+    return visuals[index % visuals.length];
   };
 
   return (
@@ -123,8 +161,8 @@ export function VoteDetailPage() {
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="flex-1">
             <ThemeTag themeId={vote.themeId} className="mb-3" />
-            <h1 className="text-4xl mb-2 text-gray-900">{vote.title}</h1>
-            <p className="text-xl text-gray-600">{vote.question}</p>
+            <h1 className="text-4xl mb-2 text-gray-900">{tLocal(vote.title)}</h1>
+            <p className="text-xl text-gray-600">{tLocal(vote.question)}</p>
           </div>
           <div>
             {isOpen && (
@@ -186,7 +224,7 @@ export function VoteDetailPage() {
                     {language === 'en' && 'Participants'}
                   </p>
                   <p className="font-semibold text-gray-900">
-                    {vote.participants || totalVotes || 0}
+                    {vote.stats?.totalVoters || totalVotes || 0}
                   </p>
                 </div>
               </div>
@@ -223,49 +261,141 @@ export function VoteDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Voting Section */}
           {isOpen && !hasVoted && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  {language === 'fr' && 'Votez maintenant'}
-                  {language === 'de' && 'Jetzt abstimmen'}
-                  {language === 'en' && 'Vote now'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {vote.options.map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => setSelectedOption(option.id)}
-                      className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                        selectedOption === option.id
-                          ? 'border-blue-600 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          selectedOption === option.id
-                            ? 'border-blue-600 bg-blue-600'
-                            : 'border-gray-300'
-                        }`}>
-                          {selectedOption === option.id && (
-                            <div className="w-2 h-2 bg-white rounded-full"></div>
-                          )}
-                        </div>
-                        <span className="font-medium text-gray-900">{option.text}</span>
-                      </div>
-                    </button>
-                  ))}
+            <Card className="border-2 border-blue-200">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-green-50">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    {language === 'fr' && 'Votez maintenant'}
+                    {language === 'de' && 'Jetzt abstimmen'}
+                    {language === 'en' && 'Vote now'}
+                  </CardTitle>
+                  <Button
+                    onClick={() => setVisualMode(!visualMode)}
+                    variant={visualMode ? "default" : "outline"}
+                    size="lg"
+                    className={`gap-2 font-semibold ${visualMode ? 'bg-green-600 hover:bg-green-700' : 'border-2 border-green-600 text-green-700 hover:bg-green-50'}`}
+                  >
+                    <Eye className="w-5 h-5" />
+                    {visualMode ? (
+                      <>
+                        {language === 'fr' ? '📝 Mode standard' :
+                        language === 'de' ? '📝 Standardmodus' :
+                        '📝 Standard mode'}
+                      </>
+                    ) : (
+                      <>
+                        {language === 'fr' ? '🎨 Mode simplifié (Analphabètes)' :
+                        language === 'de' ? '🎨 Vereinfachter Modus (Analphabeten)' :
+                        '🎨 Simplified mode (Illiterate)'}
+                      </>
+                    )}
+                  </Button>
                 </div>
+                {visualMode && (
+                  <div className="mt-3 p-3 bg-white rounded-lg border-2 border-green-200">
+                    <p className="text-sm text-gray-700 font-medium">
+                      {language === 'fr' && '✓ Mode simplifié activé : Utilisez les pictogrammes et couleurs pour voter facilement'}
+                      {language === 'de' && '✓ Vereinfachter Modus aktiviert: Verwenden Sie Piktogramme und Farben für einfaches Abstimmen'}
+                      {language === 'en' && '✓ Simplified mode enabled: Use pictograms and colors to vote easily'}
+                    </p>
+                  </div>
+                )}
+                {!visualMode && (
+                  <div className="mt-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                    <p className="text-sm text-green-800 font-medium flex items-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      {language === 'fr' && 'Vous ne savez pas lire ? Cliquez sur "Mode simplifié" pour voter avec des symboles et couleurs'}
+                      {language === 'de' && 'Sie können nicht lesen? Klicken Sie auf "Vereinfachter Modus" zum Abstimmen mit Symbolen und Farben'}
+                      {language === 'en' && 'Can\'t read? Click "Simplified mode" to vote with symbols and colors'}
+                    </p>
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent className="pt-6">{!visualMode ? (
+                  // Standard Mode
+                  <div className="space-y-3">
+                    {vote.options.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => setSelectedOption(option.id)}
+                        className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                          selectedOption === option.id
+                            ? 'border-blue-600 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            selectedOption === option.id
+                              ? 'border-blue-600 bg-blue-600'
+                              : 'border-gray-300'
+                          }`}>
+                            {selectedOption === option.id && (
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                          <span className="font-medium text-gray-900">{tLocal(option.label)}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  // Visual Mode - Simplified with Pictograms
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {vote.options.map((option, index) => {
+                      const visual = getVisualForOption(index);
+                      const VisualIcon = visual.icon;
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => setSelectedOption(option.id)}
+                          className={`p-8 rounded-2xl border-4 transition-all transform hover:scale-105 ${
+                            selectedOption === option.id
+                              ? `${visual.borderColor} ${visual.color} bg-opacity-10 shadow-xl`
+                              : 'border-gray-300 bg-white hover:border-gray-400'
+                          }`}
+                        >
+                          <div className="flex flex-col items-center gap-4">
+                            <div className={`w-24 h-24 rounded-full flex items-center justify-center ${
+                              selectedOption === option.id
+                                ? `${visual.color} text-white`
+                                : `bg-gray-100 ${visual.textColor}`
+                            }`}>
+                              <VisualIcon className="w-12 h-12 stroke-[3]" />
+                            </div>
+                            <div className="text-center">
+                              <div className={`text-5xl mb-3 ${
+                                selectedOption === option.id ? visual.textColor : 'text-gray-400'
+                              }`}>
+                                {visual.emoji}
+                              </div>
+                              <span className={`text-xl font-bold block ${
+                                selectedOption === option.id ? 'text-gray-900' : 'text-gray-700'
+                              }`}>
+                                {tLocal(option.label)}
+                              </span>
+                            </div>
+                            {selectedOption === option.id && (
+                              <div className={`mt-2 px-4 py-2 rounded-full ${visual.color} text-white font-semibold text-sm`}>
+                                {language === 'fr' && '✓ Sélectionné'}
+                                {language === 'de' && '✓ Ausgewählt'}
+                                {language === 'en' && '✓ Selected'}
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
                 <Button 
                   onClick={handleVote}
-                  className="w-full mt-6 gap-2"
+                  className="w-full mt-6 gap-2 text-lg py-6"
                   disabled={!selectedOption}
                 >
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="w-5 h-5" />
                   {language === 'fr' && 'Confirmer mon vote'}
                   {language === 'de' && 'Stimme bestätigen'}
                   {language === 'en' && 'Confirm my vote'}
@@ -385,12 +515,13 @@ export function VoteDetailPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {vote.options.map((option) => {
+                  {vote.options.map((option, index) => {
                     const percentage = getOptionPercentage(option.votes || 0);
+                    const visual = getVisualForOption(index);
                     return (
                       <div key={option.id}>
                         <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium text-gray-900">{option.text}</span>
+                          <span className="font-medium text-gray-900">{tLocal(option.label)}</span>
                           <div className="text-right">
                             <span className="font-semibold text-gray-900">{percentage.toFixed(1)}%</span>
                             <span className="text-sm text-gray-500 ml-2">({option.votes || 0} votes)</span>
@@ -496,7 +627,7 @@ export function VoteDetailPage() {
                     {language === 'en' && 'Participation rate'}
                   </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {vote.participants ? '67%' : '—'}
+                    {vote.stats?.participationRate ? `${vote.stats.participationRate.toFixed(1)}%` : '—'}
                   </p>
                 </div>
                 <Separator />
