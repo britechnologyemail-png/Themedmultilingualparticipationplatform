@@ -35,9 +35,13 @@ import {
   TrendingDown,
   Search,
   Download,
-  Filter
+  Filter,
+  Heart,
+  Settings,
+  Flag
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { toast } from 'sonner';
 
 // Mock data for user participations
 const mockParticipations = {
@@ -237,6 +241,106 @@ const mockParticipations = {
       status: 'confirmed',
       choice: 'Projet C - Centre culturel'
     }
+  ],
+  youth: [
+    {
+      id: 1,
+      userName: 'Lucas Dubois',
+      age: 15,
+      pollName: 'Aménagement skatepark',
+      action: 'voted',
+      date: '2026-01-05T14:20:00',
+      status: 'completed',
+      choice: 'Option A - Nouveaux modules'
+    },
+    {
+      id: 2,
+      userName: 'Emma Martin',
+      age: 14,
+      pollName: 'Activités vacances d\'été',
+      action: 'voted',
+      date: '2026-01-04T11:15:00',
+      status: 'completed',
+      choice: 'Sports nautiques'
+    },
+    {
+      id: 3,
+      userName: 'Noah Garcia',
+      age: 16,
+      pollName: 'Aménagement skatepark',
+      action: 'voted',
+      date: '2026-01-03T16:30:00',
+      status: 'completed',
+      choice: 'Option B - Zone street'
+    },
+    {
+      id: 4,
+      userName: 'Léa Bernard',
+      age: 13,
+      pollName: 'Choix du spectacle jeunesse',
+      action: 'voted',
+      date: '2026-01-02T10:45:00',
+      status: 'completed',
+      choice: 'Concert rap'
+    }
+  ],
+  signalements: [
+    {
+      id: 1,
+      userName: 'Marc Dubois',
+      title: 'Nid-de-poule dangereux avenue de la Liberté',
+      category: 'infrastructure',
+      action: 'created',
+      date: '2026-01-05T09:15:00',
+      status: 'under_review',
+      priority: 'high',
+      location: 'Avenue de la Liberté, 45'
+    },
+    {
+      id: 2,
+      userName: 'Sophie Leroy',
+      title: 'Déchets abandonnés parc municipal',
+      category: 'cleanliness',
+      action: 'created',
+      date: '2026-01-04T14:30:00',
+      status: 'in_progress',
+      priority: 'medium',
+      location: 'Parc Municipal'
+    },
+    {
+      id: 3,
+      userName: 'Jean Martin',
+      title: 'Éclairage défectueux rue du Commerce',
+      category: 'safety',
+      action: 'created',
+      date: '2026-01-03T18:45:00',
+      status: 'resolved',
+      priority: 'high',
+      location: 'Rue du Commerce, 23',
+      resolvedAt: '2026-01-05T10:00:00'
+    },
+    {
+      id: 4,
+      userName: 'Marie Garcia',
+      title: 'Graffiti mur école primaire',
+      category: 'vandalism',
+      action: 'created',
+      date: '2026-01-02T11:20:00',
+      status: 'in_progress',
+      priority: 'low',
+      location: 'École Primaire Jean Jaurès'
+    },
+    {
+      id: 5,
+      userName: 'Pierre Bernard',
+      title: 'Fuite d\'eau fontaine publique',
+      category: 'infrastructure',
+      action: 'created',
+      date: '2026-01-01T15:50:00',
+      status: 'submitted',
+      priority: 'medium',
+      location: 'Place de la République'
+    }
   ]
 };
 
@@ -246,6 +350,170 @@ export function ParticipationsManagement() {
   const [selectedAction, setSelectedAction] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('assemblies');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Export function
+  const handleExport = () => {
+    try {
+      let data: any[] = [];
+      let headers: string[] = [];
+      let filename = '';
+
+      // Determine which data to export based on active tab
+      switch (activeTab) {
+        case 'assemblies':
+          data = mockParticipations.assemblies;
+          headers = ['Utilisateur', 'Assemblée', 'Action', 'Date', 'Statut', 'Prochaine réunion', 'Raison'];
+          filename = 'participations_assemblees';
+          break;
+        case 'petitions':
+          data = mockParticipations.petitions;
+          headers = ['Utilisateur', 'Pétition', 'Action', 'Date', 'Statut', 'Raison'];
+          filename = 'participations_petitions';
+          break;
+        case 'conferences':
+          data = mockParticipations.conferences;
+          headers = ['Utilisateur', 'Conférence', 'Action', 'Date action', 'Statut', 'Date conférence', 'Raison'];
+          filename = 'participations_conferences';
+          break;
+        case 'comments':
+          data = mockParticipations.comments;
+          headers = ['Utilisateur', 'Processus', 'Action', 'Date', 'Statut', 'Contenu', 'Raison'];
+          filename = 'participations_commentaires';
+          break;
+        case 'votes':
+          data = mockParticipations.votes;
+          headers = ['Utilisateur', 'Vote', 'Action', 'Date', 'Statut', 'Choix', 'Ancien choix'];
+          filename = 'participations_votes';
+          break;
+        case 'youth':
+          data = mockParticipations.youth;
+          headers = ['Utilisateur', 'Âge', 'Sondage', 'Action', 'Date', 'Statut', 'Choix'];
+          filename = 'participations_jeunesse';
+          break;
+        case 'signalements':
+          data = mockParticipations.signalements;
+          headers = ['Utilisateur', 'Titre', 'Catégorie', 'Action', 'Date', 'Statut', 'Priorité', 'Localisation', 'Résolu le'];
+          filename = 'participations_signalements';
+          break;
+      }
+
+      // Generate CSV content
+      const csvContent = [
+        headers.join(','),
+        ...data.map((item: any) => {
+          const formatDate = (date: string) => {
+            return new Date(date).toLocaleString('fr-FR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+          };
+
+          switch (activeTab) {
+            case 'assemblies':
+              return [
+                `"${item.userName}"`,
+                `"${item.assemblyName}"`,
+                `"${item.action}"`,
+                `"${formatDate(item.date)}"`,
+                `"${item.status}"`,
+                `"${item.nextMeeting ? new Date(item.nextMeeting).toLocaleDateString('fr-FR') : '-'}"`,
+                `"${item.reason || '-'}"`
+              ].join(',');
+            case 'petitions':
+              return [
+                `"${item.userName}"`,
+                `"${item.petitionName}"`,
+                `"${item.action}"`,
+                `"${formatDate(item.date)}"`,
+                `"${item.status}"`,
+                `"${item.reason || '-'}"`
+              ].join(',');
+            case 'conferences':
+              return [
+                `"${item.userName}"`,
+                `"${item.conferenceName}"`,
+                `"${item.action}"`,
+                `"${formatDate(item.date)}"`,
+                `"${item.status}"`,
+                `"${item.conferenceDate ? new Date(item.conferenceDate).toLocaleDateString('fr-FR') : '-'}"`,
+                `"${item.reason || '-'}"`
+              ].join(',');
+            case 'comments':
+              return [
+                `"${item.userName}"`,
+                `"${item.processName}"`,
+                `"${item.action}"`,
+                `"${formatDate(item.date)}"`,
+                `"${item.status}"`,
+                `"${item.content || '-'}"`,
+                `"${item.reason || '-'}"`
+              ].join(',');
+            case 'votes':
+              return [
+                `"${item.userName}"`,
+                `"${item.voteName}"`,
+                `"${item.action}"`,
+                `"${formatDate(item.date)}"`,
+                `"${item.status}"`,
+                `"${item.newChoice || item.choice || '-'}"`,
+                `"${item.oldChoice || '-'}"`
+              ].join(',');
+            case 'youth':
+              return [
+                `"${item.userName}"`,
+                `"${item.age}"`,
+                `"${item.pollName}"`,
+                `"${item.action}"`,
+                `"${formatDate(item.date)}"`,
+                `"${item.status}"`,
+                `"${item.choice || '-'}"`
+              ].join(',');
+            case 'signalements':
+              return [
+                `"${item.userName}"`,
+                `"${item.title}"`,
+                `"${item.category}"`,
+                `"${item.action}"`,
+                `"${formatDate(item.date)}"`,
+                `"${item.status}"`,
+                `"${item.priority}"`,
+                `"${item.location}"`,
+                `"${item.resolvedAt ? new Date(item.resolvedAt).toLocaleDateString('fr-FR') : '-'}"`
+              ].join(',');
+            default:
+              return '';
+          }
+        })
+      ].join('\n');
+
+      // Create and download the file
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success(
+        language === 'fr' ? 'Export réussi' :
+        language === 'de' ? 'Export erfolgreich' :
+        'Export successful'
+      );
+    } catch (error) {
+      toast.error(
+        language === 'fr' ? 'Erreur lors de l\'export' :
+        language === 'de' ? 'Fehler beim Exportieren' :
+        'Error during export'
+      );
+    }
+  };
 
   const getActionBadge = (action: string) => {
     const variants: Record<string, { label: string; color: string }> = {
@@ -277,12 +545,56 @@ export function ParticipationsManagement() {
       removed: { label: 'Retiré', color: 'bg-orange-100 text-orange-700 border-orange-200', icon: AlertCircle },
       published: { label: 'Publié', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: CheckCircle },
       deleted: { label: 'Supprimé', color: 'bg-red-100 text-red-700 border-red-200', icon: XCircle },
-      updated: { label: 'Mis à jour', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: AlertCircle }
+      updated: { label: 'Mis à jour', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: AlertCircle },
+      completed: { label: 'Terminé', color: 'bg-purple-100 text-purple-700 border-purple-200', icon: CheckCircle }
     };
 
     const variant = variants[status] || { label: status, color: 'bg-gray-100 text-gray-700 border-gray-200', icon: AlertCircle };
     const Icon = variant.icon;
 
+    return (
+      <Badge className={`${variant.color} border flex items-center gap-1`}>
+        <Icon className="w-3 h-3" />
+        {variant.label}
+      </Badge>
+    );
+  };
+
+  // Badge helpers for Signalements
+  const getCategoryBadge = (category: string) => {
+    const variants: Record<string, { label: string; color: string }> = {
+      infrastructure: { label: 'Infrastructure', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+      cleanliness: { label: 'Propreté', color: 'bg-green-100 text-green-700 border-green-200' },
+      safety: { label: 'Sécurité', color: 'bg-red-100 text-red-700 border-red-200' },
+      vandalism: { label: 'Vandalisme', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+      environment: { label: 'Environnement', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+      accessibility: { label: 'Accessibilité', color: 'bg-purple-100 text-purple-700 border-purple-200' }
+    };
+    const variant = variants[category] || { label: category, color: 'bg-gray-100 text-gray-700 border-gray-200' };
+    return <Badge className={`${variant.color} border`}>{variant.label}</Badge>;
+  };
+
+  const getPriorityBadge = (priority: string) => {
+    const variants: Record<string, { label: string; color: string }> = {
+      high: { label: 'Haute', color: 'bg-red-100 text-red-700 border-red-200' },
+      medium: { label: 'Moyenne', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+      low: { label: 'Basse', color: 'bg-green-100 text-green-700 border-green-200' }
+    };
+    const variant = variants[priority] || { label: priority, color: 'bg-gray-100 text-gray-700 border-gray-200' };
+    return <Badge className={`${variant.color} border`}>{variant.label}</Badge>;
+  };
+
+  const getSignalementStatusBadge = (status: string) => {
+    const variants: Record<string, { label: string; color: string; icon: any }> = {
+      submitted: { label: 'Soumis', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: AlertCircle },
+      under_review: { label: 'En révision', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: AlertCircle },
+      in_progress: { label: 'En cours', color: 'bg-purple-100 text-purple-700 border-purple-200', icon: AlertCircle },
+      resolved: { label: 'Résolu', color: 'bg-green-100 text-green-700 border-green-200', icon: CheckCircle },
+      rejected: { label: 'Rejeté', color: 'bg-red-100 text-red-700 border-red-200', icon: XCircle },
+      archived: { label: 'Archivé', color: 'bg-gray-100 text-gray-700 border-gray-200', icon: XCircle }
+    };
+    const variant = variants[status] || { label: status, color: 'bg-gray-100 text-gray-700 border-gray-200', icon: AlertCircle };
+    const Icon = variant.icon;
     return (
       <Badge className={`${variant.color} border flex items-center gap-1`}>
         <Icon className="w-3 h-3" />
@@ -307,13 +619,22 @@ export function ParticipationsManagement() {
     
     const confirmedVotes = mockParticipations.votes.filter(v => v.status === 'confirmed').length;
     const changedVotes = mockParticipations.votes.filter(v => v.status === 'updated').length;
+    
+    const completedYouthPolls = mockParticipations.youth.filter(y => y.status === 'completed').length;
+
+    const activeSignalements = mockParticipations.signalements.filter(s => 
+      s.status === 'under_review' || s.status === 'in_progress'
+    ).length;
+    const resolvedSignalements = mockParticipations.signalements.filter(s => s.status === 'resolved').length;
 
     return {
       assemblies: { active: activeAssemblies, cancelled: cancelledAssemblies },
       petitions: { active: activePetitions, removed: removedSignatures },
       conferences: { confirmed: confirmedConferences, cancelled: cancelledConferences },
       comments: { published: publishedComments, deleted: deletedComments },
-      votes: { confirmed: confirmedVotes, changed: changedVotes }
+      votes: { confirmed: confirmedVotes, changed: changedVotes },
+      youth: { completed: completedYouthPolls },
+      signalements: { active: activeSignalements, resolved: resolvedSignalements }
     };
   };
 
@@ -426,44 +747,93 @@ export function ParticipationsManagement() {
             </div>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Sondages jeunesse terminés</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.youth.completed}</p>
+              </div>
+              <div className="p-3 bg-pink-100 rounded-lg">
+                <Heart className="w-6 h-6 text-pink-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Signalements actifs</p>
+                <p className="text-2xl font-semibold text-gray-900">{stats.signalements.active}</p>
+                <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                  <TrendingUp className="w-3 h-3" />
+                  {stats.signalements.resolved} résolus
+                </p>
+              </div>
+              <div className="p-3 bg-red-100 rounded-lg">
+                <Flag className="w-6 h-6 text-red-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Rechercher par utilisateur, processus..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+      {showFilters && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Rechercher par utilisateur, processus..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={selectedAction} onValueChange={setSelectedAction}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Type d'action" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes les actions</SelectItem>
+                  <SelectItem value="joined">Adhésions</SelectItem>
+                  <SelectItem value="cancelled">Annulations</SelectItem>
+                  <SelectItem value="signed">Signatures</SelectItem>
+                  <SelectItem value="edited">Modifications</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" className="gap-2" onClick={handleExport}>
+                <Download className="w-4 h-4" />
+                {language === 'fr' ? 'Exporter' : language === 'de' ? 'Exportieren' : 'Export'}
+              </Button>
             </div>
-            <Select value={selectedAction} onValueChange={setSelectedAction}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Type d'action" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes les actions</SelectItem>
-                <SelectItem value="joined">Adhésions</SelectItem>
-                <SelectItem value="cancelled">Annulations</SelectItem>
-                <SelectItem value="signed">Signatures</SelectItem>
-                <SelectItem value="edited">Modifications</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" className="gap-2">
-              <Download className="w-4 h-4" />
-              Exporter
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Toggle Filters Button */}
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          onClick={() => setShowFilters(!showFilters)}
+          className="gap-2"
+        >
+          <Settings className="w-4 h-4" />
+          {showFilters 
+            ? (language === 'fr' ? 'Masquer les filtres' : language === 'de' ? 'Filter ausblenden' : 'Hide filters')
+            : (language === 'fr' ? 'Afficher les filtres et export' : language === 'de' ? 'Filter und Export anzeigen' : 'Show filters and export')
+          }
+        </Button>
+      </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="assemblies" className="gap-2">
             <Users className="w-4 h-4" />
             Assemblées
@@ -483,6 +853,14 @@ export function ParticipationsManagement() {
           <TabsTrigger value="votes" className="gap-2">
             <CheckSquare className="w-4 h-4" />
             Votes
+          </TabsTrigger>
+          <TabsTrigger value="youth" className="gap-2">
+            <Heart className="w-4 h-4" />
+            Jeunesse
+          </TabsTrigger>
+          <TabsTrigger value="signalements" className="gap-2">
+            <Flag className="w-4 h-4" />
+            Signalements
           </TabsTrigger>
         </TabsList>
 
@@ -748,6 +1126,118 @@ export function ParticipationsManagement() {
                           <span className="line-through">{item.oldChoice}</span>
                         ) : (
                           '-'
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Youth Tab */}
+        <TabsContent value="youth">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Sondages jeunesse</span>
+                <Badge variant="outline">{mockParticipations.youth.length} actions</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Utilisateur</TableHead>
+                    <TableHead>Âge</TableHead>
+                    <TableHead>Sondage</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Choix</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockParticipations.youth.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">{item.userName}</TableCell>
+                      <TableCell>{item.age}</TableCell>
+                      <TableCell>{item.pollName}</TableCell>
+                      <TableCell>{getActionBadge(item.action)}</TableCell>
+                      <TableCell className="text-sm text-gray-600">
+                        {new Date(item.date).toLocaleString('fr-FR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(item.status)}</TableCell>
+                      <TableCell className="text-sm font-medium text-gray-700">
+                        {item.choice || '-'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Signalements Tab */}
+        <TabsContent value="signalements">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Signalements</span>
+                <Badge variant="outline">{mockParticipations.signalements.length} actions</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Utilisateur</TableHead>
+                    <TableHead>Titre</TableHead>
+                    <TableHead>Catégorie</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Priorité</TableHead>
+                    <TableHead>Localisation</TableHead>
+                    <TableHead>Résolu le</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockParticipations.signalements.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">{item.userName}</TableCell>
+                      <TableCell>{item.title}</TableCell>
+                      <TableCell>{getCategoryBadge(item.category)}</TableCell>
+                      <TableCell>{getActionBadge(item.action)}</TableCell>
+                      <TableCell className="text-sm text-gray-600">
+                        {new Date(item.date).toLocaleString('fr-FR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </TableCell>
+                      <TableCell>{getSignalementStatusBadge(item.status)}</TableCell>
+                      <TableCell>{getPriorityBadge(item.priority)}</TableCell>
+                      <TableCell className="text-sm text-gray-600 max-w-xs truncate">
+                        {item.location}
+                      </TableCell>
+                      <TableCell>
+                        {item.resolvedAt ? (
+                          <span className="text-sm text-gray-700">
+                            {new Date(item.resolvedAt).toLocaleDateString('fr-FR')}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-400">-</span>
                         )}
                       </TableCell>
                     </TableRow>

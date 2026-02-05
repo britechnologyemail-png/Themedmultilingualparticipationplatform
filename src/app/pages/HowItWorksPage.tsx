@@ -16,7 +16,7 @@ import {
   BarChart3,
   Shield
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 export function HowItWorksPage() {
   const { t, language } = useLanguage();

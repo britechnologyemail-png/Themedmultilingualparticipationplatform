@@ -19,7 +19,15 @@ import {
   X,
   ChevronDown,
   Mail,
-  Phone
+  Phone,
+  Building2, // Added for Organization icon
+  Navigation2, // Added for Navigation Management icon
+  MessageSquare,
+  Video,
+  Vote,
+  AlertCircle,
+  Sparkles,
+  Tag,
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import {
@@ -31,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from '../../components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
+import { NotificationCenter } from '../../components/NotificationCenter';
 
 interface NavigationItem {
   id: string;
@@ -74,6 +83,13 @@ export function AdminLayout() {
       roles: ['admin', 'manager']
     },
     {
+      id: 'legislative',
+      label: language === 'fr' ? 'Consultations Législatives' : language === 'de' ? 'Gesetzgebungsberatungen' : 'Legislative Consultations',
+      icon: <FileText className="w-5 h-5" />,
+      path: '/admin/legislative-consultations',
+      roles: ['admin', 'manager']
+    },
+    {
       id: 'themes',
       label: language === 'fr' ? 'Gestion des thèmes' : language === 'de' ? 'Themenverwaltung' : 'Theme Management',
       icon: <Shield className="w-5 h-5" />,
@@ -93,6 +109,29 @@ export function AdminLayout() {
       icon: <Users className="w-5 h-5" />,
       path: '/admin/participations',
       roles: ['admin', 'manager', 'observer']
+    },
+    {
+      id: 'newsletter',
+      label: language === 'fr' ? 'Newsletter' : language === 'de' ? 'Newsletter' : 'Newsletter',
+      icon: <Mail className="w-5 h-5" />,
+      path: '/admin/newsletter/subscribers',
+      roles: ['admin', 'manager'],
+      children: [
+        {
+          id: 'newsletter-subscribers',
+          label: language === 'fr' ? 'Abonnés' : language === 'de' ? 'Abonnenten' : 'Subscribers',
+          icon: <Users className="w-4 h-4" />,
+          path: '/admin/newsletter/subscribers',
+          roles: ['admin', 'manager']
+        },
+        {
+          id: 'newsletter-campaigns',
+          label: language === 'fr' ? 'Campagnes' : language === 'de' ? 'Kampagnen' : 'Campaigns',
+          icon: <Mail className="w-4 h-4" />,
+          path: '/admin/newsletter/campaigns',
+          roles: ['admin', 'manager']
+        }
+      ]
     },
     {
       id: 'calendar',
@@ -122,12 +161,137 @@ export function AdminLayout() {
       path: '/admin/exports',
       roles: ['admin', 'manager', 'observer']
     },
-    {
+    /*{
       id: 'ivr',
       label: language === 'fr' ? 'Synthèse IVR' : language === 'de' ? 'IVR-Synthese' : 'IVR Synthesis',
       icon: <Phone className="w-5 h-5" />,
       path: '/admin/ivr',
       roles: ['admin', 'manager', 'observer']
+    },*/  // REMOVED - IVR Section deleted
+    {
+      id: 'navigation',
+      label: language === 'fr' ? 'Navigation & Menus' : language === 'de' ? 'Navigation & Menüs' : 'Navigation & Menus',
+      icon: <Navigation2 className="w-5 h-5" />,
+      path: '/admin/navigation/header',
+      roles: ['admin'],
+      children: [
+        {
+          id: 'navigation-header',
+          label: language === 'fr' ? 'Menu Header' : language === 'de' ? 'Header-Menü' : 'Header Menu',
+          icon: <Menu className="w-4 h-4" />,
+          path: '/admin/navigation/header',
+          roles: ['admin']
+        },
+        {
+          id: 'navigation-footer',
+          label: language === 'fr' ? 'Menu Footer' : language === 'de' ? 'Footer-Menü' : 'Footer Menu',
+          icon: <Menu className="w-4 h-4" />,
+          path: '/admin/navigation/footer',
+          roles: ['admin']
+        }
+      ]
+    },
+    {
+      id: 'sections',
+      label: language === 'fr' ? 'Gestion Sections' : language === 'de' ? 'Abschnittsverwaltung' : 'Sections Management',
+      icon: <Layers className="w-5 h-5" />,
+      path: '/admin/sections',
+      roles: ['admin'],
+      children: [
+        {
+          id: 'sections-overview',
+          label: language === 'fr' ? 'Vue d\'ensemble' : language === 'de' ? 'Übersicht' : 'Overview',
+          icon: <LayoutDashboard className="w-4 h-4" />,
+          path: '/admin/sections',
+          roles: ['admin']
+        },
+        {
+          id: 'sections-consultations',
+          label: language === 'fr' ? 'Concertations' : language === 'de' ? 'Konsultationen' : 'Consultations',
+          icon: <MessageSquare className="w-4 h-4" />,
+          path: '/admin/sections/consultations',
+          roles: ['admin']
+        },
+        {
+          id: 'sections-assemblies',
+          label: language === 'fr' ? 'Assemblées' : language === 'de' ? 'Versammlungen' : 'Assemblies',
+          icon: <Users className="w-4 h-4" />,
+          path: '/admin/sections/assemblies',
+          roles: ['admin']
+        },
+        {
+          id: 'sections-petitions',
+          label: language === 'fr' ? 'Pétitions' : language === 'de' ? 'Petitionen' : 'Petitions',
+          icon: <FileText className="w-4 h-4" />,
+          path: '/admin/sections/petitions',
+          roles: ['admin']
+        },
+        {
+          id: 'sections-conferences',
+          label: language === 'fr' ? 'Conférences' : language === 'de' ? 'Konferenzen' : 'Conferences',
+          icon: <Video className="w-4 h-4" />,
+          path: '/admin/sections/conferences',
+          roles: ['admin']
+        },
+        {
+          id: 'sections-votes',
+          label: language === 'fr' ? 'Votes' : language === 'de' ? 'Abstimmungen' : 'Votes',
+          icon: <Vote className="w-4 h-4" />,
+          path: '/admin/sections/votes',
+          roles: ['admin']
+        },
+        {
+          id: 'sections-signalements',
+          label: language === 'fr' ? 'Signalements' : language === 'de' ? 'Meldungen' : 'Reports',
+          icon: <AlertCircle className="w-4 h-4" />,
+          path: '/admin/sections/signalements',
+          roles: ['admin']
+        },
+        {
+          id: 'sections-youth',
+          label: language === 'fr' ? 'Jeunesse' : language === 'de' ? 'Jugend' : 'Youth',
+          icon: <Sparkles className="w-4 h-4" />,
+          path: '/admin/sections/youth',
+          roles: ['admin']
+        },
+        {
+          id: 'sections-themes',
+          label: language === 'fr' ? 'Thèmes' : language === 'de' ? 'Themen' : 'Themes',
+          icon: <Tag className="w-4 h-4" />,
+          path: '/admin/sections/themes',
+          roles: ['admin']
+        }
+      ]
+    },
+    {
+      id: 'organization',
+      label: language === 'fr' ? 'Organisation' : language === 'de' ? 'Organisation' : 'Organization',
+      icon: <Building2 className="w-5 h-5" />,
+      path: '/admin/organization/profile',
+      roles: ['admin'],
+      children: [
+        {
+          id: 'organization-profile',
+          label: language === 'fr' ? 'Profil' : language === 'de' ? 'Profil' : 'Profile',
+          icon: <Building2 className="w-4 h-4" />,
+          path: '/admin/organization/profile',
+          roles: ['admin']
+        },
+        {
+          id: 'organization-perimeter',
+          label: language === 'fr' ? 'Périmètre géographique' : language === 'de' ? 'Geografisches Gebiet' : 'Geographic Perimeter',
+          icon: <Shield className="w-4 h-4" />,
+          path: '/admin/organization/perimeter',
+          roles: ['admin']
+        },
+        {
+          id: 'organization-territory',
+          label: language === 'fr' ? 'Gestion du territoire' : language === 'de' ? 'Gebietsverwaltung' : 'Territory Management',
+          icon: <Layers className="w-4 h-4" />,
+          path: '/admin/organization/territory',
+          roles: ['admin']
+        }
+      ]
     },
     {
       id: 'settings',
@@ -199,10 +363,7 @@ export function AdminLayout() {
 
           <div className="flex items-center gap-3">
             {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </Button>
+            <NotificationCenter />
 
             {/* User Menu */}
             <DropdownMenu>

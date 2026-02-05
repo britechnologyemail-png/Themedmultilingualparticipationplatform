@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useLanguage } from '../contexts/LanguageContext';
 import { PageBanner } from '../components/PageBanner';
 import { PageLayout } from '../components/layout/PageLayout';

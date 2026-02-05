@@ -13,7 +13,9 @@ import {
   Shield,
   Settings,
   Star,
-  TrendingUp
+  TrendingUp,
+  AlertTriangle,
+  Sparkles
 } from 'lucide-react';
 
 export function NewsletterPage() {
@@ -87,6 +89,18 @@ export function NewsletterPage() {
         icon: TrendingUp,
         label: { fr: 'Résultats', de: 'Ergebnisse', en: 'Results' },
         desc: { fr: 'Publication des résultats et rapports', de: 'Veröffentlichung von Ergebnissen und Berichten', en: 'Publication of results and reports' }
+      },
+      {
+        id: 'signalements',
+        icon: AlertTriangle,
+        label: { fr: 'Signalements', de: 'Meldungen', en: 'Reports' },
+        desc: { fr: 'Nouveaux signalements et résolutions', de: 'Neue Meldungen und Lösungen', en: 'New reports and resolutions' }
+      },
+      {
+        id: 'youth',
+        icon: Sparkles,
+        label: { fr: 'Jeunesse', de: 'Jugend', en: 'Youth' },
+        desc: { fr: 'Activités et sondages pour les jeunes', de: 'Aktivitäten und Umfragen für Jugendliche', en: 'Youth activities and polls' }
       }
     ],
     frequencies: [

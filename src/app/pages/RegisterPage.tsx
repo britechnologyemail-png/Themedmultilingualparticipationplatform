@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -7,6 +8,16 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
 import { Badge } from '../components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../components/ui/alert-dialog';
 import {
   Shield,
   UserPlus,
@@ -18,23 +29,29 @@ import {
   ChevronRight,
   ChevronLeft,
   User,
-  Calendar,
   Eye,
   EyeOff,
   Info,
   ShieldCheck,
-  AlertTriangle
+  AlertTriangle,
+  MapPin,
+  Home
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { StreetAutocomplete } from '../components/form/StreetAutocomplete';
+import { TerritoryMap } from '../components/TerritoryMap';
 
 interface FormData {
   firstName: string;
   lastName: string;
-  birthDate: string;
   email: string;
-  phone: string;
   password: string;
   confirmPassword: string;
+  municipality: string;
+  street: string;
+  streetId: string;
+  streetNumber: string;
+  postalCode: string;
   acceptTerms: boolean;
   acceptPrivacy: boolean;
   declareSincerity: boolean;
@@ -46,6 +63,7 @@ interface FormErrors {
 
 export function RegisterPage() {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -54,15 +72,26 @@ export function RegisterPage() {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [accountStatus, setAccountStatus] = useState<'pending' | 'verified' | 'active' | 'restricted'>('pending');
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  // Organization data - would be fetched from API
+  const organizationData = {
+    name: 'Ville de Genève',
+    type: 'municipality' as const,
+    postalCodes: ['1200', '1201', '1202', '1203', '1204', '1205', '1206', '1207', '1208', '1209']
+  };
 
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
-    birthDate: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
+    municipality: organizationData.name, // Pre-filled and non-editable
+    street: '',
+    streetId: '',
+    streetNumber: '',
+    postalCode: '',
     acceptTerms: false,
     acceptPrivacy: false,
     declareSincerity: false,
@@ -79,24 +108,30 @@ export function RegisterPage() {
     },
     {
       id: 1,
+      title: language === 'fr' ? 'Adresse' : language === 'de' ? 'Adresse' : 'Address',
+      icon: MapPin,
+      description: language === 'fr' ? 'Coordonnées territoriales' : language === 'de' ? 'Territoriale Koordinaten' : 'Territorial coordinates'
+    },
+    {
+      id: 2,
       title: language === 'fr' ? 'Contact' : language === 'de' ? 'Kontakt' : 'Contact',
       icon: Mail,
       description: language === 'fr' ? 'Email et téléphone' : language === 'de' ? 'E-Mail und Telefon' : 'Email and phone'
     },
     {
-      id: 2,
+      id: 3,
       title: language === 'fr' ? 'Sécurité' : language === 'de' ? 'Sicherheit' : 'Security',
       icon: Lock,
       description: language === 'fr' ? 'Mot de passe et protection' : language === 'de' ? 'Passwort und Schutz' : 'Password and protection'
     },
     {
-      id: 3,
+      id: 4,
       title: language === 'fr' ? 'Vérification' : language === 'de' ? 'Verifizierung' : 'Verification',
       icon: ShieldCheck,
       description: language === 'fr' ? 'Validation des coordonnées' : language === 'de' ? 'Validierung der Kontaktdaten' : 'Contact validation'
     },
     {
-      id: 4,
+      id: 5,
       title: language === 'fr' ? 'Confirmation' : language === 'de' ? 'Bestätigung' : 'Confirmation',
       icon: CheckCircle2,
       description: language === 'fr' ? 'Finalisation du compte' : language === 'de' ? 'Kontoabschluss' : 'Account finalization'
@@ -109,27 +144,10 @@ export function RegisterPage() {
     return emailRegex.test(email);
   };
 
-  const validatePhone = (phone: string): boolean => {
-    const phoneRegex = /^(\+|00)[1-9][0-9]{7,14}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
-  };
-
   const validatePassword = (password: string): boolean => {
     // Minimum 8 caractères, une majuscule, une minuscule, un chiffre, un caractère spécial
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return passwordRegex.test(password);
-  };
-
-  const validateAge = (birthDate: string): boolean => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    const age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      return age - 1 >= 16;
-    }
-    return age >= 16;
   };
 
   const validateStep = (step: number): boolean => {
@@ -139,32 +157,41 @@ export function RegisterPage() {
       // Validation identité
       if (!formData.firstName.trim()) {
         newErrors.firstName = language === 'fr' ? 'Le prénom est requis' : language === 'de' ? 'Vorname ist erforderlich' : 'First name is required';
+      } else if (formData.firstName.trim().length < 2) {
+        newErrors.firstName = language === 'fr' ? 'Le prénom doit contenir au moins 2 caractères' : language === 'de' ? 'Vorname muss mindestens 2 Zeichen enthalten' : 'First name must contain at least 2 characters';
       }
       if (!formData.lastName.trim()) {
         newErrors.lastName = language === 'fr' ? 'Le nom est requis' : language === 'de' ? 'Nachname ist erforderlich' : 'Last name is required';
-      }
-      if (!formData.birthDate) {
-        newErrors.birthDate = language === 'fr' ? 'La date de naissance est requise' : language === 'de' ? 'Geburtsdatum ist erforderlich' : 'Birth date is required';
-      } else if (!validateAge(formData.birthDate)) {
-        newErrors.birthDate = language === 'fr' ? 'Vous devez avoir au moins 16 ans' : language === 'de' ? 'Sie müssen mindestens 16 Jahre alt sein' : 'You must be at least 16 years old';
+      } else if (formData.lastName.trim().length < 2) {
+        newErrors.lastName = language === 'fr' ? 'Le nom doit contenir au moins 2 caractères' : language === 'de' ? 'Nachname muss mindestens 2 Zeichen enthalten' : 'Last name must contain at least 2 characters';
       }
     }
 
     if (step === 1) {
+      // Validation adresse
+      if (!formData.streetId || !formData.street) {
+        newErrors.street = language === 'fr' ? 'Vous devez sélectionner une rue' : language === 'de' ? 'Sie müssen eine Straße auswählen' : 'You must select a street';
+      }
+      if (!formData.streetNumber.trim()) {
+        newErrors.streetNumber = language === 'fr' ? 'Le numéro de rue est requis' : language === 'de' ? 'Hausnummer ist erforderlich' : 'Street number is required';
+      }
+      if (!formData.postalCode) {
+        newErrors.postalCode = language === 'fr' ? 'Le code postal est requis' : language === 'de' ? 'Postleitzahl ist erforderlich' : 'Postal code is required';
+      } else if (!organizationData.postalCodes.includes(formData.postalCode)) {
+        newErrors.postalCode = language === 'fr' ? 'Code postal non valide pour ce territoire' : language === 'de' ? 'Postleitzahl für dieses Gebiet ungültig' : 'Invalid postal code for this territory';
+      }
+    }
+
+    if (step === 2) {
       // Validation contact
       if (!formData.email.trim()) {
         newErrors.email = language === 'fr' ? 'L\'email est requis' : language === 'de' ? 'E-Mail ist erforderlich' : 'Email is required';
       } else if (!validateEmail(formData.email)) {
         newErrors.email = language === 'fr' ? 'Email invalide' : language === 'de' ? 'Ungültige E-Mail' : 'Invalid email';
       }
-      if (!formData.phone.trim()) {
-        newErrors.phone = language === 'fr' ? 'Le téléphone est requis' : language === 'de' ? 'Telefon ist erforderlich' : 'Phone is required';
-      } else if (!validatePhone(formData.phone)) {
-        newErrors.phone = language === 'fr' ? 'Format: +41 XX XXX XX XX ou +33 X XX XX XX XX' : language === 'de' ? 'Format: +41 XX XXX XX XX oder +49 XXX XXXXXXX' : 'Format: +41 XX XXX XX XX or +33 X XX XX XX XX';
-      }
     }
 
-    if (step === 2) {
+    if (step === 3) {
       // Validation sécurité
       if (!formData.password) {
         newErrors.password = language === 'fr' ? 'Le mot de passe est requis' : language === 'de' ? 'Passwort ist erforderlich' : 'Password is required';
@@ -195,7 +222,7 @@ export function RegisterPage() {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      if (currentStep === 2) {
+      if (currentStep === 3) {
         // Simuler l'envoi des codes de vérification
         sendVerificationCodes();
       }
@@ -211,10 +238,10 @@ export function RegisterPage() {
     // Simulation d'envoi de codes
     toast.success(
       language === 'fr'
-        ? `Codes de vérification envoyés à ${formData.email} et ${formData.phone}`
+        ? `Code de vérification envoyé à ${formData.email}`
         : language === 'de'
-        ? `Verifizierungscodes an ${formData.email} und ${formData.phone} gesendet`
-        : `Verification codes sent to ${formData.email} and ${formData.phone}`
+        ? `Verifizierungscode an ${formData.email} gesendet`
+        : `Verification code sent to ${formData.email}`
     );
   };
 
@@ -232,24 +259,10 @@ export function RegisterPage() {
     }
   };
 
-  const handleVerifyPhone = () => {
-    // Simulation - en production, vérifier avec le backend
-    if (phoneVerificationCode === '654321') {
-      setIsPhoneVerified(true);
-      toast.success(
-        language === 'fr' ? 'Téléphone vérifié avec succès' : language === 'de' ? 'Telefon erfolgreich verifiziert' : 'Phone verified successfully'
-      );
-    } else {
-      toast.error(
-        language === 'fr' ? 'Code incorrect' : language === 'de' ? 'Falscher Code' : 'Incorrect code'
-      );
-    }
-  };
-
   const handleSubmit = () => {
-    if (isEmailVerified && isPhoneVerified) {
+    if (isEmailVerified) {
       setAccountStatus('verified');
-      setCurrentStep(4);
+      setCurrentStep(5);
       toast.success(
         language === 'fr' 
           ? 'Compte créé avec succès !' 
@@ -260,11 +273,33 @@ export function RegisterPage() {
     } else {
       toast.error(
         language === 'fr'
-          ? 'Veuillez vérifier votre email et téléphone'
+          ? 'Veuillez vérifier votre email'
           : language === 'de'
-          ? 'Bitte verifizieren Sie Ihre E-Mail und Telefonnummer'
-          : 'Please verify your email and phone'
+          ? 'Bitte verifizieren Sie Ihre E-Mail'
+          : 'Please verify your email'
       );
+    }
+  };
+
+  const handleCancel = () => {
+    // Redirect to home page
+    navigate('/');
+    
+    // Show cancellation message
+    toast.info(
+      language === 'fr'
+        ? 'Inscription annulée'
+        : language === 'de'
+        ? 'Registrierung abgebrochen'
+        : 'Registration cancelled'
+    );
+  };
+
+  const handleStreetChange = (streetName: string, streetId: string) => {
+    setFormData({ ...formData, street: streetName, streetId });
+    // Clear error when street is selected
+    if (streetId) {
+      setErrors({ ...errors, street: '' });
     }
   };
 
@@ -397,7 +432,7 @@ export function RegisterPage() {
                       : 'One citizen = One account = One participation right'}
                   </CardDescription>
                 </div>
-                {currentStep === 4 && getAccountStatusBadge()}
+                {currentStep === 5 && getAccountStatusBadge()}
               </div>
             </CardHeader>
 
@@ -466,41 +501,121 @@ export function RegisterPage() {
                         )}
                       </div>
                     </div>
+                  </motion.div>
+                )}
 
+                {/* Step 1: Address */}
+                {currentStep === 1 && (
+                  <motion.div
+                    key="step-1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
+                  >
+                    <div className="mb-6">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        {language === 'fr' ? 'Adresse de résidence' : language === 'de' ? 'Wohnadresse' : 'Residential Address'}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {language === 'fr'
+                          ? 'Votre adresse doit être située dans le périmètre de notre territoire'
+                          : language === 'de'
+                          ? 'Ihre Adresse muss sich im Umkreis unseres Gebiets befinden'
+                          : 'Your address must be located within our territory perimeter'}
+                      </p>
+                    </div>
+
+                    {/* Territory Map */}
+                    <TerritoryMap 
+                      organizationName={organizationData.name}
+                      territoryType={organizationData.type}
+                      compact={true}
+                    />
+
+                    {/* Municipality (Read-only) */}
                     <div className="space-y-2">
-                      <Label htmlFor="birthDate" className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-600" />
-                        {language === 'fr' ? 'Date de naissance *' : language === 'de' ? 'Geburtsdatum *' : 'Birth Date *'}
+                      <Label htmlFor="municipality" className="flex items-center gap-2">
+                        <Home className="w-4 h-4 text-gray-600" />
+                        {language === 'fr' ? 'Municipalité *' : language === 'de' ? 'Gemeinde *' : 'Municipality *'}
                       </Label>
                       <Input
-                        id="birthDate"
-                        type="date"
-                        value={formData.birthDate}
-                        onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                        className={errors.birthDate ? 'border-red-500' : ''}
+                        id="municipality"
+                        value={formData.municipality}
+                        disabled
+                        className="bg-gray-50 cursor-not-allowed"
                       />
-                      {errors.birthDate && (
-                        <p className="text-sm text-red-600 flex items-center gap-1">
-                          <AlertCircle className="w-4 h-4" />
-                          {errors.birthDate}
-                        </p>
-                      )}
                       <p className="text-xs text-gray-500 flex items-center gap-1">
                         <Info className="w-3 h-3" />
                         {language === 'fr'
-                          ? 'Vous devez avoir au moins 16 ans pour participer'
+                          ? 'La municipalité est déterminée par votre organisation'
                           : language === 'de'
-                          ? 'Sie müssen mindestens 16 Jahre alt sein, um teilzunehmen'
-                          : 'You must be at least 16 years old to participate'}
+                          ? 'Die Gemeinde wird von Ihrer Organisation festgelegt'
+                          : 'The municipality is determined by your organization'}
                       </p>
+                    </div>
+
+                    {/* Street Autocomplete */}
+                    <StreetAutocomplete
+                      value={formData.street}
+                      onChange={handleStreetChange}
+                      error={errors.street}
+                      disabled={!!formData.streetId}
+                    />
+
+                    {/* Street Number and Postal Code */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="streetNumber">
+                          {language === 'fr' ? 'Numéro *' : language === 'de' ? 'Nummer *' : 'Number *'}
+                        </Label>
+                        <Input
+                          id="streetNumber"
+                          value={formData.streetNumber}
+                          onChange={(e) => setFormData({ ...formData, streetNumber: e.target.value })}
+                          className={errors.streetNumber ? 'border-red-500' : ''}
+                          placeholder="12"
+                        />
+                        {errors.streetNumber && (
+                          <p className="text-sm text-red-600 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.streetNumber}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="postalCode">
+                          {language === 'fr' ? 'Code postal *' : language === 'de' ? 'Postleitzahl *' : 'Postal Code *'}
+                        </Label>
+                        <select
+                          id="postalCode"
+                          value={formData.postalCode}
+                          onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                          className={`flex h-10 w-full rounded-md border ${errors.postalCode ? 'border-red-500' : 'border-gray-300'} bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        >
+                          <option value="">
+                            {language === 'fr' ? 'Sélectionnez' : language === 'de' ? 'Wählen' : 'Select'}
+                          </option>
+                          {organizationData.postalCodes.map((code) => (
+                            <option key={code} value={code}>{code}</option>
+                          ))}
+                        </select>
+                        {errors.postalCode && (
+                          <p className="text-sm text-red-600 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.postalCode}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </motion.div>
                 )}
 
-                {/* Step 1: Contact */}
-                {currentStep === 1 && (
+                {/* Step 2: Contact */}
+                {currentStep === 2 && (
                   <motion.div
-                    key="step-1"
+                    key="step-2"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
@@ -512,10 +627,10 @@ export function RegisterPage() {
                       </h3>
                       <p className="text-sm text-gray-600">
                         {language === 'fr'
-                          ? 'Email et téléphone seront vérifiés pour sécuriser votre compte'
+                          ? 'Votre email sera vérifié pour sécuriser votre compte'
                           : language === 'de'
-                          ? 'E-Mail und Telefon werden zur Sicherung Ihres Kontos verifiziert'
-                          : 'Email and phone will be verified to secure your account'}
+                          ? 'Ihre E-Mail wird zur Sicherung Ihres Kontos verifiziert'
+                          : 'Your email will be verified to secure your account'}
                       </p>
                     </div>
 
@@ -547,42 +662,13 @@ export function RegisterPage() {
                           : 'One unique email per citizen'}
                       </p>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-gray-600" />
-                        {language === 'fr' ? 'Numéro de téléphone *' : language === 'de' ? 'Telefonnummer *' : 'Phone Number *'}
-                      </Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className={errors.phone ? 'border-red-500' : ''}
-                        placeholder="+41 XX XXX XX XX"
-                      />
-                      {errors.phone && (
-                        <p className="text-sm text-red-600 flex items-center gap-1">
-                          <AlertCircle className="w-4 h-4" />
-                          {errors.phone}
-                        </p>
-                      )}
-                      <p className="text-xs text-gray-500 flex items-center gap-1">
-                        <Info className="w-3 h-3" />
-                        {language === 'fr'
-                          ? 'Format international recommandé (ex: +41 79 123 45 67)'
-                          : language === 'de'
-                          ? 'Internationales Format empfohlen (z.B.: +41 79 123 45 67)'
-                          : 'International format recommended (e.g.: +41 79 123 45 67)'}
-                      </p>
-                    </div>
                   </motion.div>
                 )}
 
-                {/* Step 2: Security */}
-                {currentStep === 2 && (
+                {/* Step 3: Security */}
+                {currentStep === 3 && (
                   <motion.div
-                    key="step-2"
+                    key="step-3"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
@@ -631,8 +717,7 @@ export function RegisterPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword" className="flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-gray-600" />
+                      <Label htmlFor="confirmPassword">
                         {language === 'fr' ? 'Confirmer le mot de passe *' : language === 'de' ? 'Passwort bestätigen *' : 'Confirm Password *'}
                       </Label>
                       <div className="relative">
@@ -659,44 +744,48 @@ export function RegisterPage() {
                       )}
                     </div>
 
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-3">
-                      <div className="flex items-start gap-2">
+                    <div className="space-y-4 pt-4 border-t">
+                      <div className="flex items-start gap-3">
                         <Checkbox
                           id="acceptTerms"
                           checked={formData.acceptTerms}
                           onCheckedChange={(checked) => setFormData({ ...formData, acceptTerms: checked as boolean })}
                         />
                         <Label htmlFor="acceptTerms" className="text-sm cursor-pointer">
-                          {language === 'fr'
-                            ? 'J\'accepte les Conditions Générales d\'Utilisation *'
-                            : language === 'de'
-                            ? 'Ich akzeptiere die Allgemeinen Geschäftsbedingungen *'
-                            : 'I accept the Terms and Conditions *'}
+                          {language === 'fr' ? 'J\'accepte les' : language === 'de' ? 'Ich akzeptiere die' : 'I accept the'}{' '}
+                          <a href="/terms" className="text-blue-600 hover:underline">
+                            {language === 'fr' ? 'Conditions Générales d\'Utilisation' : language === 'de' ? 'Allgemeinen Geschäftsbedingungen' : 'Terms of Use'}
+                          </a>
                         </Label>
                       </div>
                       {errors.acceptTerms && (
-                        <p className="text-sm text-red-600 ml-6">{errors.acceptTerms}</p>
+                        <p className="text-sm text-red-600 flex items-center gap-1 ml-7">
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.acceptTerms}
+                        </p>
                       )}
 
-                      <div className="flex items-start gap-2">
+                      <div className="flex items-start gap-3">
                         <Checkbox
                           id="acceptPrivacy"
                           checked={formData.acceptPrivacy}
                           onCheckedChange={(checked) => setFormData({ ...formData, acceptPrivacy: checked as boolean })}
                         />
                         <Label htmlFor="acceptPrivacy" className="text-sm cursor-pointer">
-                          {language === 'fr'
-                            ? 'J\'accepte la Politique de Confidentialité *'
-                            : language === 'de'
-                            ? 'Ich akzeptiere die Datenschutzrichtlinie *'
-                            : 'I accept the Privacy Policy *'}
+                          {language === 'fr' ? 'J\'accepte la' : language === 'de' ? 'Ich akzeptiere die' : 'I accept the'}{' '}
+                          <a href="/privacy" className="text-blue-600 hover:underline">
+                            {language === 'fr' ? 'Politique de Confidentialité' : language === 'de' ? 'Datenschutzrichtlinie' : 'Privacy Policy'}
+                          </a>
                         </Label>
                       </div>
                       {errors.acceptPrivacy && (
-                        <p className="text-sm text-red-600 ml-6">{errors.acceptPrivacy}</p>
+                        <p className="text-sm text-red-600 flex items-center gap-1 ml-7">
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.acceptPrivacy}
+                        </p>
                       )}
 
-                      <div className="flex items-start gap-2">
+                      <div className="flex items-start gap-3">
                         <Checkbox
                           id="declareSincerity"
                           checked={formData.declareSincerity}
@@ -704,36 +793,26 @@ export function RegisterPage() {
                         />
                         <Label htmlFor="declareSincerity" className="text-sm cursor-pointer">
                           {language === 'fr'
-                            ? 'Je certifie l\'exactitude des informations fournies *'
+                            ? 'Je certifie sur l\'honneur l\'exactitude des informations fournies'
                             : language === 'de'
-                            ? 'Ich bestätige die Richtigkeit der bereitgestellten Informationen *'
-                            : 'I certify the accuracy of the information provided *'}
+                            ? 'Ich bestätige die Richtigkeit der bereitgestellten Informationen'
+                            : 'I certify the accuracy of the information provided'}
                         </Label>
                       </div>
                       {errors.declareSincerity && (
-                        <p className="text-sm text-red-600 ml-6">{errors.declareSincerity}</p>
-                      )}
-                    </div>
-
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-red-800">
-                          {language === 'fr'
-                            ? 'Toute tentative de fraude ou de création de comptes multiples entraînera la suspension immédiate et définitive de votre compte, ainsi que d\'éventuelles poursuites judiciaires.'
-                            : language === 'de'
-                            ? 'Jeder Betrugsversuch oder die Erstellung mehrerer Konten führt zur sofortigen und endgültigen Sperrung Ihres Kontos sowie zu möglichen rechtlichen Schritten.'
-                            : 'Any attempt at fraud or creating multiple accounts will result in immediate and permanent suspension of your account, as well as possible legal action.'}
+                        <p className="text-sm text-red-600 flex items-center gap-1 ml-7">
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.declareSincerity}
                         </p>
-                      </div>
+                      )}
                     </div>
                   </motion.div>
                 )}
 
-                {/* Step 3: Verification */}
-                {currentStep === 3 && (
+                {/* Step 4: Verification */}
+                {currentStep === 4 && (
                   <motion.div
-                    key="step-3"
+                    key="step-4"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
@@ -741,117 +820,67 @@ export function RegisterPage() {
                   >
                     <div className="mb-6">
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {language === 'fr' ? 'Vérification de vos coordonnées' : language === 'de' ? 'Verifizierung Ihrer Kontaktdaten' : 'Verification of Your Contact Details'}
+                        {language === 'fr' ? 'Vérification de l\'email' : language === 'de' ? 'E-Mail-Verifizierung' : 'Email Verification'}
                       </h3>
                       <p className="text-sm text-gray-600">
                         {language === 'fr'
-                          ? 'Saisissez les codes reçus par email et SMS'
+                          ? 'Entrez le code de vérification envoyé à votre adresse email'
                           : language === 'de'
-                          ? 'Geben Sie die per E-Mail und SMS erhaltenen Codes ein'
-                          : 'Enter the codes received by email and SMS'}
+                          ? 'Geben Sie den an Ihre E-Mail-Adresse gesendeten Verifizierungscode ein'
+                          : 'Enter the verification code sent to your email address'}
                       </p>
                     </div>
 
-                    {/* Email Verification */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <Mail className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {language === 'fr' ? 'Vérification email' : language === 'de' ? 'E-Mail-Verifizierung' : 'Email Verification'}
-                            </p>
-                            <p className="text-sm text-gray-600">{formData.email}</p>
-                          </div>
-                        </div>
-                        {isEmailVerified && (
-                          <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-200">
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            {language === 'fr' ? 'Vérifié' : language === 'de' ? 'Verifiziert' : 'Verified'}
-                          </Badge>
-                        )}
-                      </div>
-                      {!isEmailVerified && (
-                        <>
-                          <div className="flex gap-2">
-                            <Input
-                              placeholder={language === 'fr' ? 'Code à 6 chiffres' : language === 'de' ? '6-stelliger Code' : '6-digit code'}
-                              value={emailVerificationCode}
-                              onChange={(e) => setEmailVerificationCode(e.target.value)}
-                              maxLength={6}
-                            />
-                            <Button onClick={handleVerifyEmail} disabled={emailVerificationCode.length !== 6}>
-                              {language === 'fr' ? 'Vérifier' : language === 'de' ? 'Verifizieren' : 'Verify'}
-                            </Button>
-                          </div>
-                          <p className="text-xs text-gray-500">
-                            {language === 'fr'
-                              ? 'Code de test: 123456'
-                              : language === 'de'
-                              ? 'Testcode: 123456'
-                              : 'Test code: 123456'}
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <Mail className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium text-blue-900">
+                            {language === 'fr' ? 'Code envoyé à' : language === 'de' ? 'Code gesendet an' : 'Code sent to'}
                           </p>
-                        </>
-                      )}
+                          <p className="text-sm text-blue-700 mt-1">{formData.email}</p>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Phone Verification */}
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                            <Phone className="w-5 h-5 text-purple-600" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {language === 'fr' ? 'Vérification téléphone' : language === 'de' ? 'Telefonverifizierung' : 'Phone Verification'}
-                            </p>
-                            <p className="text-sm text-gray-600">{formData.phone}</p>
-                          </div>
-                        </div>
-                        {isPhoneVerified && (
-                          <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-200">
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            {language === 'fr' ? 'Vérifié' : language === 'de' ? 'Verifiziert' : 'Verified'}
-                          </Badge>
-                        )}
+                    <div className="space-y-2">
+                      <Label htmlFor="emailCode">
+                        {language === 'fr' ? 'Code de vérification email *' : language === 'de' ? 'E-Mail-Verifizierungscode *' : 'Email Verification Code *'}
+                      </Label>
+                      <div className="flex gap-3">
+                        <Input
+                          id="emailCode"
+                          value={emailVerificationCode}
+                          onChange={(e) => setEmailVerificationCode(e.target.value)}
+                          placeholder="123456"
+                          maxLength={6}
+                        />
+                        <Button
+                          onClick={handleVerifyEmail}
+                          disabled={isEmailVerified}
+                          variant={isEmailVerified ? 'outline' : 'default'}
+                        >
+                          {isEmailVerified ? (
+                            <>
+                              <CheckCircle2 className="w-4 h-4 mr-2" />
+                              {language === 'fr' ? 'Vérifié' : language === 'de' ? 'Verifiziert' : 'Verified'}
+                            </>
+                          ) : (
+                            language === 'fr' ? 'Vérifier' : language === 'de' ? 'Verifizieren' : 'Verify'
+                          )}
+                        </Button>
                       </div>
-                      {!isPhoneVerified && (
-                        <>
-                          <div className="flex gap-2">
-                            <Input
-                              placeholder={language === 'fr' ? 'Code à 6 chiffres' : language === 'de' ? '6-stelliger Code' : '6-digit code'}
-                              value={phoneVerificationCode}
-                              onChange={(e) => setPhoneVerificationCode(e.target.value)}
-                              maxLength={6}
-                            />
-                            <Button onClick={handleVerifyPhone} disabled={phoneVerificationCode.length !== 6}>
-                              {language === 'fr' ? 'Vérifier' : language === 'de' ? 'Verifizieren' : 'Verify'}
-                            </Button>
-                          </div>
-                          <p className="text-xs text-gray-500">
-                            {language === 'fr'
-                              ? 'Code de test: 654321'
-                              : language === 'de'
-                              ? 'Testcode: 654321'
-                              : 'Test code: 654321'}
-                          </p>
-                        </>
-                      )}
+                      <p className="text-xs text-gray-500">
+                        {language === 'fr' ? 'Code de test : 123456' : language === 'de' ? 'Testcode: 123456' : 'Test code: 123456'}
+                      </p>
                     </div>
 
-                    {isEmailVerified && isPhoneVerified && (
-                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                    {isEmailVerified && (
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                          <p className="text-sm text-emerald-800 font-medium">
-                            {language === 'fr'
-                              ? 'Vos coordonnées ont été vérifiées avec succès'
-                              : language === 'de'
-                              ? 'Ihre Kontaktdaten wurden erfolgreich verifiziert'
-                              : 'Your contact details have been successfully verified'}
+                          <CheckCircle2 className="w-5 h-5 text-green-600" />
+                          <p className="text-sm font-medium text-green-900">
+                            {language === 'fr' ? 'Email vérifié avec succès' : language === 'de' ? 'E-Mail erfolgreich verifiziert' : 'Email verified successfully'}
                           </p>
                         </div>
                       </div>
@@ -859,91 +888,33 @@ export function RegisterPage() {
                   </motion.div>
                 )}
 
-                {/* Step 4: Confirmation */}
-                {currentStep === 4 && (
+                {/* Step 5: Confirmation */}
+                {currentStep === 5 && (
                   <motion.div
-                    key="step-4"
+                    key="step-5"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="text-center space-y-6 py-8"
                   >
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                      className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center"
-                    >
-                      <CheckCircle2 className="w-16 h-16 text-white" />
-                    </motion.div>
-
+                    <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto">
+                      <CheckCircle2 className="w-12 h-12 text-white" />
+                    </div>
                     <div>
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                        {language === 'fr' ? 'Compte créé avec succès !' : language === 'de' ? 'Konto erfolgreich erstellt!' : 'Account Successfully Created!'}
+                        {language === 'fr' ? 'Compte créé avec succès !' : language === 'de' ? 'Konto erfolgreich erstellt!' : 'Account Created Successfully!'}
                       </h3>
                       <p className="text-gray-600">
                         {language === 'fr'
-                          ? `Bienvenue sur CiviAgora, ${formData.firstName} ${formData.lastName}`
+                          ? 'Bienvenue sur CiviAgora ! Vous pouvez maintenant participer aux consultations citoyennes.'
                           : language === 'de'
-                          ? `Willkommen bei CiviAgora, ${formData.firstName} ${formData.lastName}`
-                          : `Welcome to CiviAgora, ${formData.firstName} ${formData.lastName}`}
+                          ? 'Willkommen bei CiviAgora! Sie können jetzt an Bürgerkonsultationen teilnehmen.'
+                          : 'Welcome to CiviAgora! You can now participate in citizen consultations.'}
                       </p>
                     </div>
-
-                    <div className="max-w-md mx-auto space-y-4">
-                      <div className="bg-white border-2 border-emerald-200 rounded-lg p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <p className="font-medium text-gray-900">
-                            {language === 'fr' ? 'Statut du compte' : language === 'de' ? 'Kontostatus' : 'Account Status'}
-                          </p>
-                          {getAccountStatusBadge()}
-                        </div>
-                        <div className="space-y-3 text-left">
-                          <div className="flex items-center gap-2 text-sm">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            <span className="text-gray-700">
-                              {language === 'fr' ? 'Identité enregistrée' : language === 'de' ? 'Identität registriert' : 'Identity registered'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            <span className="text-gray-700">
-                              {language === 'fr' ? 'Email vérifié' : language === 'de' ? 'E-Mail verifiziert' : 'Email verified'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                            <span className="text-gray-700">
-                              {language === 'fr' ? 'Téléphone vérifié' : language === 'de' ? 'Telefon verifiziert' : 'Phone verified'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <div className="flex items-start gap-3">
-                          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                          <div className="text-left">
-                            <p className="text-sm font-medium text-blue-900 mb-1">
-                              {language === 'fr' ? 'Accès aux fonctionnalités' : language === 'de' ? 'Zugang zu Funktionen' : 'Access to Features'}
-                            </p>
-                            <p className="text-sm text-blue-800">
-                              {language === 'fr'
-                                ? 'Votre compte est vérifié et autorisé à participer aux consultations, pétitions et votes citoyens.'
-                                : language === 'de'
-                                ? 'Ihr Konto ist verifiziert und berechtigt, an Konsultationen, Petitionen und Bürgerabstimmungen teilzunehmen.'
-                                : 'Your account is verified and authorized to participate in consultations, petitions and citizen votes.'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <Button
-                        size="lg"
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                        onClick={() => window.location.href = '/'}
-                      >
-                        {language === 'fr' ? 'Accéder à la plateforme' : language === 'de' ? 'Zur Plattform gehen' : 'Access the Platform'}
-                        <ChevronRight className="w-4 h-4 ml-2" />
+                    <div className="pt-4">
+                      <Button size="lg" className="gap-2" onClick={() => navigate('/login')}>
+                        {language === 'fr' ? 'Se connecter' : language === 'de' ? 'Anmelden' : 'Sign In'}
+                        <ChevronRight className="w-4 h-4" />
                       </Button>
                     </div>
                   </motion.div>
@@ -951,8 +922,8 @@ export function RegisterPage() {
               </AnimatePresence>
 
               {/* Navigation Buttons */}
-              {currentStep < 4 && (
-                <div className="flex items-center justify-between mt-8 pt-6 border-t">
+              {currentStep < 5 && (
+                <div className="flex justify-between items-center mt-8 pt-6 border-t gap-3">
                   <Button
                     variant="outline"
                     onClick={handlePrevious}
@@ -962,23 +933,25 @@ export function RegisterPage() {
                     <ChevronLeft className="w-4 h-4" />
                     {language === 'fr' ? 'Précédent' : language === 'de' ? 'Zurück' : 'Previous'}
                   </Button>
+                  
+                  {/* Cancel button to return to home */}
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowCancelDialog(true)}
+                    className="gap-2 text-gray-600 hover:text-gray-900"
+                  >
+                    {language === 'fr' ? 'Annuler' : language === 'de' ? 'Abbrechen' : 'Cancel'}
+                  </Button>
 
-                  {currentStep === 3 ? (
-                    <Button
-                      onClick={handleSubmit}
-                      disabled={!isEmailVerified || !isPhoneVerified}
-                      className="gap-2 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700"
-                    >
-                      <ShieldCheck className="w-4 h-4" />
-                      {language === 'fr' ? 'Créer mon compte sécurisé' : language === 'de' ? 'Sicheres Konto erstellen' : 'Create My Secure Account'}
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleNext}
-                      className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    >
+                  {currentStep < 4 ? (
+                    <Button onClick={handleNext} className="gap-2">
                       {language === 'fr' ? 'Suivant' : language === 'de' ? 'Weiter' : 'Next'}
                       <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  ) : (
+                    <Button onClick={handleSubmit} className="gap-2" disabled={!isEmailVerified}>
+                      {language === 'fr' ? 'Créer mon compte' : language === 'de' ? 'Konto erstellen' : 'Create Account'}
+                      <CheckCircle2 className="w-4 h-4" />
                     </Button>
                   )}
                 </div>
@@ -986,28 +959,38 @@ export function RegisterPage() {
             </CardContent>
           </Card>
         </motion.div>
-
-        {/* Security Info Footer */}
-        {currentStep < 4 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mt-8 text-center"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200">
-              <Shield className="w-4 h-4 text-blue-600" />
-              <span className="text-sm text-gray-600">
-                {language === 'fr'
-                  ? 'Vos données sont chiffrées et sécurisées'
-                  : language === 'de'
-                  ? 'Ihre Daten sind verschlüsselt und sicher'
-                  : 'Your data is encrypted and secure'}
-              </span>
-            </div>
-          </motion.div>
-        )}
       </div>
+
+      {/* Cancel Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {language === 'fr' ? 'Annuler l\'inscription' : language === 'de' ? 'Registrierung abbrechen' : 'Cancel Registration'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {language === 'fr'
+                ? 'Êtes-vous sûr de vouloir annuler ? Toutes les données saisies seront perdues.'
+                : language === 'de'
+                ? 'Sind Sie sicher, dass Sie abbrechen möchten? Alle eingegebenen Daten gehen verloren.'
+                : 'Are you sure you want to cancel? All entered data will be lost.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {language === 'fr' ? 'Annuler' : language === 'de' ? 'Abbrechen' : 'Cancel'}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowCancelDialog(false);
+                handleCancel();
+              }}
+            >
+              {language === 'fr' ? 'Confirmer' : language === 'de' ? 'Bestätigen' : 'Confirm'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

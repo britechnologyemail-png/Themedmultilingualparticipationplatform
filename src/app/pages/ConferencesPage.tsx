@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { PageBanner } from '../components/PageBanner';
 import { PageLayout } from '../components/layout/PageLayout';
 import { KPICard } from '../components/layout/KPICard';
@@ -438,11 +438,10 @@ export function ConferencesPage() {
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {conference.speakers.filter(s => s).slice(0, 3).map((speaker, idx) => {
+                            // Speaker is a SpeakerDTO object with firstName, lastName, and id
                             const speakerName = `${speaker.firstName} ${speaker.lastName}`;
-                            const speakerId = speakerName.toLowerCase()
-                              .replace(/dr\\.\\s/gi, '')
-                              .replace(/prof\\.\\s/gi, '')
-                              .replace(/\\s+/g, '-');
+                            // Use the actual speaker ID from the DTO
+                            const speakerId = speaker.id;
                             
                             return (
                               <button

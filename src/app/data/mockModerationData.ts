@@ -1,15 +1,8 @@
-/**
- * CiviAgora Platform - Mock Moderation Data
- * 
- * Mock data for the moderation system including moderation items,
- * statistics, rules, and user reports.
- */
-
-import type {
-  ModerationItemDTO,
-  ModerationStatsDTO,
-  ModerationRuleDTO,
-  UserReportDTO
+import { 
+  ModerationItemDTO, 
+  ModerationStatsDTO, 
+  ModerationRuleDTO, 
+  UserReportDTO 
 } from '../types';
 
 // ==================== Mock Moderation Items ====================
@@ -17,202 +10,29 @@ import type {
 export const mockModerationItems: ModerationItemDTO[] = [
   {
     id: 'mod_001',
-    contentType: 'proposal',
-    contentId: 'prop_001',
-    processId: 'cons_004',
+    contentType: 'comment',
+    contentId: 'comment_001',
+    processId: 'cons_001',
     processTitle: {
-      fr: 'Plan climat 2030',
-      de: 'Klimaplan 2030',
-      en: 'Climate Plan 2030'
+      fr: 'Aménagement du Parc Central',
+      de: 'Gestaltung des Zentralparks',
+      en: 'Central Park Development'
     },
     author: {
       id: 'user_001',
-      name: 'Marie Dubois',
-      email: 'marie.dubois@email.ch',
-      avatar: 'https://i.pravatar.cc/150?img=5',
-      reputation: 92,
+      name: 'Jean Dupont',
+      email: 'jean.dupont@example.com',
+      reputation: 85,
       warningsCount: 0
     },
     content: {
-      title: {
-        fr: 'Amélioration des pistes cyclables',
-        de: 'Verbesserung der Radwege',
-        en: 'Improvement of bicycle lanes'
-      },
       text: {
-        fr: 'Je propose d\'améliorer les pistes cyclables en ajoutant des protections physiques sur les axes principaux. Cela permettrait de sécuriser les trajets quotidiens et d\'encourager davantage de citoyens à utiliser le vélo comme moyen de transport principal.',
-        de: 'Ich schlage vor, die Radwege durch Hinzufügen physischer Schutzvorrichtungen auf den Hauptachsen zu verbessern. Dies würde tägliche Fahrten sicherer machen und mehr Bürger ermutigen, das Fahrrad als Hauptverkehrsmittel zu nutzen.',
-        en: 'I propose improving bicycle lanes by adding physical protection on main routes. This would make daily commutes safer and encourage more citizens to use bicycles as their main mode of transportation.'
+        fr: 'Ce projet est complètement inutile et gaspille l\'argent public. Les responsables devraient avoir honte.',
+        de: 'Dieses Projekt ist völlig nutzlos und verschwendet öffentliche Gelder. Die Verantwortlichen sollten sich schämen.',
+        en: 'This project is completely useless and wastes public money. Those responsible should be ashamed.'
       }
     },
     status: 'pending',
-    priority: 'high',
-    themeId: 'theme_001',
-    automatedFlags: [],
-    reportsCount: 0,
-    moderationHistory: [],
-    createdAt: '2026-01-13T10:30:00Z',
-    submittedAt: '2026-01-13T10:30:00Z',
-    dueDate: '2026-01-14T10:30:00Z'
-  },
-  {
-    id: 'mod_002',
-    contentType: 'comment',
-    contentId: 'comment_002',
-    processId: 'cons_002',
-    processTitle: {
-      fr: 'Aménagement centre-ville',
-      de: 'Stadtzentrum-Gestaltung',
-      en: 'City center development'
-    },
-    author: {
-      id: 'user_002',
-      name: 'Pierre Leroy',
-      email: 'pierre.leroy@email.ch',
-      reputation: 78,
-      warningsCount: 1
-    },
-    content: {
-      text: {
-        fr: 'Le projet de parc urbain est une excellente initiative. J\'aimerais suggérer d\'y inclure des espaces de jardinage partagé pour renforcer le lien social et permettre aux citoyens de cultiver leurs propres légumes.',
-        de: 'Das Stadtparkprojekt ist eine hervorragende Initiative. Ich würde vorschlagen, Gemeinschaftsgartenbereiche einzubeziehen, um soziale Bindungen zu stärken und den Bürgern zu ermöglichen, ihr eigenes Gemüse anzubauen.',
-        en: 'The urban park project is an excellent initiative. I would like to suggest including shared gardening spaces to strengthen social bonds and allow citizens to grow their own vegetables.'
-      }
-    },
-    status: 'pending',
-    priority: 'medium',
-    themeId: 'theme_003',
-    automatedFlags: [],
-    reportsCount: 0,
-    moderationHistory: [],
-    createdAt: '2026-01-13T09:15:00Z',
-    submittedAt: '2026-01-13T09:15:00Z',
-    dueDate: '2026-01-14T09:15:00Z'
-  },
-  {
-    id: 'mod_003',
-    contentType: 'comment',
-    contentId: 'comment_003',
-    processId: 'pet_002',
-    processTitle: {
-      fr: 'Pétition pour plus d\'espaces verts',
-      de: 'Petition für mehr Grünflächen',
-      en: 'Petition for more green spaces'
-    },
-    author: {
-      id: 'user_003',
-      name: 'Jean Martin',
-      email: 'jean.martin@email.ch',
-      reputation: 45,
-      warningsCount: 2
-    },
-    content: {
-      text: {
-        fr: 'Contenu inapproprié et non constructif avec des propos offensants.',
-        de: 'Unangemessener und nicht konstruktiver Inhalt mit beleidigenden Äußerungen.',
-        en: 'Inappropriate and non-constructive content with offensive statements.'
-      }
-    },
-    status: 'flagged',
-    priority: 'urgent',
-    themeId: 'theme_003',
-    automatedFlags: [
-      {
-        ruleId: 'rule_001',
-        ruleName: {
-          fr: 'Détection de langage offensant',
-          de: 'Erkennung beleidigender Sprache',
-          en: 'Offensive language detection'
-        },
-        confidence: 87,
-        reason: {
-          fr: 'Contient des termes potentiellement offensants',
-          de: 'Enthält potenziell beleidigende Begriffe',
-          en: 'Contains potentially offensive terms'
-        }
-      }
-    ],
-    reportsCount: 3,
-    moderationHistory: [],
-    createdAt: '2026-01-13T08:45:00Z',
-    submittedAt: '2026-01-13T08:45:00Z',
-    dueDate: '2026-01-13T14:45:00Z'
-  },
-  {
-    id: 'mod_004',
-    contentType: 'proposal',
-    contentId: 'prop_004',
-    processId: 'cons_005',
-    processTitle: {
-      fr: 'Budget participatif 2027',
-      de: 'Partizipatives Budget 2027',
-      en: 'Participatory budget 2027'
-    },
-    author: {
-      id: 'user_004',
-      name: 'Claire Bernard',
-      email: 'claire.bernard@email.ch',
-      reputation: 88,
-      warningsCount: 0
-    },
-    content: {
-      title: {
-        fr: 'Extension des horaires des bibliothèques',
-        de: 'Erweiterung der Bibliotheksöffnungszeiten',
-        en: 'Extension of library hours'
-      },
-      text: {
-        fr: 'Les horaires d\'ouverture des bibliothèques devraient être étendus le week-end pour mieux servir les familles et les étudiants. Je propose une ouverture de 9h à 20h le samedi et de 10h à 18h le dimanche.',
-        de: 'Die Öffnungszeiten der Bibliotheken sollten am Wochenende erweitert werden, um Familien und Studenten besser zu bedienen. Ich schlage eine Öffnung von 9-20 Uhr samstags und 10-18 Uhr sonntags vor.',
-        en: 'Library opening hours should be extended on weekends to better serve families and students. I propose opening from 9am to 8pm on Saturdays and 10am to 6pm on Sundays.'
-      }
-    },
-    status: 'approved',
-    priority: 'low',
-    themeId: 'theme_006',
-    automatedFlags: [],
-    reportsCount: 0,
-    moderationHistory: [
-      {
-        id: 'hist_001',
-        moderatorId: 'mod_001',
-        moderatorName: 'Sophie Martin',
-        action: 'approve',
-        previousStatus: 'pending',
-        newStatus: 'approved',
-        comment: 'Proposition constructive et bien argumentée',
-        performedAt: '2026-01-12T14:20:00Z'
-      }
-    ],
-    createdAt: '2026-01-12T11:45:00Z',
-    submittedAt: '2026-01-12T11:45:00Z',
-    moderatedAt: '2026-01-12T14:20:00Z'
-  },
-  {
-    id: 'mod_005',
-    contentType: 'comment',
-    contentId: 'comment_005',
-    processId: 'cons_003',
-    processTitle: {
-      fr: 'Mobilité douce',
-      de: 'Sanfte Mobilität',
-      en: 'Soft mobility'
-    },
-    author: {
-      id: 'user_005',
-      name: 'Sophie Petit',
-      email: 'sophie.petit@email.ch',
-      reputation: 34,
-      warningsCount: 4
-    },
-    content: {
-      text: {
-        fr: 'C\'est n\'importe quoi ce projet !!! Personne n\'utilisera ces pistes cyclables inutiles',
-        de: 'Dieses Projekt ist kompletter Unsinn!!! Niemand wird diese nutzlosen Radwege nutzen',
-        en: 'This project is nonsense!!! Nobody will use these useless bike lanes'
-      }
-    },
-    status: 'rejected',
     priority: 'high',
     themeId: 'theme_001',
     automatedFlags: [
@@ -223,139 +43,85 @@ export const mockModerationItems: ModerationItemDTO[] = [
           de: 'Nicht konstruktiver Inhalt',
           en: 'Non-constructive content'
         },
-        confidence: 92,
+        confidence: 82,
         reason: {
-          fr: 'Ton agressif et absence d\'argumentation',
-          de: 'Aggressiver Ton und fehlende Argumentation',
-          en: 'Aggressive tone and lack of argumentation'
+          fr: 'Le commentaire contient des termes négatifs sans proposition constructive',
+          de: 'Der Kommentar enthält negative Begriffe ohne konstruktiven Vorschlag',
+          en: 'The comment contains negative terms without constructive proposal'
         }
       }
     ],
     reportsCount: 2,
-    moderationHistory: [
-      {
-        id: 'hist_002',
-        moderatorId: 'mod_002',
-        moderatorName: 'Marc Dubois',
-        action: 'reject',
-        previousStatus: 'flagged',
-        newStatus: 'rejected',
-        reason: {
-          fr: 'Contenu ne respectant pas la charte de participation citoyenne',
-          de: 'Inhalt entspricht nicht der Bürgerbeteiligungscharta',
-          en: 'Content does not comply with citizen participation charter'
-        },
-        comment: 'Ton non constructif et absence d\'argumentation factuelle',
-        performedAt: '2026-01-12T15:30:00Z'
-      }
-    ],
-    createdAt: '2026-01-12T13:00:00Z',
-    submittedAt: '2026-01-12T13:00:00Z',
-    moderatedAt: '2026-01-12T15:30:00Z'
+    moderationHistory: [],
+    createdAt: '2026-01-13T10:30:00Z',
+    submittedAt: '2026-01-13T10:30:00Z',
+    dueDate: '2026-01-14T10:30:00Z'
   },
   {
-    id: 'mod_006',
-    contentType: 'petition',
-    contentId: 'pet_006',
+    id: 'mod_002',
+    contentType: 'proposal',
+    contentId: 'prop_012',
+    processId: 'cons_002',
+    processTitle: {
+      fr: 'Mobilité douce au centre-ville',
+      de: 'Sanfte Mobilität in der Innenstadt',
+      en: 'Soft mobility in the city center'
+    },
     author: {
-      id: 'user_006',
-      name: 'Lucas Moreau',
-      email: 'lucas.moreau@email.ch',
-      reputation: 95,
+      id: 'user_002',
+      name: 'Marie Lambert',
+      email: 'marie.lambert@example.com',
+      reputation: 92,
       warningsCount: 0
     },
     content: {
       title: {
-        fr: 'Installation de bornes de recharge électrique',
-        de: 'Installation von Elektroladestationen',
-        en: 'Installation of electric charging stations'
+        fr: 'Création de pistes cyclables protégées',
+        de: 'Schaffung geschützter Radwege',
+        en: 'Creation of protected bike lanes'
       },
       text: {
-        fr: 'Il faudrait installer plus de bornes de recharge électrique dans les parkings publics pour encourager la mobilité verte et faciliter la transition vers les véhicules électriques.',
-        de: 'Es sollten mehr Elektroladestationen in öffentlichen Parkplätzen installiert werden, um grüne Mobilität zu fördern und den Übergang zu Elektrofahrzeugen zu erleichtern.',
-        en: 'More electric charging stations should be installed in public parking lots to encourage green mobility and facilitate the transition to electric vehicles.'
-      }
-    },
-    status: 'approved',
-    priority: 'medium',
-    themeId: 'theme_003',
-    automatedFlags: [],
-    reportsCount: 0,
-    moderationHistory: [
-      {
-        id: 'hist_003',
-        moderatorId: 'mod_001',
-        moderatorName: 'Sophie Martin',
-        action: 'approve',
-        previousStatus: 'pending',
-        newStatus: 'approved',
-        performedAt: '2026-01-11T16:45:00Z'
-      }
-    ],
-    createdAt: '2026-01-11T14:30:00Z',
-    submittedAt: '2026-01-11T14:30:00Z',
-    moderatedAt: '2026-01-11T16:45:00Z'
-  },
-  {
-    id: 'mod_007',
-    contentType: 'annotation',
-    contentId: 'ann_007',
-    processId: 'leg_cons_001',
-    processTitle: {
-      fr: 'Loi sur la protection des données - Consultation',
-      de: 'Datenschutzgesetz - Konsultation',
-      en: 'Data Protection Act - Consultation'
-    },
-    author: {
-      id: 'user_007',
-      name: 'Emma Rousseau',
-      email: 'emma.rousseau@email.ch',
-      reputation: 82,
-      warningsCount: 0
-    },
-    content: {
-      text: {
-        fr: 'L\'article 3 devrait inclure une clause spécifique pour la protection des données des mineurs, avec des mécanismes de consentement parental renforcés.',
-        de: 'Artikel 3 sollte eine spezifische Klausel zum Schutz der Daten von Minderjährigen enthalten, mit verstärkten Mechanismen für die elterliche Zustimmung.',
-        en: 'Article 3 should include a specific clause for the protection of minors\' data, with reinforced parental consent mechanisms.'
+        fr: 'Je propose la création de pistes cyclables séparées et protégées le long des axes principaux du centre-ville, avec une signalisation claire et des zones de stationnement sécurisées pour vélos.',
+        de: 'Ich schlage die Schaffung separater und geschützter Radwege entlang der Hauptachsen der Innenstadt vor, mit klarer Beschilderung und sicheren Fahrradparkzonen.',
+        en: 'I propose the creation of separate and protected bike lanes along the main axes of the city center, with clear signage and secure bike parking areas.'
       }
     },
     status: 'pending',
-    priority: 'medium',
-    themeId: 'theme_008',
+    priority: 'low',
+    themeId: 'theme_002',
     automatedFlags: [],
     reportsCount: 0,
     moderationHistory: [],
-    createdAt: '2026-01-13T07:20:00Z',
-    submittedAt: '2026-01-13T07:20:00Z',
-    dueDate: '2026-01-14T07:20:00Z'
+    createdAt: '2026-01-13T09:15:00Z',
+    submittedAt: '2026-01-13T09:15:00Z',
+    dueDate: '2026-01-14T09:15:00Z'
   },
   {
-    id: 'mod_008',
+    id: 'mod_003',
     contentType: 'signalement',
-    contentId: 'sig_008',
+    contentId: 'sig_005',
     author: {
-      id: 'user_008',
-      name: 'Thomas Blanc',
-      email: 'thomas.blanc@email.ch',
-      reputation: 91,
-      warningsCount: 0
+      id: 'user_003',
+      name: 'Pierre Martin',
+      email: 'pierre.martin@example.com',
+      reputation: 78,
+      warningsCount: 1
     },
     content: {
       title: {
-        fr: 'Sécurité aux abords des écoles',
-        de: 'Sicherheit in Schulnähe',
-        en: 'Safety near schools'
+        fr: 'Danger sur le passage piéton Rue de la Gare',
+        de: 'Gefahr am Fußgängerüberweg Bahnhofstraße',
+        en: 'Danger at the pedestrian crossing on Station Street'
       },
       text: {
-        fr: 'La sécurité aux abords des écoles doit être renforcée avec des zones 30 et plus de passages piétons. J\'ai constaté plusieurs situations dangereuses le matin lors de la dépose des enfants.',
-        de: 'Die Sicherheit in Schulnähe muss mit Tempo-30-Zonen und mehr Fußgängerüberwegen verstärkt werden. Ich habe mehrere gefährliche Situationen morgens beim Absetzen der Kinder beobachtet.',
-        en: 'Safety near schools must be reinforced with 30 km/h zones and more pedestrian crossings. I have observed several dangerous situations in the morning during school drop-off.'
+        fr: 'Le passage piéton devant la gare est très dangereux, surtout pour les enfants. Plusieurs accidents ont eu lieu. URGENT : action immédiate nécessaire pour la sécurité des enfants !',
+        de: 'Der Fußgängerüberweg vor dem Bahnhof ist sehr gefährlich, besonders für Kinder. Mehrere Unfälle sind passiert. DRINGEND: Sofortiges Handeln für die Sicherheit der Kinder erforderlich!',
+        en: 'The pedestrian crossing in front of the station is very dangerous, especially for children. Several accidents have occurred. URGENT: immediate action needed for child safety!'
       }
     },
-    status: 'escalated',
+    status: 'pending',
     priority: 'urgent',
-    themeId: 'theme_001',
+    themeId: 'theme_002',
     automatedFlags: [
       {
         ruleId: 'rule_003',
@@ -366,61 +132,256 @@ export const mockModerationItems: ModerationItemDTO[] = [
         },
         confidence: 95,
         reason: {
-          fr: 'Signalement concernant la sécurité des enfants',
-          de: 'Meldung bezüglich Kindersicherheit',
-          en: 'Report regarding children\'s safety'
+          fr: 'Signalement concernant la sécurité publique et les enfants',
+          de: 'Meldung zur öffentlichen Sicherheit und Kinder',
+          en: 'Report concerning public safety and children'
         }
       }
     ],
     reportsCount: 0,
-    moderationHistory: [
-      {
-        id: 'hist_004',
-        moderatorId: 'mod_001',
-        moderatorName: 'Sophie Martin',
-        action: 'escalate',
-        previousStatus: 'pending',
-        newStatus: 'escalated',
-        comment: 'Signalement urgent concernant la sécurité des enfants - transmission au service de la mobilité',
-        performedAt: '2026-01-13T06:15:00Z'
-      }
-    ],
-    assignedTo: {
-      id: 'admin_001',
-      name: 'Direction de la mobilité'
-    },
-    createdAt: '2026-01-13T05:45:00Z',
-    submittedAt: '2026-01-13T05:45:00Z',
-    moderatedAt: '2026-01-13T06:15:00Z',
+    moderationHistory: [],
+    createdAt: '2026-01-13T07:45:00Z',
+    submittedAt: '2026-01-13T07:45:00Z',
     dueDate: '2026-01-13T11:45:00Z'
   },
   {
-    id: 'mod_009',
-    contentType: 'proposal',
-    contentId: 'prop_009',
-    processId: 'cons_007',
+    id: 'mod_004',
+    contentType: 'comment',
+    contentId: 'comment_002',
+    processId: 'vote_001',
     processTitle: {
-      fr: 'Développement culturel 2026',
-      de: 'Kulturelle Entwicklung 2026',
-      en: 'Cultural Development 2026'
+      fr: 'Budget participatif 2026',
+      de: 'Bürgerhaushalt 2026',
+      en: 'Participatory budget 2026'
     },
     author: {
-      id: 'user_009',
-      name: 'Antoine Leroux',
-      email: 'antoine.leroux@email.ch',
-      reputation: 76,
+      id: 'user_004',
+      name: 'Sophie Dubois',
+      email: 'sophie.dubois@example.com',
+      reputation: 65,
+      warningsCount: 2
+    },
+    content: {
+      text: {
+        fr: 'CLIQUEZ ICI pour gagner de l\'argent facilement! www.spam-site.com - Crypto monnaie garantie!',
+        de: 'KLICKEN SIE HIER, um leicht Geld zu verdienen! www.spam-site.com - Kryptowährung garantiert!',
+        en: 'CLICK HERE to earn money easily! www.spam-site.com - Cryptocurrency guaranteed!'
+      }
+    },
+    status: 'flagged',
+    priority: 'high',
+    automatedFlags: [
+      {
+        ruleId: 'rule_004',
+        ruleName: {
+          fr: 'Détection de spam',
+          de: 'Spam-Erkennung',
+          en: 'Spam detection'
+        },
+        confidence: 98,
+        reason: {
+          fr: 'Contenu identifié comme spam avec lien suspect',
+          de: 'Inhalt als Spam mit verdächtigem Link identifiziert',
+          en: 'Content identified as spam with suspicious link'
+        }
+      }
+    ],
+    reportsCount: 3,
+    moderationHistory: [],
+    createdAt: '2026-01-13T06:20:00Z',
+    submittedAt: '2026-01-13T06:20:00Z',
+    dueDate: '2026-01-14T06:20:00Z'
+  },
+  {
+    id: 'mod_005',
+    contentType: 'petition',
+    contentId: 'pet_003',
+    author: {
+      id: 'user_005',
+      name: 'Luc Bernard',
+      email: 'luc.bernard@example.com',
+      reputation: 88,
       warningsCount: 0
     },
     content: {
       title: {
-        fr: 'Création d\'un festival de musique en plein air',
-        de: 'Schaffung eines Freiluft-Musikfestivals',
-        en: 'Creation of an outdoor music festival'
+        fr: 'Pour une alimentation bio dans les cantines scolaires',
+        de: 'Für Bio-Lebensmittel in Schulkantinen',
+        en: 'For organic food in school canteens'
       },
       text: {
-        fr: 'Je propose la création d\'un festival de musique en plein air annuel pour dynamiser la vie culturelle locale et attirer des visiteurs. Cela pourrait se tenir dans le parc central avec des scènes multiples.',
-        de: 'Ich schlage die Schaffung eines jährlichen Freiluft-Musikfestivals vor, um das lokale Kulturleben zu beleben und Besucher anzuziehen. Es könnte im Zentralpark mit mehreren Bühnen stattfinden.',
-        en: 'I propose the creation of an annual outdoor music festival to boost local cultural life and attract visitors. This could be held in the central park with multiple stages.'
+        fr: 'Nous demandons l\'introduction progressive d\'aliments biologiques et locaux dans toutes les cantines scolaires de la commune, avec un objectif de 50% de produits bio d\'ici 2027.',
+        de: 'Wir fordern die schrittweise Einführung von biologischen und lokalen Lebensmitteln in allen Schulkantinen der Gemeinde, mit einem Ziel von 50% Bio-Produkten bis 2027.',
+        en: 'We demand the gradual introduction of organic and local food in all school canteens in the municipality, with a target of 50% organic products by 2027.'
+      }
+    },
+    status: 'pending',
+    priority: 'medium',
+    themeId: 'theme_003',
+    automatedFlags: [],
+    reportsCount: 0,
+    moderationHistory: [],
+    createdAt: '2026-01-13T08:30:00Z',
+    submittedAt: '2026-01-13T08:30:00Z',
+    dueDate: '2026-01-14T08:30:00Z'
+  },
+  {
+    id: 'mod_006',
+    contentType: 'annotation',
+    contentId: 'annot_008',
+    processId: 'leg_001',
+    processTitle: {
+      fr: 'Projet de loi Transition Énergétique 2026',
+      de: 'Gesetzentwurf Energiewende 2026',
+      en: 'Energy Transition Bill 2026'
+    },
+    author: {
+      id: 'user_006',
+      name: 'Claire Rousseau',
+      email: 'claire.rousseau@example.com',
+      reputation: 91,
+      warningsCount: 0
+    },
+    content: {
+      text: {
+        fr: 'Cet article devrait préciser les mécanismes de financement pour les ménages à revenus modestes qui souhaitent installer des panneaux solaires.',
+        de: 'Dieser Artikel sollte die Finanzierungsmechanismen für Haushalte mit geringem Einkommen präzisieren, die Solarmodule installieren möchten.',
+        en: 'This article should specify the financing mechanisms for low-income households who wish to install solar panels.'
+      }
+    },
+    status: 'pending',
+    priority: 'low',
+    themeId: 'theme_004',
+    automatedFlags: [],
+    reportsCount: 0,
+    moderationHistory: [],
+    createdAt: '2026-01-13T11:00:00Z',
+    submittedAt: '2026-01-13T11:00:00Z',
+    dueDate: '2026-01-14T11:00:00Z'
+  },
+  {
+    id: 'mod_007',
+    contentType: 'comment',
+    contentId: 'comment_003',
+    processId: 'cons_003',
+    processTitle: {
+      fr: 'Stratégie culturelle municipale',
+      de: 'Kommunale Kulturstrategie',
+      en: 'Municipal cultural strategy'
+    },
+    author: {
+      id: 'user_007',
+      name: 'Thomas Moreau',
+      email: 'thomas.moreau@example.com',
+      reputation: 72,
+      warningsCount: 1
+    },
+    content: {
+      text: {
+        fr: 'Les propositions sont ridicules et montrent une incompétence totale. Vous êtes tous des idiots qui ne comprenez rien à la culture.',
+        de: 'Die Vorschläge sind lächerlich und zeigen völlige Inkompetenz. Sie sind alle Idioten, die nichts von Kultur verstehen.',
+        en: 'The proposals are ridiculous and show total incompetence. You are all idiots who understand nothing about culture.'
+      }
+    },
+    status: 'flagged',
+    priority: 'urgent',
+    automatedFlags: [
+      {
+        ruleId: 'rule_001',
+        ruleName: {
+          fr: 'Détection de langage offensant',
+          de: 'Erkennung beleidigender Sprache',
+          en: 'Offensive language detection'
+        },
+        confidence: 96,
+        reason: {
+          fr: 'Langage offensant et injurieux détecté',
+          de: 'Beleidigende und verletzende Sprache erkannt',
+          en: 'Offensive and insulting language detected'
+        }
+      }
+    ],
+    reportsCount: 5,
+    moderationHistory: [],
+    createdAt: '2026-01-13T09:00:00Z',
+    submittedAt: '2026-01-13T09:00:00Z',
+    dueDate: '2026-01-13T13:00:00Z'
+  },
+  {
+    id: 'mod_008',
+    contentType: 'comment',
+    contentId: 'comment_004',
+    processId: 'cons_001',
+    processTitle: {
+      fr: 'Aménagement du Parc Central',
+      de: 'Gestaltung des Zentralparks',
+      en: 'Central Park Development'
+    },
+    author: {
+      id: 'user_008',
+      name: 'Isabelle Petit',
+      email: 'isabelle.petit@example.com',
+      reputation: 94,
+      warningsCount: 0
+    },
+    content: {
+      text: {
+        fr: 'OK',
+        de: 'OK',
+        en: 'OK'
+      }
+    },
+    status: 'pending',
+    priority: 'low',
+    automatedFlags: [
+      {
+        ruleId: 'rule_005',
+        ruleName: {
+          fr: 'Contenu trop court',
+          de: 'Zu kurzer Inhalt',
+          en: 'Content too short'
+        },
+        confidence: 100,
+        reason: {
+          fr: 'Contenu trop court pour être constructif (moins de 20 caractères)',
+          de: 'Inhalt zu kurz, um konstruktiv zu sein (weniger als 20 Zeichen)',
+          en: 'Content too short to be constructive (less than 20 characters)'
+        }
+      }
+    ],
+    reportsCount: 0,
+    moderationHistory: [],
+    createdAt: '2026-01-13T10:10:00Z',
+    submittedAt: '2026-01-13T10:10:00Z',
+    dueDate: '2026-01-14T10:10:00Z'
+  },
+  {
+    id: 'mod_009',
+    contentType: 'proposal',
+    contentId: 'prop_013',
+    processId: 'cons_004',
+    processTitle: {
+      fr: 'Plan numérique municipal',
+      de: 'Kommunaler Digitalplan',
+      en: 'Municipal digital plan'
+    },
+    author: {
+      id: 'user_009',
+      name: 'Antoine Garnier',
+      email: 'antoine.garnier@example.com',
+      reputation: 86,
+      warningsCount: 0
+    },
+    content: {
+      title: {
+        fr: 'WiFi public gratuit dans tous les espaces publics',
+        de: 'Kostenloses öffentliches WLAN in allen öffentlichen Räumen',
+        en: 'Free public WiFi in all public spaces'
+      },
+      text: {
+        fr: 'Installation de bornes WiFi gratuites et sécurisées dans tous les parcs, places publiques et bâtiments municipaux pour garantir l\'accès numérique à tous les citoyens.',
+        de: 'Installation von kostenlosen und sicheren WLAN-Hotspots in allen Parks, öffentlichen Plätzen und Gemeindegebäuden, um allen Bürgern digitalen Zugang zu garantieren.',
+        en: 'Installation of free and secure WiFi hotspots in all parks, public squares and municipal buildings to guarantee digital access to all citizens.'
       }
     },
     status: 'pending',
@@ -429,25 +390,25 @@ export const mockModerationItems: ModerationItemDTO[] = [
     automatedFlags: [],
     reportsCount: 0,
     moderationHistory: [],
-    createdAt: '2026-01-13T06:10:00Z',
-    submittedAt: '2026-01-13T06:10:00Z',
-    dueDate: '2026-01-15T06:10:00Z'
+    createdAt: '2026-01-13T07:20:00Z',
+    submittedAt: '2026-01-13T07:20:00Z',
+    dueDate: '2026-01-14T07:20:00Z'
   },
   {
     id: 'mod_010',
     contentType: 'comment',
-    contentId: 'comment_010',
-    processId: 'vote_003',
+    contentId: 'comment_005',
+    processId: 'vote_002',
     processTitle: {
-      fr: 'Vote sur le budget 2027',
-      de: 'Abstimmung zum Budget 2027',
-      en: 'Vote on 2027 budget'
+      fr: 'Référendum déchets et recyclage',
+      de: 'Referendum Abfall und Recycling',
+      en: 'Waste and recycling referendum'
     },
     author: {
       id: 'user_010',
-      name: 'Isabelle Moreau',
-      email: 'isabelle.moreau@email.ch',
-      reputation: 91,
+      name: 'Sandrine Leroy',
+      email: 'sandrine.leroy@example.com',
+      reputation: 79,
       warningsCount: 0
     },
     content: {

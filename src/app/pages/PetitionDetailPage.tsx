@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router';
 import { useLanguage } from '../contexts/LanguageContext';
 import { usePetition, useTheme } from '../hooks/useApi';
 import { ThemeTag } from '../components/ThemeTag';
+import { ShareButton } from '../components/ShareButton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -19,10 +20,10 @@ import {
   MapPin, 
   Target, 
   Clock, 
-  Share2,
   CheckCircle2,
   TrendingUp,
   Mail,
+  Share2,
   Facebook,
   Twitter,
   Linkedin
@@ -130,7 +131,7 @@ export function PetitionDetailPage() {
     });
   };
 
-  const handleShare = (platform?: string) => {
+  const handleShare = async (platform?: string) => {
     const url = window.location.href;
     const text = tLocal(petition.title);
 
@@ -143,19 +144,37 @@ export function PetitionDetailPage() {
     } else if (platform === 'email') {
       window.location.href = `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(url)}`;
     } else {
-      if (navigator.share) {
-        navigator.share({
-          title: tLocal(petition.title),
-          text: tLocal(petition.description),
-          url: url
-        });
-      } else {
-        navigator.clipboard.writeText(url);
+      // Essayer de copier dans le presse-papiers
+      try {
+        await navigator.clipboard.writeText(url);
         toast.success(
           language === 'fr' ? 'Lien copié dans le presse-papiers' :
           language === 'de' ? 'Link in die Zwischenablage kopiert' :
           'Link copied to clipboard'
         );
+      } catch (err) {
+        // Fallback: créer un élément temporaire pour copier
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          toast.success(
+            language === 'fr' ? 'Lien copié dans le presse-papiers' :
+            language === 'de' ? 'Link in die Zwischenablage kopiert' :
+            'Link copied to clipboard'
+          );
+        } catch (fallbackErr) {
+          toast.error(
+            language === 'fr' ? 'Impossible de copier le lien' :
+            language === 'de' ? 'Link konnte nicht kopiert werden' :
+            'Could not copy link'
+          );
+        }
+        document.body.removeChild(textArea);
       }
     }
     setShowShareMenu(false);

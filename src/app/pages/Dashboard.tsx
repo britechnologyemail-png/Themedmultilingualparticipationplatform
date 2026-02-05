@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { useLanguage } from "../contexts/LanguageContext";
 import { PageBanner } from "../components/PageBanner";
 import { PageLayout } from "../components/layout/PageLayout";
@@ -7,7 +7,6 @@ import { KPICard } from "../components/layout/KPICard";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { IVRAccessBanner } from "../components/IVRAccessBanner";
 import {
   MessageSquare,
   Users,
@@ -143,11 +142,6 @@ export function Dashboard() {
               variant={stat.variant}
             />
           ))}
-        </div>
-
-        {/* IVR Access Banner */}
-        <div className="mb-12">
-          <IVRAccessBanner />
         </div>
 
         {/* Themes Overview - Moved here after KPI cards */}

@@ -62,6 +62,10 @@ export function EditUserDialog({ open, onOpenChange, user, onSubmit }: EditUserD
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleCancel = () => {
+    onOpenChange(false);
+  };
+
   if (!user) return null;
 
   return (
@@ -257,7 +261,7 @@ export function EditUserDialog({ open, onOpenChange, user, onSubmit }: EditUserD
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={handleCancel}>
               {language === 'fr' ? 'Annuler' :
                language === 'de' ? 'Abbrechen' :
                'Cancel'}

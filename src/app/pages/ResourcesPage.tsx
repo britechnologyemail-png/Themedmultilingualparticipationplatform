@@ -15,7 +15,7 @@ import {
   Download,
   ExternalLink
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 export function ResourcesPage() {
   const { t, language } = useLanguage();

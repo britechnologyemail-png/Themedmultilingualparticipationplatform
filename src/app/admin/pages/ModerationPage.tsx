@@ -52,6 +52,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Checkbox } from '../../components/ui/checkbox';
 import { toast } from 'sonner';
+import { ModerationGuideDialog } from '../components/dialogs/ModerationGuideDialog';
+import { ExamineModerationDialog } from '../components/dialogs/ExamineModerationDialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../components/ui/dialog';
 
 // Import hooks
 import {
@@ -75,6 +85,8 @@ export function ModerationPage() {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [showBulkActionDialog, setShowBulkActionDialog] = useState(false);
   const [bulkAction, setBulkAction] = useState<'approve' | 'reject' | 'flag'>('approve');
+  const [showGuideDialog, setShowGuideDialog] = useState(false);
+  const [showExamineDialog, setShowExamineDialog] = useState(false);
 
   // Build filters
   const filters: ModerationFilterDTO = {
@@ -264,6 +276,30 @@ export function ModerationPage() {
     }
   };
 
+  // Helper functions for ExamineModerationDialog
+  const handleDialogApprove = async (itemId: string, comment?: string) => {
+    await performAction.mutateAsync({
+      itemId,
+      action: 'approve',
+      comment,
+      notifyAuthor: true
+    });
+  };
+
+  const handleDialogReject = async (itemId: string, comment: string) => {
+    await performAction.mutateAsync({
+      itemId,
+      action: 'reject',
+      reason: {
+        fr: comment,
+        de: comment,
+        en: comment
+      },
+      comment,
+      notifyAuthor: true
+    });
+  };
+
   const handleBulkAction = async () => {
     if (selectedItems.size === 0) return;
 
@@ -346,7 +382,11 @@ export function ModerationPage() {
                `Process ${selectedItems.size} selection(s)`}
             </Button>
           )}
-          <Button variant="outline" className="gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => setShowGuideDialog(true)}
+          >
             <Shield className="w-4 h-4" />
             {language === 'fr' ? 'Guide de modération' :
              language === 'de' ? 'Moderationsleitfaden' :
@@ -652,7 +692,10 @@ export function ModerationPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setSelectedItem(item)}
+                                onClick={() => {
+                                  setSelectedItem(item);
+                                  setShowExamineDialog(true);
+                                }}
                                 className="gap-2"
                               >
                                 <Eye className="w-4 h-4" />
@@ -984,6 +1027,29 @@ export function ModerationPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Moderation Guide Dialog */}
+      <ModerationGuideDialog
+        open={showGuideDialog}
+        onOpenChange={setShowGuideDialog}
+        language={language}
+      />
+
+      {/* Examine Moderation Dialog */}
+      <ExamineModerationDialog
+        open={showExamineDialog}
+        onOpenChange={(open) => {
+          setShowExamineDialog(open);
+          if (!open) {
+            setSelectedItem(null);
+          }
+        }}
+        item={selectedItem}
+        language={language}
+        onApprove={handleDialogApprove}
+        onReject={handleDialogReject}
+        isProcessing={performAction.isPending}
+      />
     </div>
   );
 }

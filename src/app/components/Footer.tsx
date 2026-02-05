@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import { 
   Users, 
   Mail, 
@@ -17,13 +18,74 @@ import {
   CircleHelp,
   Settings
 } from 'lucide-react';
+import { DynamicFooterMenu } from './DynamicFooterMenu';
 
 export function Footer() {
   const { t, language } = useLanguage();
 
+  // Fonction de partage sur les réseaux sociaux
+  const handleSocialShare = (platform: string) => {
+    const currentUrl = window.location.href;
+    const pageTitle = document.title;
+    const encodedUrl = encodeURIComponent(currentUrl);
+    const encodedTitle = encodeURIComponent(pageTitle);
+
+    switch (platform) {
+      case 'facebook':
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+          '_blank',
+          'width=600,height=400'
+        );
+        toast.success(
+          language === 'fr' ? 'Partage sur Facebook ouvert' :
+          language === 'de' ? 'Facebook-Freigabe geöffnet' :
+          'Facebook share opened'
+        );
+        break;
+      case 'twitter':
+        window.open(
+          `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+          '_blank',
+          'width=600,height=400'
+        );
+        toast.success(
+          language === 'fr' ? 'Partage sur Twitter ouvert' :
+          language === 'de' ? 'Twitter-Freigabe geöffnet' :
+          'Twitter share opened'
+        );
+        break;
+      case 'linkedin':
+        window.open(
+          `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+          '_blank',
+          'width=600,height=400'
+        );
+        toast.success(
+          language === 'fr' ? 'Partage sur LinkedIn ouvert' :
+          language === 'de' ? 'LinkedIn-Freigabe geöffnet' :
+          'LinkedIn share opened'
+        );
+        break;
+      case 'instagram':
+        // Instagram ne permet pas le partage direct via URL
+        // On affiche un message invitant à partager manuellement
+        toast.info(
+          language === 'fr' ? '📸 Instagram : Partagez cette page manuellement dans votre story !' :
+          language === 'de' ? '📸 Instagram: Teilen Sie diese Seite manuell in Ihrer Story!' :
+          '📸 Instagram: Share this page manually in your story!',
+          {
+            duration: 5000
+          }
+        );
+        break;
+    }
+  };
+
   const footerLinks = {
     platform: [
       { label: t('nav.consultations'), path: '/consultations' },
+      { label: t('nav.legislativeConsultations'), path: '/legislative-consultations' },
       { label: t('nav.assemblies'), path: '/assemblies' },
       { label: t('nav.petitions'), path: '/petitions' },
       { label: t('nav.conferences'), path: '/conferences' },
@@ -36,15 +98,7 @@ export function Footer() {
       { label: t('footer.howItWorks'), path: '/how-it-works' },
       { label: t('footer.faq'), path: '/faq' },
       { label: t('footer.guides'), path: '/guides' },
-      { label: t('footer.support'), path: '/support' },
-      { label: t('footer.ivrAccess') || 'Accès téléphonique (IVR)', path: '/ivr-access' },
-    ],
-    legal: [
-      { label: t('footer.legal'), path: '/legal-notice' },
-      { label: t('footer.privacy'), path: '/privacy' },
-      { label: t('footer.terms'), path: '/terms' },
-      { label: t('footer.accessibility'), path: '/accessibility' },
-      { label: t('footer.cookies'), path: '/cookies' },
+      { label: t('footer.organizationProfile'), path: '/organization' },
     ],
   };
 
@@ -78,6 +132,9 @@ export function Footer() {
 
   return (
     <footer className="bg-gray-900 text-gray-300 mt-16">
+      {/* Dynamic Horizontal Menu */}
+      <DynamicFooterMenu />
+      
       {/* Centered Container with max-width */}
       <div className="w-full flex justify-center">
         <div className="w-full max-w-[1400px] px-6 lg:px-8 py-12">
@@ -95,17 +152,12 @@ export function Footer() {
                   <Users className="w-5 h-5 text-white" />
                 </div>
                 <motion.h3 
-                  className="font-bold text-xl bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent bg-[length:200%_auto]"
-                  animate={{
-                    backgroundPosition: ["0% center", "200% center", "0% center"],
-                  }}
-                  transition={{
-                    duration: 5,
-                    repeat: Infinity,
-                    ease: "linear"
-                  }}
+                  className="text-2xl font-bold mb-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
                 >
-                  CiviAgora
+                  CiviX
                 </motion.h3>
               </div>
               <p className="text-sm text-gray-400 mb-4">
@@ -114,8 +166,8 @@ export function Footer() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-blue-400" />
-                  <a href="mailto:contact@civiagora.ch" className="hover:text-blue-400 transition-colors">
-                    contact@civiagora.ch
+                  <a href="mailto:contact@civix.ch" className="hover:text-blue-400 transition-colors">
+                    contact@civix.ch
                   </a>
                 </div>
                 <div className="flex items-center gap-2">
@@ -171,26 +223,15 @@ export function Footer() {
               </ul>
             </motion.div>
 
-            {/* Legal & Newsletter */}
+            {/* Newsletter */}
             <motion.div variants={itemVariants}>
-              <h4 className="font-semibold text-white mb-4">{t('footer.legal')}</h4>
-              <ul className="space-y-2 mb-6">
-                {footerLinks.legal.map((link) => (
-                  <li key={link.label}>
-                    <Link 
-                      to={link.path} 
-                      className="text-sm hover:text-blue-400 transition-colors flex items-center gap-1 group"
-                    >
-                      <span className="w-0 h-0.5 bg-blue-400 group-hover:w-2 transition-all duration-300"></span>
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Newsletter */}
+              <h4 className="font-semibold text-white mb-4">{t('footer.newsletter')}</h4>
               <div>
-                <h5 className="font-semibold text-white text-sm mb-2">{t('footer.newsletter')}</h5>
+                <p className="text-sm text-gray-400 mb-4">
+                  {language === 'fr' ? 'Restez informé de l\'actualité démocratique' : 
+                   language === 'de' ? 'Bleiben Sie über demokratische Neuigkeiten informiert' : 
+                   'Stay informed about democratic news'}
+                </p>
                 <Link to="/newsletter">
                   <div className="flex gap-2">
                     <input 
@@ -225,16 +266,19 @@ export function Footer() {
                 {socialLinks.map((social) => {
                   const Icon = social.icon;
                   return (
-                    <motion.a
+                    <motion.button
                       key={social.label}
-                      href={social.href}
                       aria-label={social.label}
-                      className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center hover:bg-blue-600 transition-colors"
+                      className="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       whileTap={{ scale: 0.9 }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleSocialShare(social.label.toLowerCase());
+                      }}
                     >
                       <Icon className="w-5 h-5" />
-                    </motion.a>
+                    </motion.button>
                   );
                 })}
               </motion.div>
@@ -248,7 +292,7 @@ export function Footer() {
                 transition={{ delay: 0.3 }}
               >
                 <p className="flex items-center justify-center md:justify-end gap-1">
-                  © 2025 CiviAgora • {t('footer.madeWith')} 
+                  © 2025 CiviX • {t('footer.madeWith')} 
                   <Heart className="w-4 h-4 text-red-500 inline animate-pulse" /> 
                   {t('footer.forCitizens')}
                 </p>

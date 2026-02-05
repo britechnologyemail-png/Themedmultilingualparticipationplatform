@@ -1,10 +1,10 @@
 /**
- * MobileMenu - Menu mobile responsive pour CiviAgora
+ * MobileMenu - Menu mobile responsive pour CiviX
  * Utilise Sheet (Radix UI) pour un menu latéral élégant avec icônes et routing visible
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import {

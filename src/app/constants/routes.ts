@@ -1,5 +1,5 @@
 /**
- * CiviAgora - Routes Documentation
+ * CiviX - Routes Documentation
  * 
  * Centralisation de toutes les routes de la plateforme pour une meilleure maintenabilité
  * et visibilité du routing React Router.

@@ -1,5 +1,5 @@
 /**
- * CiviAgora - Application Constants
+ * CiviX - Application Constants
  * 
  * Centralized constants used throughout the application.
  */
@@ -8,7 +8,7 @@ import type { Language, ConsultationStatus, PetitionStatus, VoteStatus } from '.
 
 // ==================== Application ====================
 
-export const APP_NAME = 'CiviAgora';
+export const APP_NAME = 'CiviX';
 export const APP_VERSION = '1.0.0';
 export const APP_DESCRIPTION = {
   fr: 'Plateforme de démocratie participative',
@@ -151,7 +151,7 @@ export const VALIDATION_RULES = {
     pattern: /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
     message: {
       fr: 'Numéro de téléphone invalide',
-      de: 'Ungültige Telefonnummer',
+      de: 'Ung��ltige Telefonnummer',
       en: 'Invalid phone number',
     },
   },
@@ -298,33 +298,33 @@ export const ROUTES = {
 // ==================== Local Storage Keys ====================
 
 export const STORAGE_KEYS = {
-  accessToken: 'civiagora_access_token',
-  refreshToken: 'civiagora_refresh_token',
-  user: 'civiagora_user',
-  language: 'civiagora_language',
-  theme: 'civiagora_theme',
-  preferences: 'civiagora_preferences',
-  recentSearches: 'civiagora_recent_searches',
+  accessToken: 'civix_access_token',
+  refreshToken: 'civix_refresh_token',
+  user: 'civix_user',
+  language: 'civix_language',
+  theme: 'civix_theme',
+  preferences: 'civix_preferences',
+  recentSearches: 'civix_recent_searches',
 } as const;
 
 // ==================== Social Media ====================
 
 export const SOCIAL_MEDIA = {
-  facebook: 'https://facebook.com/civiagora',
-  twitter: 'https://twitter.com/civiagora',
-  linkedin: 'https://linkedin.com/company/civiagora',
-  instagram: 'https://instagram.com/civiagora',
-  youtube: 'https://youtube.com/@civiagora',
+  facebook: 'https://facebook.com/civix',
+  twitter: 'https://twitter.com/civix',
+  linkedin: 'https://linkedin.com/company/civix',
+  instagram: 'https://instagram.com/civix',
+  youtube: 'https://youtube.com/@civix',
 } as const;
 
 // ==================== Contact ====================
 
 export const CONTACT_INFO = {
-  email: 'contact@civiagora.fr',
+  email: 'contact@civix.fr',
   phone: '+33 1 23 45 67 89',
   address: '1 Place de la République, 75001 Paris, France',
-  supportEmail: 'support@civiagora.fr',
-  pressEmail: 'presse@civiagora.fr',
+  supportEmail: 'support@civix.fr',
+  pressEmail: 'presse@civix.fr',
 } as const;
 
 // ==================== Feature Flags ====================

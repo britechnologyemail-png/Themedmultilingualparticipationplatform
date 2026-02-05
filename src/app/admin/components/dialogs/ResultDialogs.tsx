@@ -602,41 +602,41 @@ export function DeleteResultDialog({ open, onOpenChange, result, onConfirm }: De
                'Delete Result'}
             </AlertDialogTitle>
           </div>
-          <AlertDialogDescription className="space-y-4 pt-4">
-            {isPublished && (
-              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-sm text-red-900 dark:text-red-200 font-medium">
-                  {language === 'fr' ? '⚠️ Attention' :
-                   language === 'de' ? '⚠️ Achtung' :
-                   '⚠️ Warning'}
-                </p>
-                <p className="text-sm text-red-700 dark:text-red-300 mt-2">
-                  {language === 'fr' ? 
-                    'Ce résultat est actuellement publié et visible par les citoyens. La suppression le retirera de la plateforme.' :
-                   language === 'de' ?
-                    'Dieses Ergebnis ist derzeit veröffentlicht und für Bürger sichtbar. Das Löschen entfernt es von der Plattform.' :
-                    'This result is currently published and visible to citizens. Deletion will remove it from the platform.'}
-                </p>
-              </div>
-            )}
-
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              {language === 'fr' ? 
-                'Êtes-vous sûr de vouloir supprimer ce résultat ?' :
-               language === 'de' ?
-                'Sind Sie sicher, dass Sie dieses Ergebnis löschen möchten?' :
-                'Are you sure you want to delete this result?'}
-            </p>
-
-            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
-              <p className="font-medium text-gray-900 dark:text-white">{result.title}</p>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="capitalize">{result.type}</Badge>
-                <Badge variant="outline" className="capitalize">{result.status}</Badge>
-              </div>
-            </div>
-          </AlertDialogDescription>
         </AlertDialogHeader>
+        <div className="space-y-4 pt-4">
+          {isPublished && (
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-900 dark:text-red-200 font-medium">
+                {language === 'fr' ? '⚠️ Attention' :
+                 language === 'de' ? '⚠️ Achtung' :
+                 '⚠️ Warning'}
+              </p>
+              <p className="text-sm text-red-700 dark:text-red-300 mt-2">
+                {language === 'fr' ? 
+                  'Ce résultat est actuellement publié et visible par les citoyens. La suppression le retirera de la plateforme.' :
+                 language === 'de' ?
+                  'Dieses Ergebnis ist derzeit veröffentlicht und für Bürger sichtbar. Das Löschen entfernt es von der Plattform.' :
+                  'This result is currently published and visible to citizens. Deletion will remove it from the platform.'}
+              </p>
+            </div>
+          )}
+
+          <p className="text-sm text-gray-700 dark:text-gray-300">
+            {language === 'fr' ? 
+              'Êtes-vous sûr de vouloir supprimer ce résultat ?' :
+             language === 'de' ?
+              'Sind Sie sicher, dass Sie dieses Ergebnis löschen möchten?' :
+              'Are you sure you want to delete this result?'}
+          </p>
+
+          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+            <p className="font-medium text-gray-900 dark:text-white">{result.title}</p>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="capitalize">{result.type}</Badge>
+              <Badge variant="outline" className="capitalize">{result.status}</Badge>
+            </div>
+          </div>
+        </div>
         <AlertDialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {language === 'fr' ? 'Annuler' :

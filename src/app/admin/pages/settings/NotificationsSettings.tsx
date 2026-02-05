@@ -285,10 +285,10 @@ export function NotificationsSettings() {
             </label>
             <div className="flex flex-wrap gap-2 mb-3">
               <Badge className="bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400">
-                admin@civiagora.ch
+                admin@civix.ch
               </Badge>
               <Badge className="bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400">
-                moderateur@civiagora.ch
+                moderateur@civix.ch
               </Badge>
             </div>
             <Input

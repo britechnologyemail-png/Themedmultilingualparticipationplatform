@@ -24,8 +24,8 @@ export function AuditSettings() {
   const [logs] = useState<AuditLog[]>([
     {
       id: '1',
-      timestamp: '2025-01-06T10:45:23',
-      user: 'admin@civiagora.ch',
+      timestamp: '2026-01-06T10:45:23',
+      user: 'admin@civix.ch',
       action: 'Modification des paramètres',
       module: 'Paramètres',
       level: 'info',
@@ -34,8 +34,8 @@ export function AuditSettings() {
     },
     {
       id: '2',
-      timestamp: '2025-01-06T10:30:15',
-      user: 'moderateur@civiagora.ch',
+      timestamp: '2026-01-06T10:30:15',
+      user: 'moderateur@civix.ch',
       action: 'Modération de contenu',
       module: 'Modération',
       level: 'warning',
@@ -44,7 +44,7 @@ export function AuditSettings() {
     },
     {
       id: '3',
-      timestamp: '2025-01-06T09:15:42',
+      timestamp: '2026-01-06T09:15:42',
       user: 'system',
       action: 'Échec de connexion',
       module: 'Sécurité',
@@ -54,8 +54,8 @@ export function AuditSettings() {
     },
     {
       id: '4',
-      timestamp: '2025-01-06T08:22:11',
-      user: 'admin@civiagora.ch',
+      timestamp: '2026-01-06T08:22:11',
+      user: 'admin@civix.ch',
       action: 'Création d\'utilisateur',
       module: 'Utilisateurs',
       level: 'info',
@@ -64,7 +64,7 @@ export function AuditSettings() {
     },
     {
       id: '5',
-      timestamp: '2025-01-05T18:30:00',
+      timestamp: '2026-01-05T18:30:00',
       user: 'system',
       action: 'Sauvegarde automatique',
       module: 'Système',

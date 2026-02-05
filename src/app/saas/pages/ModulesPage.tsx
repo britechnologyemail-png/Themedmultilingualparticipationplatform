@@ -20,7 +20,8 @@ import {
   CheckCircle2,
   XCircle,
   BarChart3,
-  TrendingUp
+  TrendingUp,
+  Baby
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
@@ -58,7 +59,7 @@ import { toast } from 'sonner';
 interface Module {
   id: string;
   name: string;
-  type: 'votes' | 'debates' | 'petitions' | 'assemblies' | 'conferences';
+  type: 'votes' | 'debates' | 'petitions' | 'assemblies' | 'conferences' | 'youth';
   icon: any;
   count: number;
   activeProcesses: number;
@@ -156,6 +157,22 @@ export function ModulesPage() {
         ? 'Organisation öffentlicher Veranstaltungen mit Anmeldung und Nachverfolgung'
         : 'Public event organization with registration and tracking',
       organizations: ['Canton de Genève']
+    },
+    { 
+      id: '6',
+      name: language === 'fr' ? 'Espace Jeunesse' : language === 'de' ? 'Jugendbereich' : 'Youth Space', 
+      type: 'youth',
+      count: 67, 
+      activeProcesses: 15,
+      totalParticipants: 1850,
+      status: 'enabled',
+      icon: Baby,
+      description: language === 'fr' 
+        ? 'Sondages et consultations adaptés aux jeunes (mode simplifié avec pictogrammes)'
+        : language === 'de'
+        ? 'Umfragen und Konsultationen für Jugendliche (vereinfachter Modus mit Piktogrammen)'
+        : 'Polls and consultations adapted for youth (simplified mode with pictograms)',
+      organizations: ['Ville de Bruxelles', 'Commune d\'Ixelles', 'Région Wallonne', 'Canton de Genève']
     }
   ]);
 

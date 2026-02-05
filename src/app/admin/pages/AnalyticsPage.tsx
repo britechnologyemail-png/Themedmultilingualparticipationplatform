@@ -3,9 +3,282 @@ import { BarChart as BarChartIcon, TrendingUp, Users, Mail, ThumbsUp, Eye, Downl
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
+import { toast } from 'sonner';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export function AnalyticsPage() {
+  const { language } = useLanguage();
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  const [exportFormat, setExportFormat] = useState<string>('csv');
+
+  const handleExport = () => {
+    try {
+      const currentDate = new Date().toISOString().split('T')[0];
+      const timeRangeLabels = {
+        '7d': '7_jours',
+        '30d': '30_jours',
+        '90d': '90_jours',
+        '1y': '1_an'
+      };
+
+      const filename = `statistiques_civix_${timeRangeLabels[timeRange]}_${currentDate}`;
+
+      if (exportFormat === 'csv') {
+        exportToCSV(filename);
+      } else if (exportFormat === 'xlsx') {
+        exportToXLSX(filename);
+      } else if (exportFormat === 'pdf') {
+        exportToPDF(filename);
+      }
+
+      toast.success(
+        language === 'fr' ? `Export ${exportFormat.toUpperCase()} réussi` :
+        language === 'de' ? `${exportFormat.toUpperCase()}-Export erfolgreich` :
+        `${exportFormat.toUpperCase()} export successful`,
+        {
+          description: language === 'fr' ? 'Le fichier a été téléchargé' :
+                      language === 'de' ? 'Die Datei wurde heruntergeladen' :
+                      'The file has been downloaded'
+        }
+      );
+    } catch (error) {
+      toast.error(
+        language === 'fr' ? 'Erreur lors de l\'export' :
+        language === 'de' ? 'Fehler beim Exportieren' :
+        'Error during export',
+        {
+          description: language === 'fr' ? 'Veuillez réessayer' :
+                      language === 'de' ? 'Bitte versuchen Sie es erneut' :
+                      'Please try again'
+        }
+      );
+    }
+  };
+
+  const exportToCSV = (filename: string) => {
+    // KPI Data
+    const kpiData = [
+      ['Indicateur', 'Valeur', 'Évolution'],
+      ['Utilisateurs actifs', '2,847', '+12.5%'],
+      ['Contributions', '8,426', '+18.2%'],
+      ['Votes totaux', '15,683', '+24.8%'],
+      ['Vues de page', '45,219', '+8.4%']
+    ];
+
+    // Participation Evolution
+    const participationHeaders = ['Date', 'Concertations', 'Pétitions', 'Votes', 'Assemblées'];
+    const participationRows = participationData.map(d => [
+      d.date,
+      d.consultations.toString(),
+      d.petitions.toString(),
+      d.votes.toString(),
+      d.assemblies.toString()
+    ]);
+
+    // Module Distribution
+    const moduleHeaders = ['Module', 'Pourcentage'];
+    const moduleRows = moduleData.map(m => [m.name, `${m.value}%`]);
+
+    // Theme Engagement
+    const themeHeaders = ['Thème', 'Participants', 'Contributions'];
+    const themeRows = themeEngagementData.map(t => [
+      t.theme,
+      t.participants.toString(),
+      t.contributions.toString()
+    ]);
+
+    // Demographics
+    const demoHeaders = ['Tranche d\'âge', 'Nombre d\'utilisateurs'];
+    const demoRows = demographicsData.map(d => [d.ageGroup, d.count.toString()]);
+
+    // Combine all sections
+    const csvContent = [
+      ['RAPPORT STATISTIQUES CIVIX'],
+      [`Période: ${timeRange}`],
+      [`Date d'export: ${new Date().toLocaleString('fr-FR')}`],
+      [],
+      ['=== INDICATEURS CLÉS ==='],
+      ...kpiData,
+      [],
+      ['=== ÉVOLUTION DE LA PARTICIPATION ==='],
+      participationHeaders,
+      ...participationRows,
+      [],
+      ['=== RÉPARTITION PAR MODULE ==='],
+      moduleHeaders,
+      ...moduleRows,
+      [],
+      ['=== ENGAGEMENT PAR THÈME ==='],
+      themeHeaders,
+      ...themeRows,
+      [],
+      ['=== DÉMOGRAPHIE DES UTILISATEURS ==='],
+      demoHeaders,
+      ...demoRows
+    ].map(row => Array.isArray(row) ? row.map(cell => `"${cell}"`).join(',') : row).join('\n');
+
+    // Create and download file
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToXLSX = (filename: string) => {
+    // For XLSX, we'll create a CSV with tab separators that Excel can open
+    // A real implementation would use a library like xlsx or exceljs
+    const sections = [
+      {
+        title: 'INDICATEURS CLÉS',
+        headers: ['Indicateur', 'Valeur', 'Évolution'],
+        data: [
+          ['Utilisateurs actifs', '2,847', '+12.5%'],
+          ['Contributions', '8,426', '+18.2%'],
+          ['Votes totaux', '15,683', '+24.8%'],
+          ['Vues de page', '45,219', '+8.4%']
+        ]
+      },
+      {
+        title: 'ÉVOLUTION DE LA PARTICIPATION',
+        headers: ['Date', 'Concertations', 'Pétitions', 'Votes', 'Assemblées'],
+        data: participationData.map(d => [
+          d.date,
+          d.consultations.toString(),
+          d.petitions.toString(),
+          d.votes.toString(),
+          d.assemblies.toString()
+        ])
+      },
+      {
+        title: 'RÉPARTITION PAR MODULE',
+        headers: ['Module', 'Pourcentage'],
+        data: moduleData.map(m => [m.name, `${m.value}%`])
+      },
+      {
+        title: 'ENGAGEMENT PAR THÈME',
+        headers: ['Thème', 'Participants', 'Contributions'],
+        data: themeEngagementData.map(t => [
+          t.theme,
+          t.participants.toString(),
+          t.contributions.toString()
+        ])
+      },
+      {
+        title: 'DÉMOGRAPHIE DES UTILISATEURS',
+        headers: ['Tranche d\'âge', 'Nombre d\'utilisateurs'],
+        data: demographicsData.map(d => [d.ageGroup, d.count.toString()])
+      }
+    ];
+
+    let xlsxContent = `RAPPORT STATISTIQUES CIVIX\t\t\t\t\n`;
+    xlsxContent += `Période: ${timeRange}\t\t\t\t\n`;
+    xlsxContent += `Date d'export: ${new Date().toLocaleString('fr-FR')}\t\t\t\t\n\n`;
+
+    sections.forEach(section => {
+      xlsxContent += `${section.title}\t\t\t\t\n`;
+      xlsxContent += section.headers.join('\t') + '\n';
+      section.data.forEach(row => {
+        xlsxContent += row.join('\t') + '\n';
+      });
+      xlsxContent += '\n';
+    });
+
+    const blob = new Blob(['\uFEFF' + xlsxContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}.xls`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToPDF = (filename: string) => {
+    // Generate a text-based PDF-like report
+    // A real implementation would use a library like jsPDF
+    const report = `
+╔════════════════════════════════════════════════════════════════╗
+║           RAPPORT STATISTIQUES CIVIX - ${timeRange.toUpperCase()}                    ║
+╚════════════════════════════════════════════════════════════════╝
+
+Date d'export: ${new Date().toLocaleString('fr-FR')}
+Période analysée: ${timeRange}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 INDICATEURS CLÉS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👥 Utilisateurs actifs      : 2,847     (+12.5%)
+💬 Contributions             : 8,426     (+18.2%)
+🗳️  Votes totaux             : 15,683    (+24.8%)
+👁️  Vues de page             : 45,219    (+8.4%)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📈 ÉVOLUTION DE LA PARTICIPATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Date      | Concertations | Pétitions | Votes | Assemblées
+----------|---------------|-----------|-------|------------
+${participationData.map(d => 
+  `${d.date.padEnd(9)} | ${d.consultations.toString().padEnd(13)} | ${d.petitions.toString().padEnd(9)} | ${d.votes.toString().padEnd(5)} | ${d.assemblies.toString()}`
+).join('\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 RÉPARTITION PAR MODULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${moduleData.map(m => `${m.name.padEnd(20)} : ${m.value}%`).join('\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏷️  ENGAGEMENT PAR THÈME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Thème            | Participants | Contributions
+-----------------|--------------|---------------
+${themeEngagementData.map(t => 
+  `${t.theme.padEnd(16)} | ${t.participants.toString().padEnd(12)} | ${t.contributions.toString()}`
+).join('\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👥 DÉMOGRAPHIE DES UTILISATEURS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tranche d'âge    | Nombre d'utilisateurs
+-----------------|----------------------
+${demographicsData.map(d => 
+  `${d.ageGroup.padEnd(16)} | ${d.count.toString()}`
+).join('\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Rapport généré automatiquement par CiviX
+Plateforme de démocratie participative
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    `.trim();
+
+    const blob = new Blob([report], { type: 'text/plain;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}.txt`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Participation data over time
   const participationData = [
@@ -108,7 +381,17 @@ export function AnalyticsPage() {
               1 an
             </button>
           </div>
-          <Button className="gap-2">
+          <Select onValueChange={setExportFormat} defaultValue={exportFormat}>
+            <SelectTrigger className="w-24">
+              <SelectValue placeholder="Format" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pdf">PDF</SelectItem>
+              <SelectItem value="csv">CSV</SelectItem>
+              <SelectItem value="xlsx">XLSX</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button className="gap-2" onClick={handleExport}>
             <Download className="w-4 h-4" />
             Exporter
           </Button>

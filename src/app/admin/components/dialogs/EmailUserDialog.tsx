@@ -32,25 +32,19 @@ interface EmailUserDialogProps {
 
 const EMAIL_TEMPLATES = [
   {
-    id: 'custom',
-    name: 'Message personnalisé',
-    subject: '',
-    body: ''
-  },
-  {
     id: 'welcome',
-    name: 'Bienvenue sur CiviAgora',
-    subject: 'Bienvenue sur la plateforme CiviAgora',
+    name: 'Bienvenue sur CiviX',
+    subject: 'Bienvenue sur la plateforme CiviX',
     body: `Bonjour {name},
 
-Nous sommes ravis de vous accueillir sur CiviAgora, la plateforme de démocratie participative de la Région de Bruxelles-Capitale.
+Nous sommes ravis de vous accueillir sur CiviX, la plateforme de démocratie participative de la Région de Bruxelles-Capitale.
 
 Votre compte a été créé avec succès. Vous pouvez dès maintenant vous connecter et participer aux différents processus démocratiques en cours.
 
 Pour toute question, n'hésitez pas à nous contacter.
 
 Cordialement,
-L'équipe CiviAgora`
+L'équipe CiviX`
   },
   {
     id: 'password_reset',
@@ -58,7 +52,7 @@ L'équipe CiviAgora`
     subject: 'Réinitialisation de votre mot de passe',
     body: `Bonjour {name},
 
-Vous avez demandé la réinitialisation de votre mot de passe sur CiviAgora.
+Vous avez demandé la réinitialisation de votre mot de passe sur CiviX.
 
 Cliquez sur le lien ci-dessous pour créer un nouveau mot de passe :
 {reset_link}
@@ -68,7 +62,7 @@ Ce lien expirera dans 24 heures.
 Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.
 
 Cordialement,
-L'équipe CiviAgora`
+L'équipe CiviX`
   },
   {
     id: 'account_update',
@@ -76,12 +70,12 @@ L'équipe CiviAgora`
     subject: 'Votre compte a été mis à jour',
     body: `Bonjour {name},
 
-Votre compte CiviAgora a été mis à jour par un administrateur.
+Votre compte CiviX a été mis à jour par un administrateur.
 
 Si vous avez des questions concernant ces modifications, veuillez contacter l'équipe administrative.
 
 Cordialement,
-L'équipe CiviAgora`
+L'équipe CiviX`
   },
   {
     id: 'role_change',
@@ -89,7 +83,7 @@ L'équipe CiviAgora`
     subject: 'Votre rôle a été modifié',
     body: `Bonjour {name},
 
-Votre rôle sur la plateforme CiviAgora a été modifié.
+Votre rôle sur la plateforme CiviX a été modifié.
 
 Nouveau rôle : {role}
 
@@ -98,13 +92,13 @@ Cela peut affecter vos permissions et votre accès à certaines fonctionnalités
 Pour toute question, n'hésitez pas à nous contacter.
 
 Cordialement,
-L'équipe CiviAgora`
+L'équipe CiviX`
   }
 ];
 
 export function EmailUserDialog({ open, onOpenChange, user, onSubmit }: EmailUserDialogProps) {
   const { language } = useLanguage();
-  const [selectedTemplate, setSelectedTemplate] = useState('custom');
+  const [selectedTemplate, setSelectedTemplate] = useState('welcome');
   const [formData, setFormData] = useState({
     subject: '',
     body: '',
@@ -140,7 +134,7 @@ export function EmailUserDialog({ open, onOpenChange, user, onSubmit }: EmailUse
     });
     onOpenChange(false);
     // Reset form
-    setSelectedTemplate('custom');
+    setSelectedTemplate('welcome');
     setFormData({
       subject: '',
       body: '',

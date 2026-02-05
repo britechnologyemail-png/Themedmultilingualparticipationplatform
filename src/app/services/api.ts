@@ -49,10 +49,10 @@ import type {
   YouthSpaceStatsDTO,
   CreateYouthPollResponseDTO,
   YouthPollResponseDTO,
-  IVRResponseDTO,
-  IVRStatsDTO,
-  IVRCampaignDTO,
-  IVRProcessSummaryDTO,
+  // IVRResponseDTO, // REMOVED - IVR Section deleted
+  // IVRStatsDTO, // REMOVED - IVR Section deleted
+  // IVRCampaignDTO, // REMOVED - IVR Section deleted
+  // IVRProcessSummaryDTO, // REMOVED - IVR Section deleted
   ModerationItemDTO,
   ModerationStatsDTO,
   ModerationRuleDTO,
@@ -60,6 +60,14 @@ import type {
   ModerationFilterDTO,
   PerformModerationActionDTO,
   BulkModerationActionDTO,
+  FooterMenuDataDTO,
+  FooterMenuConfigDTO,
+  FooterMenuItemDTO,
+  FooterMenuStatsDTO,
+  CreateFooterMenuItemDTO,
+  UpdateFooterMenuItemDTO,
+  UpdateFooterMenuConfigDTO,
+  BatchUpdateMenuOrderDTO,
 } from '../types';
 
 import {
@@ -91,10 +99,10 @@ import {
   mockLegislativeSummaries,
   mockYouthPolls,
   mockYouthSpaceStats,
-  mockIVRResponses,
-  mockIVRStats,
-  mockIVRCampaigns,
-  mockIVRProcessSummaries,
+  mockIVRResponses, // Empty stub - IVR Section deleted
+  mockIVRStats, // Empty stub - IVR Section deleted
+  mockIVRCampaigns, // Empty stub - IVR Section deleted
+  mockIVRProcessSummaries, // Empty stub - IVR Section deleted
   mockModerationItems,
   mockModerationStats,
   mockModerationRules,
@@ -104,6 +112,21 @@ import {
   mockParticipationHistory,
   mockApiData,
 } from '../data/api-mock';
+
+import {
+  mockFooterMenuData,
+  mockFooterMenuStats,
+  mockFooterMenuItems,
+  mockFooterMenuConfig,
+  getActiveFooterMenuItems,
+  getFooterMenuItemById,
+  toggleFooterMenuItemActive,
+  toggleFooterMenuItemVisibility,
+  updateFooterMenuItemOrder,
+  updateFooterMenuConfig as updateMockFooterMenuConfig,
+} from '../data/footerMenuMock';
+
+import { headerMenuApi } from './headerMenuApi';
 
 // Simulated API delay (remove in production)
 const simulateDelay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
@@ -664,6 +687,7 @@ export const legislativeConsultationApi = {
   async getLegislativeConsultationSummaries(params?: {
     status?: string;
     themeId?: string;
+    textType?: string;
     limit?: number;
   }): Promise<ApiResponse<LegislativeConsultationSummaryDTO[]>> {
     await simulateDelay();
@@ -676,6 +700,10 @@ export const legislativeConsultationApi = {
     
     if (params?.themeId) {
       summaries = summaries.filter(s => s.themeId === params.themeId);
+    }
+    
+    if (params?.textType) {
+      summaries = summaries.filter(s => s.textType === params.textType);
     }
     
     if (params?.limit) {
@@ -1948,6 +1976,233 @@ export const moderationApi = {
   },
 };
 
+// ==================== Footer Dynamic Menu API ====================
+
+const footerMenuApi = {
+  /**
+   * Get complete footer menu data (config + items)
+   */
+  async getFooterMenuData(): Promise<ApiResponse<FooterMenuDataDTO>> {
+    await delay(300);
+    return {
+      data: mockFooterMenuData,
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Get footer menu configuration only
+   */
+  async getFooterMenuConfig(): Promise<ApiResponse<FooterMenuConfigDTO>> {
+    await delay(200);
+    return {
+      data: mockFooterMenuConfig,
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Get all footer menu items
+   */
+  async getFooterMenuItems(): Promise<ApiResponse<FooterMenuItemDTO[]>> {
+    await delay(250);
+    return {
+      data: mockFooterMenuItems,
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Get active and visible menu items for display
+   */
+  async getActiveFooterMenuItems(): Promise<ApiResponse<FooterMenuItemDTO[]>> {
+    await delay(200);
+    return {
+      data: getActiveFooterMenuItems(),
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Get single menu item by ID
+   */
+  async getFooterMenuItem(id: string): Promise<ApiResponse<FooterMenuItemDTO>> {
+    await delay(150);
+    const item = getFooterMenuItemById(id);
+    
+    if (!item) {
+      throw new Error(`Menu item with ID ${id} not found`);
+    }
+
+    return {
+      data: item,
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Create new menu item
+   */
+  async createFooterMenuItem(data: CreateFooterMenuItemDTO): Promise<ApiResponse<FooterMenuItemDTO>> {
+    await delay(400);
+    
+    const newItem: FooterMenuItemDTO = {
+      id: `menu-item-${Date.now()}`,
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    mockFooterMenuItems.push(newItem);
+
+    return {
+      data: newItem,
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Update menu item
+   */
+  async updateFooterMenuItem(
+    id: string,
+    updates: UpdateFooterMenuItemDTO
+  ): Promise<ApiResponse<FooterMenuItemDTO>> {
+    await delay(350);
+    
+    const item = getFooterMenuItemById(id);
+    if (!item) {
+      throw new Error(`Menu item with ID ${id} not found`);
+    }
+
+    Object.assign(item, updates, {
+      updatedAt: new Date().toISOString(),
+    });
+
+    return {
+      data: item,
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Toggle menu item active state
+   */
+  async toggleMenuItemActive(id: string): Promise<ApiResponse<FooterMenuItemDTO>> {
+    await delay(250);
+    
+    const item = toggleFooterMenuItemActive(id);
+    if (!item) {
+      throw new Error(`Menu item with ID ${id} not found`);
+    }
+
+    return {
+      data: item,
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Toggle menu item visibility
+   */
+  async toggleMenuItemVisibility(id: string): Promise<ApiResponse<FooterMenuItemDTO>> {
+    await delay(250);
+    
+    const item = toggleFooterMenuItemVisibility(id);
+    if (!item) {
+      throw new Error(`Menu item with ID ${id} not found`);
+    }
+
+    return {
+      data: item,
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Delete menu item
+   */
+  async deleteFooterMenuItem(id: string): Promise<ApiResponse<{ success: boolean }>> {
+    await delay(300);
+    
+    const index = mockFooterMenuItems.findIndex(item => item.id === id);
+    if (index === -1) {
+      throw new Error(`Menu item with ID ${id} not found`);
+    }
+
+    mockFooterMenuItems.splice(index, 1);
+
+    return {
+      data: { success: true },
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Batch update menu items order
+   */
+  async batchUpdateMenuOrder(data: BatchUpdateMenuOrderDTO): Promise<ApiResponse<FooterMenuItemDTO[]>> {
+    await delay(400);
+    
+    data.items.forEach(({ id, order }) => {
+      updateFooterMenuItemOrder(id, order);
+    });
+
+    return {
+      data: mockFooterMenuItems.sort((a, b) => a.order - b.order),
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Update footer menu configuration
+   */
+  async updateFooterMenuConfig(updates: UpdateFooterMenuConfigDTO): Promise<ApiResponse<FooterMenuConfigDTO>> {
+    await delay(350);
+    
+    const updatedConfig = updateMockFooterMenuConfig(updates);
+
+    return {
+      data: updatedConfig,
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+
+  /**
+   * Get footer menu statistics
+   */
+  async getFooterMenuStats(): Promise<ApiResponse<FooterMenuStatsDTO>> {
+    await delay(300);
+    
+    // Dynamically calculate stats
+    const stats: FooterMenuStatsDTO = {
+      ...mockFooterMenuStats,
+      totalItems: mockFooterMenuItems.length,
+      activeItems: mockFooterMenuItems.filter(item => item.isActive).length,
+      inactiveItems: mockFooterMenuItems.filter(item => !item.isActive).length,
+      visibleItems: mockFooterMenuItems.filter(item => item.isVisible && item.showInFooter).length,
+    };
+
+    return {
+      data: stats,
+      timestamp: new Date().toISOString(),
+      success: true,
+    };
+  },
+};
+
 // ==================== Unified API Service ====================
 
 export const apiService = {
@@ -1965,8 +2220,10 @@ export const apiService = {
   search: searchApi,
   signalement: signalementApi,
   ai: aiApi,
-  ivr: ivrApi,
+  // ivr: ivrApi, // REMOVED - IVR Section deleted
   moderation: moderationApi,
+  footerMenu: footerMenuApi,
+  headerMenu: headerMenuApi,
 };
 
 export default apiService;

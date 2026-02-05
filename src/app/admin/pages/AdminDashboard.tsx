@@ -1,8 +1,4 @@
-import React from 'react';
-import { useLanguage } from '../../contexts/LanguageContext';
-import { StatCard } from '../components/StatCard';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
+import { Link } from 'react-router';
 import {
   Users,
   Activity,
@@ -17,12 +13,28 @@ import {
   UserMinus,
   Edit,
   Mic,
-  CheckSquare
+  CheckSquare,
+  Heart,
+  MessageSquare,
+  Video,
+  Vote,
+  Sparkles,
+  Tag,
+  Settings,
+  Eye,
+  EyeOff,
+  Layers,
+  XCircle,
 } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { useAllSections, useToggleSectionStatus } from '../../hooks/useSections';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { StatCard } from '../components/StatCard';
 import {
-  LineChart,
+  LineChart as RechartsLineChart,
   Line,
-  BarChart,
+  BarChart as RechartsBarChart,
   Bar,
   PieChart,
   Pie,
@@ -31,10 +43,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts';
-import { Link } from 'react-router-dom';
 
 // Mock data for charts
 const participationData = [
@@ -131,6 +141,20 @@ const pendingModerations = [
 
 export function AdminDashboard() {
   const { language } = useLanguage();
+  const { data: sections, isLoading: sectionsLoading } = useAllSections();
+  const toggleStatus = useToggleSectionStatus();
+
+  // Icon mapping for sections
+  const SECTION_ICONS: Record<string, any> = {
+    consultations: MessageSquare,
+    assemblies: Users,
+    petitions: FileText,
+    conferences: Video,
+    votes: Vote,
+    signalements: AlertCircle,
+    youth: Sparkles,
+    themes: Tag,
+  };
 
   return (
     <div className="space-y-6">
@@ -187,6 +211,164 @@ export function AdminDashboard() {
         />
       </div>
 
+      {/* NOUVELLE SECTION : Gestion des Sections */}
+      <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Layers className="w-6 h-6 text-indigo-600" />
+                {language === 'fr' ? 'Gestion des Sections' :
+                 language === 'de' ? 'Abschnittsverwaltung' :
+                 'Sections Management'}
+              </CardTitle>
+              <CardDescription className="mt-1">
+                {language === 'fr' ? 'Configuration et gestion de toutes les sections de la plateforme CiviX' :
+                 language === 'de' ? 'Konfiguration und Verwaltung aller Abschnitte der CiviX-Plattform' :
+                 'Configure and manage all sections of the CiviX platform'}
+              </CardDescription>
+            </div>
+            <Link to="/admin/sections">
+              <Button className="gap-2">
+                {language === 'fr' ? 'Voir toutes les sections' :
+                 language === 'de' ? 'Alle Abschnitte anzeigen' :
+                 'View all sections'}
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {sectionsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-white p-4 rounded-lg border border-gray-200 animate-pulse">
+                  <div className="h-8 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {sections?.map((section) => {
+                const Icon = SECTION_ICONS[section.config.key] || Settings;
+                const isActive = section.config.status === 'active';
+                
+                return (
+                  <Link
+                    key={section.config.key}
+                    to={`/admin/sections/${section.config.key}`}
+                    className="bg-white p-4 rounded-lg border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all group"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${section.config.display.backgroundColor}`}>
+                        <Icon className={`w-5 h-5 ${section.config.display.iconColor}`} />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {isActive ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-gray-400" />
+                        )}
+                        {section.config.display.featured && (
+                          <TrendingUp className="w-4 h-4 text-yellow-600" />
+                        )}
+                      </div>
+                    </div>
+                    
+                    <h4 className="font-semibold text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors">
+                      {section.config.metadata.title[language]}
+                    </h4>
+                    
+                    <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                      {section.config.metadata.shortDescription[language]}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Users className="w-3 h-3" />
+                        <span>{section.stats.totalParticipants.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Activity className="w-3 h-3" />
+                        <span>{section.stats.totalItems} items</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                        isActive 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {isActive ? (
+                          <>
+                            <CheckCircle className="w-3 h-3" />
+                            {language === 'fr' ? 'Active' : language === 'de' ? 'Aktiv' : 'Active'}
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="w-3 h-3" />
+                            {language === 'fr' ? 'Inactive' : language === 'de' ? 'Inaktiv' : 'Inactive'}
+                          </>
+                        )}
+                      </span>
+                      
+                      <div className="flex items-center gap-1 ml-auto text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Settings className="w-3 h-3" />
+                        <span className="text-xs font-medium">
+                          {language === 'fr' ? 'Configurer' : language === 'de' ? 'Konfigurieren' : 'Configure'}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+          
+          {/* Quick Stats */}
+          {sections && (
+            <div className="mt-4 p-4 bg-white rounded-lg border border-indigo-200">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-indigo-600">
+                    {sections.length}
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {language === 'fr' ? 'Sections totales' : language === 'de' ? 'Gesamt' : 'Total sections'}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {sections.filter(s => s.config.status === 'active').length}
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {language === 'fr' ? 'Actives' : language === 'de' ? 'Aktiv' : 'Active'}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {sections.reduce((sum, s) => sum + s.stats.totalParticipants, 0).toLocaleString()}
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {language === 'fr' ? 'Participants' : language === 'de' ? 'Teilnehmer' : 'Participants'}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {sections.reduce((sum, s) => sum + s.stats.totalInteractions, 0).toLocaleString()}
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    {language === 'fr' ? 'Interactions' : language === 'de' ? 'Interaktionen' : 'Interactions'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Participations citoyennes - Section spécifique */}
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <CardHeader>
@@ -215,7 +397,7 @@ export function AdminDashboard() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
             {/* Assemblées */}
             <div className="bg-white p-4 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between mb-2">
@@ -305,6 +487,24 @@ export function AdminDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* Jeunesse */}
+            <div className="bg-white p-4 rounded-lg border border-pink-200">
+              <div className="flex items-center justify-between mb-2">
+                <Heart className="w-5 h-5 text-pink-600" />
+                <span className="text-xs font-medium text-pink-600">Jeunesse</span>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-gray-900">24</span>
+                  <span className="text-xs text-gray-600">sondages</span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-green-600">
+                  <TrendingUp className="w-3 h-3" />
+                  <span>+15%</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Action récentes - Participations */}
@@ -349,7 +549,7 @@ export function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={participationData}>
+              <RechartsLineChart data={participationData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="month" stroke="#6b7280" />
                 <YAxis stroke="#6b7280" />
@@ -361,7 +561,7 @@ export function AdminDashboard() {
                   strokeWidth={2}
                   dot={{ fill: '#3b82f6', r: 4 }}
                 />
-              </LineChart>
+              </RechartsLineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
@@ -412,13 +612,13 @@ export function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={processStatusData}>
+            <RechartsBarChart data={processStatusData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="status" stroke="#6b7280" />
               <YAxis stroke="#6b7280" />
               <Tooltip />
               <Bar dataKey="count" fill="#3b82f6" radius={[8, 8, 0, 0]} />
-            </BarChart>
+            </RechartsBarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>

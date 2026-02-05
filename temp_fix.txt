@@ -1,0 +1,21 @@
+                  {exportItem.status === 'failed' && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="gap-2" 
+                      onClick={() => handleRetryExport(exportItem)}
+                      disabled={retryingIds.includes(exportItem.id)}
+                    >
+                      {retryingIds.includes(exportItem.id) ? (
+                        <>
+                          <Clock className="w-4 h-4 animate-spin" />
+                          {language === 'fr' ? 'Régénération...' : language === 'de' ? 'Regenerierung...' : 'Retrying...'}
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="w-4 h-4" />
+                          {language === 'fr' ? 'Réessayer' : language === 'de' ? 'Wiederholen' : 'Retry'}
+                        </>
+                      )}
+                    </Button>
+                  )}

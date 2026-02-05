@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -42,9 +42,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             </div>
             <DialogHeader>
               <DialogTitle className="text-2xl text-white text-center">
-                {language === 'fr' && 'Bienvenue sur CiviAgora'}
-                {language === 'de' && 'Willkommen bei CiviAgora'}
-                {language === 'en' && 'Welcome to CiviAgora'}
+                {language === 'fr' && 'Bienvenue sur CiviX'}
+                {language === 'de' && 'Willkommen bei CiviX'}
+                {language === 'en' && 'Welcome to CiviX'}
               </DialogTitle>
               <DialogDescription className="text-blue-50 text-center">
                 {language === 'fr' && 'Plateforme sécurisée de démocratie participative'}
@@ -114,9 +114,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       {language === 'en' && 'Create a Secure Account'}
                     </h3>
                     <p className="text-sm text-gray-600 mb-2">
-                      {language === 'fr' && 'Première fois sur CiviAgora ? Créez votre compte en quelques étapes'}
-                      {language === 'de' && 'Neu bei CiviAgora? Erstellen Sie Ihr Konto in wenigen Schritten'}
-                      {language === 'en' && 'New to CiviAgora? Create your account in a few steps'}
+                      {language === 'fr' && 'Première fois sur CiviX ? Créez votre compte en quelques étapes'}
+                      {language === 'de' && 'Neu bei CiviX? Erstellen Sie Ihr Konto in wenigen Schritten'}
+                      {language === 'en' && 'New to CiviX? Create your account in a few steps'}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-100 rounded px-2 py-1 w-fit">
                       <ShieldCheck className="w-3 h-3" />

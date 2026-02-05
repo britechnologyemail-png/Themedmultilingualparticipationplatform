@@ -14,11 +14,11 @@ export function GeneralSettings() {
   const [saved, setSaved] = useState(false);
   
   // Platform Information State
-  const [platformName, setPlatformName] = useState('CiviAgora');
+  const [platformName, setPlatformName] = useState('CiviX');
   const [institutionName, setInstitutionName] = useState('Ville de Bruxelles');
   const [description, setDescription] = useState('Plateforme de démocratie participative pour impliquer les citoyens dans les décisions publiques.');
-  const [platformUrl, setPlatformUrl] = useState('https://civiagora.brussels.be');
-  const [contactEmail, setContactEmail] = useState('contact@civiagora.brussels.be');
+  const [platformUrl, setPlatformUrl] = useState('https://civix.brussels.be');
+  const [contactEmail, setContactEmail] = useState('contact@civix.brussels.be');
   
   // Language Settings State
   const [defaultLanguage, setDefaultLanguage] = useState('fr');
@@ -27,8 +27,8 @@ export function GeneralSettings() {
   // Email Settings State
   const [smtpServer, setSmtpServer] = useState('smtp.brussels.be');
   const [smtpPort, setSmtpPort] = useState('587');
-  const [senderEmail, setSenderEmail] = useState('noreply@civiagora.brussels.be');
-  const [senderName, setSenderName] = useState('CiviAgora - Ville de Bruxelles');
+  const [senderEmail, setSenderEmail] = useState('noreply@civix.brussels.be');
+  const [senderName, setSenderName] = useState('CiviX - Ville de Bruxelles');
   const [smtpAuth, setSmtpAuth] = useState(true);
   
   // Security Settings State
@@ -45,11 +45,28 @@ export function GeneralSettings() {
   const [modulePetitions, setModulePetitions] = useState(true);
   const [moduleConferences, setModuleConferences] = useState(true);
   const [moduleVotes, setModuleVotes] = useState(true);
+  const [moduleYouth, setModuleYouth] = useState(true);
+  const [moduleSignalements, setModuleSignalements] = useState(true);
 
   const handleSave = () => {
     setSaved(true);
     toast.success('✓ Paramètres généraux enregistrés avec succès');
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  // Module Toggle Handlers with Feedback
+  const handleModuleToggle = (moduleName: string, isEnabled: boolean, setter: (value: boolean) => void) => {
+    setter(isEnabled);
+    
+    if (isEnabled) {
+      toast.success(`✓ Module "${moduleName}" activé`, {
+        description: 'Le module est maintenant accessible aux utilisateurs'
+      });
+    } else {
+      toast.info(`Module "${moduleName}" désactivé`, {
+        description: 'Le module n\'est plus accessible aux utilisateurs'
+      });
+    }
   };
 
   return (
@@ -89,7 +106,7 @@ export function GeneralSettings() {
         <CardHeader>
           <CardTitle>Informations de la plateforme</CardTitle>
           <CardDescription>
-            Configuration générale de l'instance CiviAgora
+            Configuration générale de l'instance CiviX
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -406,7 +423,7 @@ export function GeneralSettings() {
               </div>
               <Switch
                 checked={moduleConcertations}
-                onCheckedChange={(checked) => setModuleConcertations(checked)}
+                onCheckedChange={(checked) => handleModuleToggle('Concertations', checked, setModuleConcertations)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -418,7 +435,7 @@ export function GeneralSettings() {
               </div>
               <Switch
                 checked={moduleAssemblies}
-                onCheckedChange={(checked) => setModuleAssemblies(checked)}
+                onCheckedChange={(checked) => handleModuleToggle('Assemblées', checked, setModuleAssemblies)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -430,7 +447,7 @@ export function GeneralSettings() {
               </div>
               <Switch
                 checked={modulePetitions}
-                onCheckedChange={(checked) => setModulePetitions(checked)}
+                onCheckedChange={(checked) => handleModuleToggle('Pétitions', checked, setModulePetitions)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -442,7 +459,7 @@ export function GeneralSettings() {
               </div>
               <Switch
                 checked={moduleConferences}
-                onCheckedChange={(checked) => setModuleConferences(checked)}
+                onCheckedChange={(checked) => handleModuleToggle('Conférences', checked, setModuleConferences)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>
@@ -454,7 +471,31 @@ export function GeneralSettings() {
               </div>
               <Switch
                 checked={moduleVotes}
-                onCheckedChange={(checked) => setModuleVotes(checked)}
+                onCheckedChange={(checked) => handleModuleToggle('Votes', checked, setModuleVotes)}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Jeunesse</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Programmes pour la jeunesse</p>
+              </div>
+              <Switch
+                checked={moduleYouth}
+                onCheckedChange={(checked) => handleModuleToggle('Jeunesse', checked, setModuleYouth)}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Signalements</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Signalements de contenu</p>
+              </div>
+              <Switch
+                checked={moduleSignalements}
+                onCheckedChange={(checked) => handleModuleToggle('Signalements', checked, setModuleSignalements)}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
             </div>

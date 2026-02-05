@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useVote, useTheme } from '../hooks/useApi';
 import { ThemeTag } from '../components/ThemeTag';

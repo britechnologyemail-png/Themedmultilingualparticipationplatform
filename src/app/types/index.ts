@@ -1689,6 +1689,664 @@ export interface PerformModerationActionDTO {
   metadata?: Record<string, any>;
 }
 
+// ==================== Newsletter DTOs ====================
+
+export type NewsletterFrequency = 'daily' | 'weekly' | 'monthly';
+export type NewsletterSubscriptionStatus = 'active' | 'paused' | 'unsubscribed';
+export type NewsletterCampaignStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
+export type NewsletterTopicType = 'consultations' | 'votes' | 'petitions' | 'assemblies' | 'conferences' | 'results' | 'signalements' | 'youth';
+
+/**
+ * Newsletter Subscription - User subscription to newsletter
+ */
+export interface NewsletterSubscriptionDTO {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  userId?: string; // linked to registered user if exists
+  status: NewsletterSubscriptionStatus;
+  frequency: NewsletterFrequency;
+  language: Language;
+  topics: NewsletterTopicType[];
+  subscribedAt: string;
+  unsubscribedAt?: string;
+  lastEmailSentAt?: string;
+  emailsSent: number;
+  emailsOpened: number;
+  emailsClicked: number;
+  openRate: number; // percentage
+  clickRate: number; // percentage
+  source: 'website' | 'admin' | 'import' | 'api';
+  metadata?: {
+    ipAddress?: string;
+    userAgent?: string;
+    referrer?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Newsletter Campaign - Email campaign configuration
+ */
+export interface NewsletterCampaignDTO {
+  id: string;
+  name: LocalizedString;
+  subject: LocalizedString;
+  preheader?: LocalizedString; // preview text
+  content: {
+    html: LocalizedString;
+    text: LocalizedString; // plain text version
+  };
+  status: NewsletterCampaignStatus;
+  scheduledFor?: string;
+  sentAt?: string;
+  targetAudience: {
+    frequency?: NewsletterFrequency[];
+    topics?: NewsletterTopicType[];
+    languages?: Language[];
+    status?: NewsletterSubscriptionStatus[];
+    customSegment?: string; // custom filter query
+  };
+  stats: NewsletterCampaignStatsDTO;
+  template?: string; // template ID
+  themeIds?: string[]; // related themes
+  attachments?: DocumentDTO[];
+  testRecipients?: string[]; // for test sends
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Newsletter Campaign Statistics
+ */
+export interface NewsletterCampaignStatsDTO {
+  totalRecipients: number;
+  totalSent: number;
+  totalDelivered: number;
+  totalBounced: number;
+  totalOpened: number;
+  totalClicked: number;
+  totalUnsubscribed: number;
+  openRate: number; // percentage
+  clickRate: number; // percentage
+  bounceRate: number; // percentage
+  unsubscribeRate: number; // percentage
+  topLinks?: {
+    url: string;
+    clicks: number;
+  }[];
+  deviceStats?: {
+    desktop: number;
+    mobile: number;
+    tablet: number;
+  };
+  locationStats?: {
+    country: string;
+    count: number;
+  }[];
+}
+
+/**
+ * Newsletter Template - Reusable email template
+ */
+export interface NewsletterTemplateDTO {
+  id: string;
+  name: LocalizedString;
+  description?: LocalizedString;
+  thumbnail?: string;
+  htmlTemplate: string;
+  variables: {
+    key: string;
+    label: LocalizedString;
+    type: 'text' | 'image' | 'link' | 'list';
+    required: boolean;
+    defaultValue?: string;
+  }[];
+  category: 'announcement' | 'digest' | 'event' | 'results' | 'custom';
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Newsletter Subscription Request
+ */
+export interface CreateNewsletterSubscriptionDTO {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  frequency: NewsletterFrequency;
+  language: Language;
+  topics: NewsletterTopicType[];
+  acceptPrivacyPolicy: boolean;
+}
+
+/**
+ * Newsletter Subscription Update
+ */
+export interface UpdateNewsletterSubscriptionDTO {
+  frequency?: NewsletterFrequency;
+  language?: Language;
+  topics?: NewsletterTopicType[];
+  status?: NewsletterSubscriptionStatus;
+}
+
+/**
+ * Newsletter Statistics Dashboard
+ */
+export interface NewsletterStatsDTO {
+  overview: {
+    totalSubscribers: number;
+    activeSubscribers: number;
+    pausedSubscribers: number;
+    unsubscribedCount: number;
+    totalCampaigns: number;
+    campaignsSent: number;
+  };
+  growth: {
+    date: string;
+    newSubscribers: number;
+    unsubscribers: number;
+    netGrowth: number;
+  }[];
+  byFrequency: {
+    daily: number;
+    weekly: number;
+    monthly: number;
+  };
+  byLanguage: {
+    fr: number;
+    de: number;
+    en: number;
+  };
+  byTopic: {
+    topic: NewsletterTopicType;
+    subscribers: number;
+  }[];
+  engagement: {
+    averageOpenRate: number;
+    averageClickRate: number;
+    mostEngagedSubscribers: {
+      email: string;
+      openRate: number;
+      clickRate: number;
+    }[];
+  };
+  recentCampaigns: {
+    id: string;
+    name: LocalizedString;
+    sentAt: string;
+    recipients: number;
+    openRate: number;
+    clickRate: number;
+  }[];
+}
+
+// ==================== Footer Dynamic Menu DTOs ====================
+
+/**
+ * Menu Item Icon Configuration
+ */
+export interface MenuItemIconDTO {
+  name: string; // lucide-react icon name (e.g., "Home", "MessageSquare", "Users")
+  activeColor: string; // e.g., "text-blue-600", "text-green-600"
+  inactiveColor: string; // e.g., "text-gray-400"
+  hoverColor: string; // e.g., "text-blue-500"
+}
+
+/**
+ * Footer Menu Item
+ */
+export interface FooterMenuItemDTO {
+  id: string;
+  key: string; // unique identifier (e.g., "home", "consultations")
+  label: LocalizedString;
+  path: string;
+  icon: MenuItemIconDTO;
+  order: number; // display order (0 = first, 1 = second, etc.)
+  isActive: boolean; // active/inactive state
+  isVisible: boolean; // show/hide from menu
+  showInFooter: boolean; // specifically for footer display
+  description?: LocalizedString; // optional tooltip/description
+  badge?: {
+    count?: number;
+    label?: LocalizedString;
+    color?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Footer Menu Configuration (Global Settings)
+ */
+export interface FooterMenuConfigDTO {
+  id: string;
+  logo: {
+    isVisible: boolean;
+    url?: string; // custom logo URL
+    altText: LocalizedString;
+    width?: number;
+    height?: number;
+  };
+  layout: {
+    position: 'top' | 'bottom' | 'both'; // where to show the menu in footer
+    alignment: 'left' | 'center' | 'right';
+    showIcons: boolean;
+    showLabels: boolean;
+    compactMode: boolean; // smaller size for mobile
+  };
+  styling: {
+    backgroundColor: string;
+    textColor: string;
+    hoverBackgroundColor: string;
+    activeBackgroundColor: string;
+    borderColor?: string;
+  };
+  behavior: {
+    enableDropdowns: boolean; // for future submenu support
+    enableTooltips: boolean;
+    animationEnabled: boolean;
+  };
+  updatedAt: string;
+  updatedBy: string; // admin user ID
+}
+
+/**
+ * Complete Footer Menu Data
+ */
+export interface FooterMenuDataDTO {
+  config: FooterMenuConfigDTO;
+  items: FooterMenuItemDTO[];
+}
+
+/**
+ * Create/Update Menu Item Request
+ */
+export interface CreateFooterMenuItemDTO {
+  key: string;
+  label: LocalizedString;
+  path: string;
+  icon: MenuItemIconDTO;
+  order: number;
+  isActive: boolean;
+  isVisible: boolean;
+  showInFooter: boolean;
+  description?: LocalizedString;
+}
+
+/**
+ * Update Menu Item Request
+ */
+export interface UpdateFooterMenuItemDTO {
+  label?: LocalizedString;
+  path?: string;
+  icon?: MenuItemIconDTO;
+  order?: number;
+  isActive?: boolean;
+  isVisible?: boolean;
+  showInFooter?: boolean;
+  description?: LocalizedString;
+}
+
+/**
+ * Update Menu Configuration Request
+ */
+export interface UpdateFooterMenuConfigDTO {
+  logo?: Partial<FooterMenuConfigDTO['logo']>;
+  layout?: Partial<FooterMenuConfigDTO['layout']>;
+  styling?: Partial<FooterMenuConfigDTO['styling']>;
+  behavior?: Partial<FooterMenuConfigDTO['behavior']>;
+}
+
+/**
+ * Batch Update Menu Items Order
+ */
+export interface BatchUpdateMenuOrderDTO {
+  items: {
+    id: string;
+    order: number;
+  }[];
+}
+
+/**
+ * Menu Item Statistics
+ */
+export interface FooterMenuStatsDTO {
+  totalItems: number;
+  activeItems: number;
+  inactiveItems: number;
+  visibleItems: number;
+  clickStats: {
+    itemId: string;
+    itemKey: string;
+    totalClicks: number;
+    last7Days: number;
+    last30Days: number;
+  }[];
+  mostPopularItems: {
+    id: string;
+    key: string;
+    label: LocalizedString;
+    clicks: number;
+  }[];
+}
+
+// ==================== Header Menu DTOs ====================
+
+/**
+ * Header Menu Item
+ */
+export interface HeaderMenuItemDTO {
+  id: string;
+  key: string; // unique identifier (e.g., "home", "consultations")
+  label: LocalizedString;
+  path: string;
+  icon: MenuItemIconDTO;
+  order: number; // display order (0 = first, 1 = second, etc.)
+  isActive: boolean; // active/inactive state
+  isVisible: boolean; // show/hide from menu
+  showInHeader: boolean; // specifically for header display
+  description?: LocalizedString; // optional tooltip/description
+  badge?: {
+    count?: number;
+    label?: LocalizedString;
+    color?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Header Menu Configuration (Global Settings)
+ */
+export interface HeaderMenuConfigDTO {
+  id: string;
+  logo: {
+    isVisible: boolean;
+    url?: string; // custom logo URL
+    altText: LocalizedString;
+    width?: number;
+    height?: number;
+  };
+  layout: {
+    position: 'left' | 'center' | 'right'; // logo position
+    alignment: 'left' | 'center' | 'right'; // menu items alignment
+    showIcons: boolean;
+    showLabels: boolean;
+    compactMode: boolean; // smaller size for mobile
+  };
+  styling: {
+    backgroundColor: string;
+    textColor: string;
+    hoverBackgroundColor: string;
+    activeBackgroundColor: string;
+    borderColor?: string;
+  };
+  behavior: {
+    enableDropdowns: boolean; // for future submenu support
+    enableTooltips: boolean;
+    animationEnabled: boolean;
+    stickyHeader: boolean; // stick to top on scroll
+  };
+  updatedAt: string;
+  updatedBy: string; // admin user ID
+}
+
+/**
+ * Complete Header Menu Data
+ */
+export interface HeaderMenuDataDTO {
+  config: HeaderMenuConfigDTO;
+  items: HeaderMenuItemDTO[];
+}
+
+/**
+ * Create Header Menu Item Request
+ */
+export interface CreateHeaderMenuItemDTO {
+  key: string;
+  label: LocalizedString;
+  path: string;
+  icon: MenuItemIconDTO;
+  order: number;
+  isActive: boolean;
+  isVisible: boolean;
+  showInHeader: boolean;
+  description?: LocalizedString;
+}
+
+/**
+ * Update Header Menu Item Request
+ */
+export interface UpdateHeaderMenuItemDTO {
+  label?: LocalizedString;
+  path?: string;
+  icon?: MenuItemIconDTO;
+  order?: number;
+  isActive?: boolean;
+  isVisible?: boolean;
+  showInHeader?: boolean;
+  description?: LocalizedString;
+}
+
+/**
+ * Update Header Menu Configuration Request
+ */
+export interface UpdateHeaderMenuConfigDTO {
+  logo?: Partial<HeaderMenuConfigDTO['logo']>;
+  layout?: Partial<HeaderMenuConfigDTO['layout']>;
+  styling?: Partial<HeaderMenuConfigDTO['styling']>;
+  behavior?: Partial<HeaderMenuConfigDTO['behavior']>;
+}
+
+/**
+ * Header Menu Item Statistics
+ */
+export interface HeaderMenuStatsDTO {
+  totalItems: number;
+  activeItems: number;
+  inactiveItems: number;
+  visibleItems: number;
+  clickStats: {
+    itemId: string;
+    itemKey: string;
+    totalClicks: number;
+    last7Days: number;
+    last30Days: number;
+  }[];
+  mostPopularItems: {
+    id: string;
+    key: string;
+    label: LocalizedString;
+    clicks: number;
+  }[];
+}
+
+// ==================== Sections Management DTOs ====================
+
+/**
+ * Section Key - All available sections in CiviX platform
+ */
+export type SectionKey = 
+  | 'consultations'
+  | 'assemblies'
+  | 'petitions'
+  | 'conferences'
+  | 'votes'
+  | 'signalements'
+  | 'youth'
+  | 'themes';
+
+/**
+ * Section Status
+ */
+export type SectionStatus = 'active' | 'inactive' | 'maintenance' | 'coming-soon';
+
+/**
+ * Section Visibility Settings
+ */
+export interface SectionVisibility {
+  showInHeader: boolean;
+  showInFooter: boolean;
+  showInHomepage: boolean;
+  showInSearch: boolean;
+  requiresAuth: boolean;
+}
+
+/**
+ * Section Display Configuration
+ */
+export interface SectionDisplay {
+  icon: string; // Icon name from lucide-react
+  iconColor: string; // Tailwind color class
+  backgroundColor: string; // Tailwind background class
+  order: number; // Display order
+  featured: boolean; // Featured on homepage
+}
+
+/**
+ * Section Access Control
+ */
+export interface SectionAccessControl {
+  allowedRoles: string[]; // User roles that can access
+  allowedAgeGroups?: string[]; // Age restrictions (e.g., ['13-17', '18+'])
+  geoRestricted: boolean; // Restricted by geographic location
+  allowedTerritories?: string[]; // Territory IDs if geo-restricted
+}
+
+/**
+ * Section Features Configuration
+ */
+export interface SectionFeatures {
+  enableComments: boolean;
+  enableVoting: boolean;
+  enableSharing: boolean;
+  enableNotifications: boolean;
+  enableAnalytics: boolean;
+  enableModeration: boolean;
+  enableExport: boolean;
+}
+
+/**
+ * Section Metadata
+ */
+export interface SectionMetadata {
+  title: LocalizedString;
+  description: LocalizedString;
+  shortDescription: LocalizedString;
+  keywords: LocalizedString;
+  helpUrl?: LocalizedString;
+  tutorialUrl?: LocalizedString;
+}
+
+/**
+ * Section Statistics
+ */
+export interface SectionStats {
+  totalItems: number;
+  activeItems: number;
+  totalParticipants: number;
+  totalViews: number;
+  totalInteractions: number;
+  last7Days: {
+    views: number;
+    interactions: number;
+    newItems: number;
+  };
+  last30Days: {
+    views: number;
+    interactions: number;
+    newItems: number;
+  };
+}
+
+/**
+ * Complete Section Configuration DTO
+ */
+export interface SectionConfigDTO {
+  id: string;
+  key: SectionKey;
+  status: SectionStatus;
+  visibility: SectionVisibility;
+  display: SectionDisplay;
+  accessControl: SectionAccessControl;
+  features: SectionFeatures;
+  metadata: SectionMetadata;
+  createdAt: string;
+  updatedAt: string;
+  updatedBy: string;
+}
+
+/**
+ * Section with Statistics DTO
+ */
+export interface SectionDTO {
+  config: SectionConfigDTO;
+  stats: SectionStats;
+}
+
+/**
+ * All Sections Summary DTO
+ */
+export interface SectionsSummaryDTO {
+  sections: SectionDTO[];
+  totalSections: number;
+  activeSections: number;
+  inactiveSections: number;
+  totalParticipants: number;
+  totalInteractions: number;
+  updatedAt: string;
+}
+
+/**
+ * Create Section Configuration Request
+ */
+export interface CreateSectionConfigDTO {
+  key: SectionKey;
+  status: SectionStatus;
+  visibility: SectionVisibility;
+  display: SectionDisplay;
+  accessControl: SectionAccessControl;
+  features: SectionFeatures;
+  metadata: SectionMetadata;
+}
+
+/**
+ * Update Section Configuration Request
+ */
+export interface UpdateSectionConfigDTO {
+  status?: SectionStatus;
+  visibility?: Partial<SectionVisibility>;
+  display?: Partial<SectionDisplay>;
+  accessControl?: Partial<SectionAccessControl>;
+  features?: Partial<SectionFeatures>;
+  metadata?: Partial<SectionMetadata>;
+}
+
+/**
+ * Section Batch Update Request
+ */
+export interface BatchUpdateSectionsDTO {
+  updates: {
+    key: SectionKey;
+    changes: UpdateSectionConfigDTO;
+  }[];
+}
+
+/**
+ * Section Order Update Request
+ */
+export interface UpdateSectionOrderDTO {
+  sections: {
+    key: SectionKey;
+    order: number;
+  }[];
+}
+
 // ==================== Export types ====================
 
 export type {

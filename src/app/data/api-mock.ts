@@ -1708,6 +1708,58 @@ export const mockLegislativeConsultations: LegislativeConsultationDTO[] = [
     createdAt: '2025-11-25T10:00:00Z',
     updatedAt: '2026-01-10T23:59:59Z',
   },
+  {
+    id: 'leg_004',
+    slug: 'ordonnance-numerique-accessible',
+    title: {
+      fr: 'Ordonnance sur l\'accessibilité numérique',
+      de: 'Verordnung über digitale Barrierefreiheit',
+      en: 'Digital Accessibility Ordinance',
+    },
+    description: {
+      fr: 'Ordonnance établissant les normes d\'accessibilité pour les services numériques publics et privés.',
+      de: 'Verordnung zur Festlegung von Barrierefreiheitsstandards für öffentliche und private digitale Dienste.',
+      en: 'Ordinance establishing accessibility standards for public and private digital services.',
+    },
+    themeId: 'culture',
+    textType: 'ordinance',
+    referenceNumber: 'ORD-2026-04',
+    status: 'upcoming',
+    startDate: '2026-03-01T00:00:00Z',
+    endDate: '2026-04-15T23:59:59Z',
+    author: {
+      id: 'usr_admin_004',
+      firstName: 'Commission',
+      lastName: 'Numérique',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop',
+      role: 'admin',
+    },
+    organizer: {
+      id: 'org_federal',
+      name: {
+        fr: 'Gouvernement Fédéral',
+        de: 'Bundesregierung',
+        en: 'Federal Government',
+      },
+      type: 'national',
+      logo: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=200&h=200&fit=crop',
+      website: 'https://admin.ch',
+    },
+    articles: [],
+    stats: {
+      totalArticles: 10,
+      totalAnnotations: 0,
+      totalParticipants: 0,
+      totalVotes: 0,
+      articlesWithAnnotations: 0,
+      averageAnnotationsPerArticle: 0,
+      engagementRate: 0,
+    },
+    documents: [],
+    tags: ['numérique', 'accessibilité', 'inclusion', 'technologie'],
+    createdAt: '2026-02-01T10:00:00Z',
+    updatedAt: '2026-02-01T10:00:00Z',
+  },
 ];
 
 export const mockArticles: ArticleDTO[] = [
@@ -3168,6 +3220,100 @@ export const mockSpeakers: SpeakerDTO[] = [
     },
     sessions: ['ses_001', 'ses_003'],
   },
+  {
+    id: 'spk_003',
+    firstName: 'Marie',
+    lastName: 'Dubois',
+    title: {
+      fr: 'Experte en Économie Circulaire',
+      de: 'Expertin für Kreislaufwirtschaft',
+      en: 'Circular Economy Expert',
+    },
+    organization: 'Institut d\'Économie Durable',
+    bio: {
+      fr: 'Dr. Marie Dubois est une pionnière reconnue de l\'économie circulaire en Europe francophone. Avec plus de 20 ans d\'expérience, elle accompagne les entreprises et collectivités dans leur transformation vers des modèles économiques durables.',
+      de: 'Dr. Marie Dubois ist eine anerkannte Pionierin der Kreislaufwirtschaft im frankophonen Europa. Mit über 20 Jahren Erfahrung begleitet sie Unternehmen und Gemeinden bei ihrer Transformation zu nachhaltigen Wirtschaftsmodellen.',
+      en: 'Dr. Marie Dubois is a recognized pioneer of the circular economy in Francophone Europe. With over 20 years of experience, she supports companies and communities in their transformation to sustainable economic models.',
+    },
+    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&h=150&fit=crop',
+    expertise: ['économie circulaire', 'gestion des déchets', 'écoconception', 'durabilité'],
+    socialLinks: {
+      linkedin: 'https://linkedin.com/in/mariedubois',
+      twitter: '@dr_dubois_eco',
+      website: 'https://mariedubois-research.com',
+    },
+    sessions: [],
+  },
+  {
+    id: 'spk_004',
+    firstName: 'Sophie',
+    lastName: 'Laurent',
+    title: {
+      fr: 'Professeure en Écologie Industrielle',
+      de: 'Professorin für Industrielle Ökologie',
+      en: 'Professor of Industrial Ecology',
+    },
+    organization: 'Université de Lausanne',
+    bio: {
+      fr: 'Prof. Sophie Laurent est titulaire de la Chaire d\'Écologie Industrielle à l\'Université de Lausanne. Ses recherches portent sur l\'analyse de cycle de vie, l\'écoconception et les stratégies de décarbonation industrielle.',
+      de: 'Prof. Sophie Laurent ist Inhaberin des Lehrstuhls für Industrielle Ökologie an der Universität Lausanne. Ihre Forschung konzentriert sich auf Lebenszyklusanalyse, Ökodesign und industrielle Dekarbonisierungsstrategien.',
+      en: 'Prof. Sophie Laurent holds the Chair of Industrial Ecology at the University of Lausanne. Her research focuses on life cycle analysis, eco-design and industrial decarbonization strategies.',
+    },
+    avatar: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=150&h=150&fit=crop',
+    expertise: ['écologie industrielle', 'analyse de cycle de vie', 'écoconception', 'décarbonation'],
+    socialLinks: {
+      linkedin: 'https://linkedin.com/in/sophielaurent',
+      twitter: '@prof_slaurent',
+      website: 'https://unil.ch/ecologie-industrielle',
+    },
+    sessions: [],
+  },
+  {
+    id: 'spk_005',
+    firstName: 'Pierre',
+    lastName: 'Renaud',
+    title: {
+      fr: 'Médecin & Expert en Santé Publique',
+      de: 'Arzt & Experte für öffentliche Gesundheit',
+      en: 'Physician & Public Health Expert',
+    },
+    organization: 'Centre Hospitalier Universitaire Vaudois (CHUV)',
+    bio: {
+      fr: 'Dr. Pierre Renaud est médecin infectiologue et expert en santé publique au CHUV. Il dirige le département de médecine préventive et coordonne les programmes de vaccination et de prévention des maladies infectieuses.',
+      de: 'Dr. Pierre Renaud ist Infektiologe und Experte für öffentliche Gesundheit am CHUV. Er leitet die Abteilung für Präventivmedizin und koordiniert Impf- und Infektionskrankheitspräventionsprogramme.',
+      en: 'Dr. Pierre Renaud is an infectious disease physician and public health expert at CHUV. He heads the preventive medicine department and coordinates vaccination and infectious disease prevention programs.',
+    },
+    avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150&h=150&fit=crop',
+    expertise: ['infectiologie', 'épidémiologie', 'médecine préventive', 'santé publique', 'vaccination'],
+    socialLinks: {
+      linkedin: 'https://linkedin.com/in/pierrerenaud',
+    },
+    sessions: [],
+  },
+  {
+    id: 'spk_006',
+    firstName: 'Isabelle',
+    lastName: 'Chen',
+    title: {
+      fr: 'Chercheuse en Neurosciences & Santé Mentale',
+      de: 'Forscherin für Neurowissenschaften & psychische Gesundheit',
+      en: 'Neuroscience & Mental Health Researcher',
+    },
+    organization: 'Institut des Neurosciences de Genève',
+    bio: {
+      fr: 'Dr. Isabelle Chen est une chercheuse de renommée internationale spécialisée en neurosciences cognitives et santé mentale. Ses travaux portent sur les mécanismes cérébraux du stress et de l\'anxiété.',
+      de: 'Dr. Isabelle Chen ist eine international renommierte Forscherin, spezialisiert auf kognitive Neurowissenschaften und psychische Gesundheit. Ihre Arbeit konzentriert sich auf die Gehirnmechanismen von Stress und Angst.',
+      en: 'Dr. Isabelle Chen is an internationally renowned researcher specializing in cognitive neuroscience and mental health. Her work focuses on the brain mechanisms of stress and anxiety.',
+    },
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop',
+    expertise: ['neurosciences cognitives', 'santé mentale', 'gestion du stress', 'neuroplasticité'],
+    socialLinks: {
+      linkedin: 'https://linkedin.com/in/isabellechen',
+      twitter: '@dr_ichen',
+      website: 'https://neurosciences.unige.ch/chen-lab',
+    },
+    sessions: [],
+  },
 ];
 
 export const mockConferences: ConferenceDTO[] = [
@@ -4581,6 +4727,34 @@ export const mockAIQuickAnswers: import('../types').AIQuickAnswerDTO[] = [
     },
     category: 'participation',
     tags: ['vote', 'security', 'anonymity']
+  },
+  {
+    question: {
+      fr: "Quels sont les critères du budget participatif ?",
+      de: "Was sind die Kriterien für den Bürgerhaushalt?",
+      en: "What are the criteria for participatory budgeting?"
+    },
+    answer: {
+      fr: "Le budget participatif permet aux citoyens de proposer et voter pour des projets locaux. Les critères incluent : projet d'intérêt général, faisabilité technique, coût raisonnable (généralement entre 5 000€ et 100 000€), impact positif sur la communauté. Tous les résidents de plus de 16 ans peuvent participer.",
+      de: "Der Bürgerhaushalt ermöglicht es den Bürgern, lokale Projekte vorzuschlagen und darüber abzustimmen. Die Kriterien umfassen: Projekt von allgemeinem Interesse, technische Machbarkeit, angemessene Kosten (normalerweise zwischen 5.000 € und 100.000 €), positive Auswirkungen auf die Gemeinschaft. Alle Einwohner über 16 Jahren können teilnehmen.",
+      en: "Participatory budgeting allows citizens to propose and vote on local projects. Criteria include: project of general interest, technical feasibility, reasonable cost (typically between €5,000 and €100,000), positive community impact. All residents over 16 can participate."
+    },
+    category: 'participation',
+    tags: ['budget', 'criteria', 'participatory']
+  },
+  {
+    question: {
+      fr: "Comment devenir bénévole pour la ville ?",
+      de: "Wie werde ich Freiwilliger für die Stadt?",
+      en: "How do I become a volunteer for the city?"
+    },
+    answer: {
+      fr: "Pour devenir bénévole, visitez la section 'Engagement' de votre profil et consultez les opportunités disponibles. Vous pouvez aider lors d'événements, participer à des assemblées citoyennes, ou rejoindre des groupes de travail thématiques. Inscrivez-vous aux missions qui vous intéressent et notre équipe vous contactera.",
+      de: "Um Freiwilliger zu werden, besuchen Sie den Bereich 'Engagement' in Ihrem Profil und sehen Sie sich die verfügbaren Möglichkeiten an. Sie können bei Veranstaltungen helfen, an Bürgerversammlungen teilnehmen oder thematischen Arbeitsgruppen beitreten. Melden Sie sich für die Missionen an, die Sie interessieren, und unser Team wird Sie kontaktieren.",
+      en: "To become a volunteer, visit the 'Engagement' section of your profile and check available opportunities. You can help at events, participate in citizen assemblies, or join thematic working groups. Sign up for missions that interest you and our team will contact you."
+    },
+    category: 'engagement',
+    tags: ['volunteer', 'engagement', 'community']
   }
 ];
 
@@ -4604,6 +4778,48 @@ export const mockAISuggestions: import('../types').AISuggestionDTO[] = [
       fr: "Voir la concertation",
       de: "Konsultation ansehen",
       en: "View consultation"
+    }
+  },
+  {
+    id: 'sug_002',
+    type: 'action',
+    title: {
+      fr: "Élisez le meilleur projet de quartier",
+      de: "Wählen Sie das beste Quartiersprojekt",
+      en: "Vote for the best neighborhood project"
+    },
+    description: {
+      fr: "Votez pour le projet qui transformera votre quartier",
+      de: "Stimmen Sie für das Projekt, das Ihr Viertel transformieren wird",
+      en: "Vote for the project that will transform your neighborhood"
+    },
+    relevanceScore: 0.88,
+    actionUrl: '/votes',
+    actionLabel: {
+      fr: "Voter maintenant",
+      de: "Jetzt abstimmen",
+      en: "Vote now"
+    }
+  },
+  {
+    id: 'sug_003',
+    type: 'resource',
+    title: {
+      fr: "Atelier d'urbanisme : Centre-ville",
+      de: "Stadtplanungs-Workshop: Innenstadt",
+      en: "Urban planning workshop: City center"
+    },
+    description: {
+      fr: "Participez à l'atelier sur le réaménagement du centre-ville",
+      de: "Nehmen Sie am Workshop zur Neugestaltung der Innenstadt teil",
+      en: "Participate in the workshop on city center redevelopment"
+    },
+    relevanceScore: 0.82,
+    actionUrl: '/conferences',
+    actionLabel: {
+      fr: "S'inscrire",
+      de: "Registrieren",
+      en: "Register"
     }
   }
 ];
@@ -4968,9 +5184,72 @@ export const mockYouthPolls: YouthPollDTO[] = [
           },
         ],
       },
+      {
+        id: 'q_005b',
+        question: {
+          fr: 'Qu\'est-ce qui pourrait améliorer ton trajet ? (plusieurs choix possibles)',
+          de: 'Was könnte deine Fahrt verbessern? (Mehrfachauswahl)',
+          en: 'What could improve your journey? (multiple choices)',
+        },
+        type: 'multiple_choice',
+        required: false,
+        maxSelections: 3,
+        options: [
+          {
+            id: 'opt_017a',
+            text: {
+              fr: 'Plus de fréquence ⏰',
+              de: 'Mehr Fahrten ⏰',
+              en: 'More frequency ⏰',
+            },
+            emoji: '⏰',
+            voteCount: 289,
+          },
+          {
+            id: 'opt_017b',
+            text: {
+              fr: 'Moins d\'attente ⏱️',
+              de: 'Weniger Wartezeit ⏱️',
+              en: 'Less waiting ⏱️',
+            },
+            emoji: '⏱️',
+            voteCount: 312,
+          },
+          {
+            id: 'opt_017c',
+            text: {
+              fr: 'Bus plus confortables 🛋️',
+              de: 'Komfortablere Busse 🛋️',
+              en: 'More comfortable buses 🛋️',
+            },
+            emoji: '🛋️',
+            voteCount: 234,
+          },
+          {
+            id: 'opt_017d',
+            text: {
+              fr: 'Nouveaux arrêts 📍',
+              de: 'Neue Haltestellen 📍',
+              en: 'New stops 📍',
+            },
+            emoji: '📍',
+            voteCount: 178,
+          },
+          {
+            id: 'opt_017e',
+            text: {
+              fr: 'Pistes cyclables sécurisées 🚴',
+              de: 'Sichere Radwege 🚴',
+              en: 'Safe bike lanes 🚴',
+            },
+            emoji: '🚴',
+            voteCount: 267,
+          },
+        ],
+      },
     ],
     totalResponses: 600,
-    estimatedDuration: 2,
+    estimatedDuration: 3,
     createdAt: '2025-12-20T10:00:00Z',
     startDate: '2026-01-05T00:00:00Z',
     endDate: '2026-01-31T23:59:59Z',
@@ -5084,6 +5363,85 @@ export const mockYouthPolls: YouthPollDTO[] = [
         ],
         maxSelections: 5,
       },
+      {
+        id: 'q_006b',
+        question: {
+          fr: 'Quelle fréquence d\'événements préfères-tu ?',
+          de: 'Welche Veranstaltungshäufigkeit bevorzugst du?',
+          en: 'What frequency of events do you prefer?',
+        },
+        type: 'single_choice',
+        required: true,
+        options: [
+          {
+            id: 'opt_023a',
+            text: {
+              fr: 'Chaque semaine 📅',
+              de: 'Jede Woche 📅',
+              en: 'Every week 📅',
+            },
+            emoji: '📅',
+            voteCount: 145,
+            percentage: 28,
+          },
+          {
+            id: 'opt_023b',
+            text: {
+              fr: 'Toutes les deux semaines 🗓️',
+              de: 'Alle zwei Wochen 🗓️',
+              en: 'Every two weeks 🗓️',
+            },
+            emoji: '🗓️',
+            voteCount: 234,
+            percentage: 45,
+          },
+          {
+            id: 'opt_023c',
+            text: {
+              fr: 'Une fois par mois 📆',
+              de: 'Einmal pro Monat 📆',
+              en: 'Once a month 📆',
+            },
+            emoji: '📆',
+            voteCount: 144,
+            percentage: 27,
+          },
+        ],
+      },
+      {
+        id: 'q_006c',
+        question: {
+          fr: 'Serais-tu intéressé(e) pour aider à organiser des événements ?',
+          de: 'Würdest du bei der Organisation von Veranstaltungen helfen?',
+          en: 'Would you be interested in helping organize events?',
+        },
+        type: 'yes_no',
+        required: false,
+        options: [
+          {
+            id: 'opt_023d',
+            text: {
+              fr: 'Oui, volontiers ! 🙌',
+              de: 'Ja, gerne! 🙌',
+              en: 'Yes, gladly! 🙌',
+            },
+            emoji: '🙌',
+            voteCount: 198,
+            percentage: 38,
+          },
+          {
+            id: 'opt_023e',
+            text: {
+              fr: 'Non, merci 🙅',
+              de: 'Nein, danke 🙅',
+              en: 'No, thank you 🙅',
+            },
+            emoji: '🙅',
+            voteCount: 325,
+            percentage: 62,
+          },
+        ],
+      },
     ],
     totalResponses: 523,
     estimatedDuration: 2,
@@ -5156,6 +5514,104 @@ export const mockYouthPolls: YouthPollDTO[] = [
             },
             voteCount: 168,
             percentage: 42,
+          },
+        ],
+      },
+      {
+        id: 'q_007b',
+        question: {
+          fr: 'Quel type de formation t\'intéresse le plus ?',
+          de: 'Welche Art von Ausbildung interessiert dich am meisten?',
+          en: 'What type of training interests you most?',
+        },
+        type: 'single_choice',
+        required: true,
+        options: [
+          {
+            id: 'opt_025a',
+            text: {
+              fr: 'Formation professionnelle 🛠️',
+              de: 'Berufsausbildung 🛠️',
+              en: 'Vocational training 🛠️',
+            },
+            emoji: '🛠️',
+            voteCount: 156,
+            percentage: 39,
+          },
+          {
+            id: 'opt_025b',
+            text: {
+              fr: 'Études universitaires 🎓',
+              de: 'Universitätsstudium 🎓',
+              en: 'University studies 🎓',
+            },
+            emoji: '🎓',
+            voteCount: 178,
+            percentage: 44,
+          },
+          {
+            id: 'opt_025c',
+            text: {
+              fr: 'Apprentissage en entreprise 💼',
+              de: 'Ausbildung im Unternehmen 💼',
+              en: 'Company apprenticeship 💼',
+            },
+            emoji: '💼',
+            voteCount: 68,
+            percentage: 17,
+          },
+        ],
+      },
+      {
+        id: 'q_007c',
+        question: {
+          fr: 'Quels services d\'orientation souhaiterais-tu ? (plusieurs choix possibles)',
+          de: 'Welche Beratungsdienste wünschst du dir? (Mehrfachauswahl)',
+          en: 'What guidance services would you like? (multiple choices)',
+        },
+        type: 'multiple_choice',
+        required: false,
+        maxSelections: 3,
+        options: [
+          {
+            id: 'opt_025d',
+            text: {
+              fr: 'Rencontres avec des professionnels 👥',
+              de: 'Treffen mit Fachleuten 👥',
+              en: 'Meet professionals 👥',
+            },
+            emoji: '👥',
+            voteCount: 267,
+          },
+          {
+            id: 'opt_025e',
+            text: {
+              fr: 'Stages découverte 🔍',
+              de: 'Schnupperpraktika 🔍',
+              en: 'Discovery internships 🔍',
+            },
+            emoji: '🔍',
+            voteCount: 312,
+          },
+          {
+            id: 'opt_025f',
+            text: {
+              fr: 'Ateliers CV et motivation ✍️',
+              de: 'CV- und Motivations-Workshops ✍️',
+              en: 'CV and motivation workshops ✍️',
+            },
+            emoji: '✍️',
+            voteCount: 198,
+          },
+          {
+            id: 'opt_025g',
+            text: {
+              fr: 'Conseils personnalisés 💬',
+              de: 'Persönliche Beratung 💬',
+              en: 'Personalized advice 💬',
+            },
+            emoji: '💬',
+            voteCount: 289,
           },
         ],
       },
@@ -5349,7 +5805,7 @@ export const mockYouthPolls: YouthPollDTO[] = [
               de: 'Immer ♻️',
               en: 'Always ♻️',
             },
-            emoji: '♻️',
+            emoji: '♻���',
             voteCount: 423,
             percentage: 62,
           },
@@ -5454,7 +5910,9 @@ export const mockYouthSpaceStats: YouthSpaceStatsDTO = {
 
 // ==================== Mock IVR Data ====================
 
-export const mockIVRResponses: import('../types').IVRResponseDTO[] = [
+// REMOVED - IVR Section deleted
+export const mockIVRResponses: any[] = [];
+/*
   {
     id: 'ivr_resp_001',
     channel: 'phone',
@@ -5636,8 +6094,11 @@ export const mockIVRResponses: import('../types').IVRResponseDTO[] = [
     }
   }
 ];
+*/
 
-export const mockIVRStats: import('../types').IVRStatsDTO = {
+export const mockIVRStats: any = {};
+/*
+export const mockIVRStats_OLD: import('../types').IVRStatsDTO = {
   totalResponses: 347,
   completedResponses: 312,
   partialResponses: 28,
@@ -5691,8 +6152,11 @@ export const mockIVRStats: import('../types').IVRStatsDTO = {
     { date: '2026-01-13', responses: 45 }
   ]
 };
+*/
 
-export const mockIVRCampaigns: import('../types').IVRCampaignDTO[] = [
+export const mockIVRCampaigns: any[] = [];
+/*
+export const mockIVRCampaigns_OLD: import('../types').IVRCampaignDTO[] = [
   {
     id: 'ivr_camp_001',
     name: {
@@ -5808,8 +6272,11 @@ export const mockIVRCampaigns: import('../types').IVRCampaignDTO[] = [
     updatedAt: '2026-01-13T14:20:00Z'
   }
 ];
+*/
 
-export const mockIVRProcessSummaries: import('../types').IVRProcessSummaryDTO[] = [
+export const mockIVRProcessSummaries: any[] = [];
+/*
+export const mockIVRProcessSummaries_OLD: import('../types').IVRProcessSummaryDTO[] = [
   {
     processId: 'cons_001',
     processType: 'consultation',
@@ -5883,6 +6350,7 @@ export const mockIVRProcessSummaries: import('../types').IVRProcessSummaryDTO[] 
     ]
   }
 ];
+*/
 
 // ==================== Export all mock data ====================
 

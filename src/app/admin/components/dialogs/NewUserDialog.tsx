@@ -44,6 +44,14 @@ export function NewUserDialog({ open, onOpenChange, onSubmit }: NewUserDialogPro
     onSubmit?.(formData);
     onOpenChange(false);
     // Reset form
+    resetForm();
+  };
+
+  const handleChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const resetForm = () => {
     setFormData({
       firstName: '',
       lastName: '',
@@ -55,8 +63,10 @@ export function NewUserDialog({ open, onOpenChange, onSubmit }: NewUserDialogPro
     });
   };
 
-  const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleCancel = () => {
+    // Reset form when canceling
+    resetForm();
+    onOpenChange(false);
   };
 
   return (
@@ -69,9 +79,9 @@ export function NewUserDialog({ open, onOpenChange, onSubmit }: NewUserDialogPro
              'Create New User'}
           </DialogTitle>
           <DialogDescription>
-            {language === 'fr' ? 'Ajoutez un nouvel utilisateur à la plateforme CiviAgora' :
-             language === 'de' ? 'Fügen Sie einen neuen Benutzer zur CiviAgora-Plattform hinzu' :
-             'Add a new user to the CiviAgora platform'}
+            {language === 'fr' ? 'Ajoutez un nouvel utilisateur à la plateforme CiviX' :
+             language === 'de' ? 'Fügen Sie einen neuen Benutzer zur CiviX-Plattform hinzu' :
+             'Add a new user to the CiviX platform'}
           </DialogDescription>
         </DialogHeader>
         
@@ -239,7 +249,7 @@ export function NewUserDialog({ open, onOpenChange, onSubmit }: NewUserDialogPro
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={handleCancel}>
               {language === 'fr' ? 'Annuler' :
                language === 'de' ? 'Abbrechen' :
                'Cancel'}

@@ -609,6 +609,7 @@ export function useLegislativeConsultation(id: string) {
 export function useLegislativeConsultationSummaries(filters?: {
   status?: string;
   themeId?: string;
+  textType?: string;
   limit?: number;
 }) {
   return useQuery({

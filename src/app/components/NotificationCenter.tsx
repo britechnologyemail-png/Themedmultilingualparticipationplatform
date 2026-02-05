@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { Bell, X, Check, CheckCheck, Filter, Trash2 } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
+import { useLanguage } from '../contexts/LanguageContext';
+import { Bell, Check, CheckCheck } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from './ui/sheet';
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 import { ScrollArea } from './ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { useLanguage } from '@/app/contexts/LanguageContext';
-import { useNotifications, useMarkNotificationAsRead } from '@/app/hooks/useApi';
-import type { NotificationDTO } from '@/app/types';
-import { Link } from 'react-router-dom';
+import { useNotifications, useMarkNotificationAsRead } from '../hooks/useApi';
+import type { NotificationDTO } from '../types';
+import { Link } from 'react-router';
 
 /**
  * NotificationCenter - Centre de notifications UI
@@ -200,6 +200,11 @@ export function NotificationCenter() {
                 </Button>
               )}
             </div>
+            <SheetDescription className="sr-only">
+              {language === 'fr' ? 'Gérez vos notifications et restez informé des dernières activités' : 
+               language === 'de' ? 'Verwalten Sie Ihre Benachrichtigungen und bleiben Sie über die neuesten Aktivitäten informiert' : 
+               'Manage your notifications and stay informed about the latest activities'}
+            </SheetDescription>
           </SheetHeader>
 
           {/* Filtres */}

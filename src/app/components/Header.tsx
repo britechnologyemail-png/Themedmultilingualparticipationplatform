@@ -17,13 +17,36 @@ import {
   Layers,
   Sparkles,
   AlertCircle,
+  Video,
+  Tag,
 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { motion } from 'motion/react';
 import { AuthModal } from './AuthModal';
 import { UserMenu } from './UserMenu';
 import { GlobalSearch } from './GlobalSearch';
 import { MobileMenu } from './MobileMenu';
 import { NotificationCenter } from './NotificationCenter';
+import { useActiveHeaderMenuItems } from '../hooks/useHeaderMenuApi';
+
+// Helper function to get Lucide icon component by name
+function getIconComponent(iconName: string): React.ComponentType<any> | null {
+  const iconMap: Record<string, React.ComponentType<any>> = {
+    Home: LucideIcons.Home,
+    MessageSquare: LucideIcons.MessageSquare,
+    Users: LucideIcons.Users,
+    FileText: LucideIcons.FileText,
+    Video: LucideIcons.Video,
+    Vote: LucideIcons.Vote,
+    AlertCircle: LucideIcons.AlertCircle,
+    Sparkles: LucideIcons.Sparkles,
+    Tag: LucideIcons.Tag,
+    Mic: LucideIcons.Mic,
+    Layers: LucideIcons.Layers,
+  };
+
+  return iconMap[iconName] || LucideIcons.Home;
+}
 
 export function Header() {
   const { language, setLanguage, t } = useLanguage();
@@ -31,6 +54,9 @@ export function Header() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Fetch active header menu items from API
+  const { data: menuItems, isLoading } = useActiveHeaderMenuItems();
 
   // Keyboard shortcut for search (Ctrl+K or Cmd+K)
   useEffect(() => {
@@ -45,19 +71,6 @@ export function Header() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Navigation items with icons
-  const navItems = [
-    { key: 'home', path: '/', icon: Home, label: t('nav.home') },
-    { key: 'consultations', path: '/consultations', icon: MessageSquare, label: t('nav.consultations') },
-    { key: 'assemblies', path: '/assemblies', icon: Users, label: t('nav.assemblies') },
-    { key: 'petitions', path: '/petitions', icon: FileText, label: t('nav.petitions') },
-    { key: 'conferences', path: '/conferences', icon: Mic, label: t('nav.conferences') },
-    { key: 'votes', path: '/votes', icon: Vote, label: language === 'fr' ? 'Votes' : language === 'de' ? 'Abstimmungen' : 'Votes' },
-    { key: 'signalements', path: '/signalements', icon: AlertCircle, label: language === 'fr' ? 'Signalements' : language === 'de' ? 'Meldungen' : 'Reports' },
-    { key: 'youth-space', path: '/youth-space', icon: Sparkles, label: language === 'fr' ? '🌟 Jeunesse' : language === 'de' ? '🌟 Jugend' : '🌟 Youth' },
-    { key: 'themes', path: '/themes', icon: Layers, label: t('nav.themes') },
-  ];
-
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       {/* Centered Container with max-width */}
@@ -65,7 +78,7 @@ export function Header() {
         <div className="w-full max-w-[1400px] px-6 lg:px-8">
           <div className="grid grid-cols-[auto_1fr_auto] items-center h-16 gap-6">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
+            <Link to="/organization" className="flex items-center gap-3" title={language === 'fr' ? 'À propos de l\'organisation' : language === 'de' ? 'Über die Organisation' : 'About the Organization'}>
               <motion.div 
                 className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg"
                 whileHover={{ scale: 1.05, rotate: 5 }}
@@ -78,16 +91,20 @@ export function Header() {
 
             {/* Navigation principale - Center aligned with icons */}
             <nav className="hidden lg:flex items-center justify-center gap-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.key}
-                  to={item.path}
-                  className="group flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50/50 text-center whitespace-nowrap text-[15px]"
-                >
-                  <item.icon className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity" />
-                  <span>{item.label}</span>
-                </Link>
-              ))}
+              {isLoading && <div className="text-sm text-gray-500">Loading...</div>}
+              {menuItems && menuItems.map((item) => {
+                const IconComponent = getIconComponent(item.icon.name);
+                return (
+                  <Link
+                    key={item.key}
+                    to={item.path}
+                    className="group flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-blue-50/50 text-center whitespace-nowrap text-[15px]"
+                  >
+                    {IconComponent && <IconComponent className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity" />}
+                    <span>{item.label[language]}</span>
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Actions - Right aligned */}

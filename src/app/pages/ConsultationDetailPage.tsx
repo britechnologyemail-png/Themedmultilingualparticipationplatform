@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useConsultation, useTheme } from '../hooks/useApi';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -8,6 +8,7 @@ import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
 import { ThemeTag } from '../components/ThemeTag';
 import { StatusBadge } from '../components/StatusBadge';
+import { ShareButton } from '../components/ShareButton';
 import { 
   Calendar, 
   MapPin, 
@@ -17,7 +18,6 @@ import {
   Heart,
   Send,
   ThumbsUp,
-  Share2,
   Edit2,
   Trash2,
   Save,
@@ -451,12 +451,12 @@ export function ConsultationDetailPage() {
                   {language === 'en' && 'Register'}
                 </Button>
               )}
-              <Button variant="outline" className="w-full gap-2">
-                <Share2 className="w-4 h-4" />
-                {language === 'fr' && 'Partager'}
-                {language === 'de' && 'Teilen'}
-                {language === 'en' && 'Share'}
-              </Button>
+              <ShareButton 
+                title={tLocal(consultation.title)}
+                description={tLocal(consultation.description)}
+                variant="outline"
+                className="w-full"
+              />
             </CardContent>
           </Card>
 

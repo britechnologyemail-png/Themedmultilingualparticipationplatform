@@ -34,7 +34,7 @@ const translations: Translations = {
   'footer.faq': { fr: 'FAQ', de: 'FAQ', en: 'FAQ' },
   'footer.guides': { fr: 'Guides', de: 'Leitfäden', en: 'Guides' },
   'footer.support': { fr: 'Support', de: 'Unterstützung', en: 'Support' },
-  'footer.ivrAccess': { fr: 'Accès téléphonique (IVR)', de: 'Telefonzugang (IVR)', en: 'Phone access (IVR)' },
+  'footer.organizationProfile': { fr: 'Profil de l\'organisation', de: 'Organisationsprofil', en: 'Organization profile' },
   'footer.privacy': { fr: 'Confidentialité', de: 'Datenschutz', en: 'Privacy' },
   'footer.terms': { fr: 'Conditions d\'utilisation', de: 'Nutzungsbedingungen', en: 'Terms of use' },
   'footer.accessibility': { fr: 'Accessibilité', de: 'Zugänglichkeit', en: 'Accessibility' },

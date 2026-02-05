@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { useLanguage } from '../contexts/LanguageContext';
 import {
   Dialog,
@@ -55,7 +55,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
   // Load recent searches from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('civiagora_recent_searches');
+    const saved = localStorage.getItem('civix_recent_searches');
     if (saved) {
       setRecentSearches(JSON.parse(saved));
     }
@@ -187,7 +187,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
     // Save to recent searches
     const updated = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
     setRecentSearches(updated);
-    localStorage.setItem('civiagora_recent_searches', JSON.stringify(updated));
+    localStorage.setItem('civix_recent_searches', JSON.stringify(updated));
 
     navigate(result.url);
     onOpenChange(false);
@@ -200,7 +200,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
   const clearRecentSearches = () => {
     setRecentSearches([]);
-    localStorage.removeItem('civiagora_recent_searches');
+    localStorage.removeItem('civix_recent_searches');
   };
 
   const getTypeLabel = (type: string) => {
@@ -251,9 +251,9 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={
-                language === 'fr' ? 'Rechercher dans CiviAgora...' :
-                language === 'de' ? 'In CiviAgora suchen...' :
-                'Search in CiviAgora...'
+                language === 'fr' ? 'Rechercher dans CiviX...' :
+                language === 'de' ? 'In CiviX suchen...' :
+                'Search in CiviX...'
               }
               className="pl-10 pr-4 py-6 text-lg border-0 border-b border-gray-200 rounded-none focus:ring-0 focus:border-blue-500"
               autoFocus

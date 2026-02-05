@@ -107,9 +107,9 @@ export function AIAssistant() {
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
               <h2 className="font-semibold">
-                {language === 'fr' && 'Assistant CiviAgora'}
-                {language === 'de' && 'CiviAgora-Assistent'}
-                {language === 'en' && 'CiviAgora Assistant'}
+                {language === 'fr' && 'Assistant CiviX'}
+                {language === 'de' && 'CiviX-Assistent'}
+                {language === 'en' && 'CiviX Assistant'}
               </h2>
             </div>
             <Button
@@ -152,13 +152,13 @@ export function AIAssistant() {
                       {language === 'de' && 'Häufige Fragen'}
                       {language === 'en' && 'Frequent questions'}
                     </div>
-                    {quickAnswers.slice(0, 3).map((qa) => (
+                    {quickAnswers.map((qa) => (
                       <button
                         key={qa.tags.join('-')}
                         onClick={() => handleQuickAnswer(qa)}
-                        className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all text-sm"
+                        className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all text-sm group"
                       >
-                        {tLocal(qa.question)}
+                        <span className="group-hover:text-blue-700">{tLocal(qa.question)}</span>
                       </button>
                     ))}
                   </div>
@@ -167,30 +167,39 @@ export function AIAssistant() {
                 {/* Suggestions */}
                 {suggestions && suggestions.length > 0 && (
                   <div className="space-y-3">
-                    <div className="text-sm font-medium text-gray-700">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
                       {language === 'fr' && 'Recommandations pour vous'}
                       {language === 'de' && 'Empfehlungen für Sie'}
                       {language === 'en' && 'Recommendations for you'}
                     </div>
-                    {suggestions.slice(0, 2).map((suggestion) => (
-                      <Card
-                        key={suggestion.id}
-                        className="p-3 hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => handleSuggestionClick(suggestion)}
-                      >
-                        <div className="space-y-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <h4 className="font-medium text-sm">{tLocal(suggestion.title)}</h4>
-                            <Badge variant="secondary" className="text-xs">
+                    <div className="space-y-2">
+                      {suggestions.map((suggestion) => (
+                        <Card
+                          key={suggestion.id}
+                          className="p-3 hover:shadow-md transition-shadow cursor-pointer border border-gray-200 hover:border-blue-300"
+                          onClick={() => handleSuggestionClick(suggestion)}
+                        >
+                          <div className="flex items-start gap-3">
+                            <Badge 
+                              variant="secondary" 
+                              className={`text-xs shrink-0 ${
+                                suggestion.type === 'process' ? 'bg-blue-100 text-blue-700' :
+                                suggestion.type === 'action' ? 'bg-purple-100 text-purple-700' :
+                                'bg-green-100 text-green-700'
+                              }`}
+                            >
                               {suggestion.type === 'process' && (language === 'fr' ? 'Processus' : language === 'de' ? 'Prozess' : 'Process')}
-                              {suggestion.type === 'action' && (language === 'fr' ? 'Action' : language === 'de' ? 'Aktion' : 'Action')}
-                              {suggestion.type === 'resource' && (language === 'fr' ? 'Ressource' : language === 'de' ? 'Ressource' : 'Resource')}
+                              {suggestion.type === 'action' && (language === 'fr' ? 'Vote' : language === 'de' ? 'Abstimmung' : 'Vote')}
+                              {suggestion.type === 'resource' && (language === 'fr' ? 'Événement' : language === 'de' ? 'Veranstaltung' : 'Event')}
                             </Badge>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-sm text-gray-900">{tLocal(suggestion.title)}</h4>
+                            </div>
                           </div>
-                          <p className="text-xs text-gray-600">{tLocal(suggestion.description)}</p>
-                        </div>
-                      </Card>
-                    ))}
+                        </Card>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

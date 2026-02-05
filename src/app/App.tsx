@@ -18,8 +18,8 @@ const queryClient = new QueryClient({
 // Layout Components
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
-import { ScrollToTop } from './components/ScrollToTop';
-import { AIAssistant } from './components/AIAssistant';
+import { ScrollRestoration } from './components/ScrollRestoration';
+import { Chatbot } from './components/Chatbot';
 
 // Front-Office Pages
 import { Dashboard } from './pages/Dashboard';
@@ -56,16 +56,20 @@ import { LoginPage } from './pages/LoginPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import YouthSpacePage from './pages/YouthSpacePage';
 import YouthPollDetailPage from './pages/YouthPollDetailPage';
-import IVRAccessPage from './pages/IVRAccessPage';
 import { SignalementsPage } from './pages/SignalementsPage';
 import { CreateSignalementPage } from './pages/CreateSignalementPage';
 import { SignalementDetailPage } from './pages/SignalementDetailPage';
+import { OrganizationPublicProfile } from './pages/OrganizationPublicProfile';
+
+// Test Components (can be removed in production)
+import { FiltersDemoPage } from './pages/FiltersDemoPage';
 
 // Back-Office Admin Components & Pages
 import { AdminLayout } from './admin/components/AdminLayout';
 import { AdminDashboard } from './admin/pages/AdminDashboard';
 import { UsersManagement } from './admin/pages/UsersManagement';
 import { ProcessesManagement } from './admin/pages/ProcessesManagement';
+import { LegislativeConsultationsManagement } from './admin/pages/LegislativeConsultationsManagement';
 import { ModerationPage } from './admin/pages/ModerationPage';
 import { ThemesManagement } from './admin/pages/ThemesManagement';
 import { CalendarManagement } from './admin/pages/CalendarManagement';
@@ -74,10 +78,21 @@ import { ResultsPublication } from './admin/pages/ResultsPublication';
 import { ExportsPage } from './admin/pages/ExportsPage';
 import { ParticipationsManagement } from './admin/pages/ParticipationsManagement';
 import { GeneralSettings } from './admin/pages/settings/GeneralSettings';
-import IVRSynthesisPage from './admin/pages/IVRSynthesisPage';
+// import { IVRSynthesisPage } from './admin/pages/IVRSynthesisPage'; // REMOVED - IVR Section deleted
 import { NotificationsSettings } from './admin/pages/settings/NotificationsSettings';
 import { DataSettings } from './admin/pages/settings/DataSettings';
 import { AuditSettings } from './admin/pages/settings/AuditSettings';
+import { NewsletterSubscribersPage } from './admin/pages/NewsletterSubscribersPage';
+import { NewsletterCampaignsPage } from './admin/pages/NewsletterCampaignsPage';
+import { OrganizationProfile } from './admin/pages/OrganizationProfile';
+import { GeographicPerimeter } from './admin/pages/GeographicPerimeter';
+import { TerritoryManagement } from './admin/pages/TerritoryManagement';
+import { FooterMenuManagementPageEnhanced as FooterMenuManagementPage } from './pages/admin/FooterMenuManagementPageEnhanced';
+import { HeaderMenuManagementPageEnhanced as HeaderMenuManagementPage } from './pages/admin/HeaderMenuManagementPageEnhanced';
+import { SectionsManagement } from './admin/pages/SectionsManagement';
+import { SectionDetailConfig } from './admin/pages/SectionDetailConfig';
+import { SectionsDiagnostic } from './admin/pages/SectionsDiagnostic';
+import { MenuDiagnostic } from './admin/pages/MenuDiagnostic';
 
 // Back-Office SaaS Components & Pages
 import { SaasLayout } from './saas/components/SaasLayout';
@@ -91,13 +106,14 @@ import { SettingsPage as SaasSettingsPage } from './saas/pages/SettingsPage';
 import { Toaster } from './components/ui/sonner';
 
 // Main application component
+// Updated: Fixed IVR section removal and ensured proper provider wrapping
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <AuthProvider>
           <BrowserRouter>
-            <ScrollToTop />
+            <ScrollRestoration />
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={
@@ -368,14 +384,6 @@ export default function App() {
                   <Toaster />
                 </div>
               } />
-              <Route path="/ivr-access" element={
-                <div className="min-h-screen bg-gray-50">
-                  <Header />
-                  <main><IVRAccessPage /></main>
-                  <Footer />
-                  <Toaster />
-                </div>
-              } />
               <Route path="/signalements" element={
                 <div className="min-h-screen bg-gray-50">
                   <Header />
@@ -400,24 +408,54 @@ export default function App() {
                   <Toaster />
                 </div>
               } />
+              <Route path="/organization" element={
+                <div className="min-h-screen bg-gray-50">
+                  <Header />
+                  <main><OrganizationPublicProfile /></main>
+                  <Footer />
+                  <Toaster />
+                </div>
+              } />
+
+              {/* Test/Demo Routes (can be removed in production) */}
+              <Route path="/test/filters-demo" element={
+                <div className="min-h-screen bg-gray-50">
+                  <Header />
+                  <main><FiltersDemoPage /></main>
+                  <Footer />
+                  <Toaster />
+                </div>
+              } />
 
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="users" element={<UsersManagement />} />
                 <Route path="processes" element={<ProcessesManagement />} />
-                <Route path="moderation" element={<ModerationPage />} />
+                <Route path="legislative-consultations" element={<LegislativeConsultationsManagement />} />
                 <Route path="themes" element={<ThemesManagement />} />
+                <Route path="moderation" element={<ModerationPage />} />
                 <Route path="calendar" element={<CalendarManagement />} />
                 <Route path="analytics" element={<AnalyticsPage />} />
                 <Route path="results" element={<ResultsPublication />} />
                 <Route path="exports" element={<ExportsPage />} />
                 <Route path="participations" element={<ParticipationsManagement />} />
-                <Route path="ivr" element={<IVRSynthesisPage />} />
+                <Route path="newsletter/subscribers" element={<NewsletterSubscribersPage />} />
+                <Route path="newsletter/campaigns" element={<NewsletterCampaignsPage />} />
                 <Route path="settings/general" element={<GeneralSettings />} />
+                {/* REMOVED - IVR Section deleted: <Route path="ivr" element={<IVRSynthesisPage />} /> */}
                 <Route path="settings/notifications" element={<NotificationsSettings />} />
                 <Route path="settings/data" element={<DataSettings />} />
                 <Route path="settings/audit" element={<AuditSettings />} />
+                <Route path="organization/profile" element={<OrganizationProfile />} />
+                <Route path="organization/perimeter" element={<GeographicPerimeter />} />
+                <Route path="organization/territory" element={<TerritoryManagement />} />
+                <Route path="navigation/header" element={<HeaderMenuManagementPage />} />
+                <Route path="navigation/footer" element={<FooterMenuManagementPage />} />
+                <Route path="sections" element={<SectionsManagement />} />
+                <Route path="sections/:sectionKey" element={<SectionDetailConfig />} />
+                <Route path="sections/diagnostic" element={<SectionsDiagnostic />} />
+                <Route path="menu/diagnostic" element={<MenuDiagnostic />} />
               </Route>
 
               {/* Saas Routes */}
@@ -431,7 +469,7 @@ export default function App() {
                 <Route path="settings" element={<SaasSettingsPage />} />
               </Route>
             </Routes>
-            <AIAssistant />
+            <Chatbot />
           </BrowserRouter>
         </AuthProvider>
       </LanguageProvider>

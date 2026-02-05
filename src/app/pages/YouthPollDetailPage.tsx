@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router';
 import { useLanguage } from '@/app/contexts/LanguageContext';
 import { PageBanner } from '@/app/components/PageBanner';
 import { PageLayout } from '@/app/components/layout/PageLayout';
@@ -511,6 +511,84 @@ export default function YouthPollDetailPage() {
                           </div>
                         );
                       })}
+                    </RadioGroup>
+                  )
+                )}
+
+                {question.type === 'emoji' && (
+                  visualMode ? (
+                    // Visual Mode - Big Emoji buttons
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {question.options.map((option, optionIndex) => {
+                        const isSelected = responses[question.id]?.[0] === option.id;
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={() => handleOptionSelect(question.id, option.id, false)}
+                            disabled={hasResponded}
+                            className={`p-6 rounded-2xl border-4 transition-all transform hover:scale-105 ${
+                              isSelected
+                                ? 'border-purple-500 bg-purple-50 shadow-xl'
+                                : 'border-gray-300 bg-white hover:border-gray-400'
+                            } ${hasResponded ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                          >
+                            <div className="flex flex-col items-center gap-3">
+                              <div className={`text-6xl ${isSelected ? 'scale-125' : ''} transition-transform`}>
+                                {option.emoji}
+                              </div>
+                              <span className={`text-base font-bold text-center ${
+                                isSelected ? 'text-purple-700' : 'text-gray-700'
+                              }`}>
+                                {tLocal(option.text)}
+                              </span>
+                              {isSelected && (
+                                <div className="mt-2 px-3 py-1 rounded-full bg-purple-600 text-white font-semibold text-sm">
+                                  {language === 'fr' && '✓ Choisi'}
+                                  {language === 'de' && '✓ Gewählt'}
+                                  {language === 'en' && '✓ Selected'}
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    // Standard Mode - Emoji selection
+                    <RadioGroup
+                      value={responses[question.id]?.[0] || ''}
+                      onValueChange={(value) => handleOptionSelect(question.id, value, false)}
+                      disabled={hasResponded}
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {question.options.map((option) => {
+                          const isSelected = responses[question.id]?.[0] === option.id;
+                          return (
+                            <div 
+                              key={option.id} 
+                              className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all ${
+                                isSelected 
+                                  ? 'border-purple-500 bg-purple-50' 
+                                  : 'border-gray-200 hover:bg-gray-50'
+                              }`}
+                            >
+                              <RadioGroupItem value={option.id} id={option.id} />
+                              <Label htmlFor={option.id} className="flex-1 cursor-pointer flex items-center gap-3">
+                                <span className="text-3xl">{option.emoji}</span>
+                                <span className="font-medium">{tLocal(option.text)}</span>
+                              </Label>
+                              {hasResponded && option.percentage !== undefined && (
+                                <div className="flex items-center gap-2">
+                                  <Progress value={option.percentage} className="w-20 h-2" />
+                                  <span className="text-sm text-gray-500 min-w-[3rem]">
+                                    {Math.round(option.percentage)}%
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </RadioGroup>
                   )
                 )}
