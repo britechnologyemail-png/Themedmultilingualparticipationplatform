@@ -94,6 +94,15 @@ import { SectionDetailConfig } from './admin/pages/SectionDetailConfig';
 import { SectionsDiagnostic } from './admin/pages/SectionsDiagnostic';
 import { MenuDiagnostic } from './admin/pages/MenuDiagnostic';
 
+// Section-specific management pages
+import { ConsultationsManagement } from './admin/pages/ConsultationsManagement';
+import { PetitionsManagement } from './admin/pages/PetitionsManagement';
+import { VotesManagement } from './admin/pages/VotesManagement';
+import { SignalementsManagement } from './admin/pages/SignalementsManagement';
+import { AssembliesManagement } from './admin/pages/AssembliesManagement';
+import { ConferencesManagement } from './admin/pages/ConferencesManagement';
+import { YouthManagement } from './admin/pages/YouthManagement';
+
 // Back-Office SaaS Components & Pages
 import { SaasLayout } from './saas/components/SaasLayout';
 import { SaasDashboard } from './saas/pages/SaasDashboard';
@@ -456,6 +465,13 @@ export default function App() {
                 <Route path="sections/:sectionKey" element={<SectionDetailConfig />} />
                 <Route path="sections/diagnostic" element={<SectionsDiagnostic />} />
                 <Route path="menu/diagnostic" element={<MenuDiagnostic />} />
+                <Route path="consultations" element={<ConsultationsManagement />} />
+                <Route path="petitions" element={<PetitionsManagement />} />
+                <Route path="votes" element={<VotesManagement />} />
+                <Route path="signalements" element={<SignalementsManagement />} />
+                <Route path="assemblies" element={<AssembliesManagement />} />
+                <Route path="conferences" element={<ConferencesManagement />} />
+                <Route path="youth" element={<YouthManagement />} />
               </Route>
 
               {/* Saas Routes */}
